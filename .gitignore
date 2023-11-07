@@ -9,3 +9,5 @@
 /doc/api/
 .idea/
 /spark-warehouse/
+flowFile/
+target/

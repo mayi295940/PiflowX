@@ -1,0 +1,36 @@
+{
+  "flow":{
+    "name":"test",
+    "uuid":"1234",
+    "stops":[
+
+      {
+        "uuid":"1111",
+        "name":"SelectHiveQL",
+        "bundle":"cn.piflow.bundle.hive.SelectHiveQL",
+        "properties":{
+          "hiveQL":"select * from stu"
+        }
+      },
+      {
+        "uuid":"1324",
+        "name":"PutHiveStream",
+        "bundle":"cn.piflow.bundle.hive.PutHiveStream",
+        "properties":{
+        "database":"test",
+        "table"   :"stream"
+        }
+
+      }
+
+    ],
+    "paths":[
+      {
+        "from":"SelectHiveQL",
+        "outport":"",
+        "inport":"",
+        "to":"PutHiveStream"
+      }
+    ]
+  }
+}
