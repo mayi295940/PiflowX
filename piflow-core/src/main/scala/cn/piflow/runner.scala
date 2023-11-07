@@ -130,7 +130,7 @@ trait RunnerListener {
 
   def onJobFailed(ctx: JobContext);
 
-  def monitorJobCompleted(ctx: JobContext,outputs : JobOutputStream);
+  def monitorJobCompleted(ctx: JobContext, outputs: JobOutputStream);
 
   def onGroupStarted(ctx: GroupContext);
 
@@ -142,7 +142,6 @@ trait RunnerListener {
 
 }
 
-
 class RunnerLogger extends RunnerListener with Logging {
   //TODO: add GroupID or ProjectID
   override def onProcessStarted(ctx: ProcessContext): Unit = {
@@ -153,9 +152,9 @@ class RunnerLogger extends RunnerListener with Logging {
     println(s"process started: $pid, flow: $flowName, time: $time")
     //update flow state to STARTED
     val appId = getAppId(ctx)
-    H2Util.addFlow(appId,pid,ctx.getFlow().getFlowName())
-    H2Util.updateFlowState(appId,FlowState.STARTED)
-    H2Util.updateFlowStartTime(appId,time)
+    H2Util.addFlow(appId, pid, ctx.getFlow().getFlowName())
+    H2Util.updateFlowState(appId, FlowState.STARTED)
+    H2Util.updateFlowStartTime(appId, time)
   };
 
   override def onJobStarted(ctx: JobContext): Unit = {
@@ -165,8 +164,8 @@ class RunnerLogger extends RunnerListener with Logging {
     logger.debug(s"job started: $jid, stop: $stopName, time: $time");
     println(s"job started: $jid, stop: $stopName, time: $time")
     //update stop state to STARTED
-    H2Util.updateStopState(getAppId(ctx),stopName,StopState.STARTED)
-    H2Util.updateStopStartTime(getAppId(ctx),stopName,time)
+    H2Util.updateStopState(getAppId(ctx), stopName, StopState.STARTED)
+    H2Util.updateStopStartTime(getAppId(ctx), stopName, time)
   };
 
   override def onJobFailed(ctx: JobContext): Unit = {
@@ -176,8 +175,8 @@ class RunnerLogger extends RunnerListener with Logging {
     logger.debug(s"job failed: $stopName, time: $time");
     println(s"job failed: $stopName, time: $time")
     //update stop state to FAILED
-    H2Util.updateStopFinishedTime(getAppId(ctx),stopName,time)
-    H2Util.updateStopState(getAppId(ctx),stopName,StopState.FAILED)
+    H2Util.updateStopFinishedTime(getAppId(ctx), stopName, time)
+    H2Util.updateStopState(getAppId(ctx), stopName, StopState.FAILED)
 
   };
 
@@ -188,8 +187,8 @@ class RunnerLogger extends RunnerListener with Logging {
     println(s"job initialized: $stopName, time: $time")
     //add stop into h2 db and update stop state to INIT
     val appId = getAppId(ctx)
-    H2Util.addStop(appId,stopName)
-    H2Util.updateStopState(appId,stopName,StopState.INIT)
+    H2Util.addStop(appId, stopName)
+    H2Util.updateStopState(appId, stopName, StopState.INIT)
   };
 
   override def onProcessCompleted(ctx: ProcessContext): Unit = {
@@ -199,8 +198,8 @@ class RunnerLogger extends RunnerListener with Logging {
     println(s"process completed: $pid, time: $time")
     //update flow state to COMPLETED
     val appId = getAppId(ctx)
-    H2Util.updateFlowFinishedTime(appId,time)
-    H2Util.updateFlowState(appId,FlowState.COMPLETED)
+    H2Util.updateFlowFinishedTime(appId, time)
+    H2Util.updateFlowState(appId, FlowState.COMPLETED)
 
   };
 
@@ -211,8 +210,8 @@ class RunnerLogger extends RunnerListener with Logging {
     println(s"job completed: $stopName, time: $time")
     //update stop state to COMPLETED
     val appId = getAppId(ctx)
-    H2Util.updateStopFinishedTime(appId,stopName,time)
-    H2Util.updateStopState(appId,stopName,StopState.COMPLETED)
+    H2Util.updateStopFinishedTime(appId, stopName, time)
+    H2Util.updateStopState(appId, stopName, StopState.COMPLETED)
 
   };
 
@@ -223,8 +222,8 @@ class RunnerLogger extends RunnerListener with Logging {
     println(s"process failed: $pid, time: $time")
     //update flow state to FAILED
     val appId = getAppId(ctx)
-    H2Util.updateFlowFinishedTime(appId,time)
-    H2Util.updateFlowState(getAppId(ctx),FlowState.FAILED)
+    H2Util.updateFlowFinishedTime(appId, time)
+    H2Util.updateFlowState(getAppId(ctx), FlowState.FAILED)
 
   }
 
@@ -235,8 +234,8 @@ class RunnerLogger extends RunnerListener with Logging {
     println(s"process aborted: $pid, time: $time")
     //update flow state to ABORTED
     val appId = getAppId(ctx)
-    H2Util.updateFlowFinishedTime(appId,time)
-    H2Util.updateFlowState(appId,FlowState.ABORTED)
+    H2Util.updateFlowFinishedTime(appId, time)
+    H2Util.updateFlowState(appId, FlowState.ABORTED)
 
   }
 
@@ -247,10 +246,10 @@ class RunnerLogger extends RunnerListener with Logging {
     logger.debug(s"process forked: $pid, child flow execution: $cid, time: $time");
     println(s"process forked: $pid, child flow execution: $cid, time: $time")
     //update flow state to FORK
-    H2Util.updateFlowState(getAppId(ctx),FlowState.FORK)
+    H2Util.updateFlowState(getAppId(ctx), FlowState.FORK)
   }
 
-  private def getAppId(ctx: Context) : String = {
+  private def getAppId(ctx: Context): String = {
     val sparkSession = ctx.get(classOf[SparkSession].getName).asInstanceOf[SparkSession]
     sparkSession.sparkContext.applicationId
   }
@@ -261,10 +260,6 @@ class RunnerLogger extends RunnerListener with Logging {
     logger.debug(s"job completed: monitor $stopName");
     println(s"job completed: monitor $stopName")
 
-    val outputDataCount = outputs.getDataCount()
-    outputDataCount.keySet.foreach(portName => {
-      H2Util.addThroughput(appId, stopName, portName, outputDataCount(portName))
-    })
   }
 
   override def onGroupStarted(ctx: GroupContext): Unit = {
@@ -278,8 +273,8 @@ class RunnerLogger extends RunnerListener with Logging {
     println(s"Group started: $groupId, group: $flowGroupName, time: $time")
     //update flow group state to STARTED
     H2Util.addGroup(groupId, flowGroupName, childCount)
-    H2Util.updateGroupState(groupId,GroupState.STARTED)
-    H2Util.updateGroupStartTime(groupId,time)
+    H2Util.updateGroupState(groupId, GroupState.STARTED)
+    H2Util.updateGroupStartTime(groupId, time)
   }
 
   override def onGroupCompleted(ctx: GroupContext): Unit = {
@@ -290,8 +285,8 @@ class RunnerLogger extends RunnerListener with Logging {
     logger.debug(s"Group completed: $groupId, time: $time");
     println(s"Group completed: $groupId, time: $time")
     //update flow group state to COMPLETED
-    H2Util.updateGroupFinishedTime(groupId,time)
-    H2Util.updateGroupState(groupId,GroupState.COMPLETED)
+    H2Util.updateGroupFinishedTime(groupId, time)
+    H2Util.updateGroupState(groupId, GroupState.COMPLETED)
 
   }
 
@@ -303,9 +298,8 @@ class RunnerLogger extends RunnerListener with Logging {
     logger.debug(s"Group stoped: $groupId, time: $time");
     println(s"Group stoped: $groupId, time: $time")
     //update flow group state to COMPLETED
-    H2Util.updateGroupFinishedTime(groupId,time)
-    H2Util.updateGroupState(groupId,GroupState.KILLED)
-
+    H2Util.updateGroupFinishedTime(groupId, time)
+    H2Util.updateGroupState(groupId, GroupState.KILLED)
 
   }
 
@@ -317,8 +311,8 @@ class RunnerLogger extends RunnerListener with Logging {
     logger.debug(s"Group failed: $groupId, time: $time");
     println(s"Group failed: $groupId, time: $time")
     //update flow group state to FAILED
-    H2Util.updateGroupFinishedTime(groupId,time)
-    H2Util.updateGroupState(groupId,GroupState.FAILED)
+    H2Util.updateGroupFinishedTime(groupId, time)
+    H2Util.updateGroupState(groupId, GroupState.FAILED)
 
   }
 

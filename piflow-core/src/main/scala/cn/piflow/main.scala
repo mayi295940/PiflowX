@@ -1,51 +1,36 @@
 package cn.piflow
 
-import java.io.IOException
-import java.net.URI
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 
 import cn.piflow.util._
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.FileSystem
-import org.apache.spark.sql._
-import org.apache.spark.streaming.{Seconds, StreamingContext}
-import org.apache.spark.streaming.dstream.{DStream, InputDStream, ReceiverInputDStream}
-
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
-import org.apache.spark.sql.functions.{col, max}
 
 trait JobInputStream {
   def isEmpty(): Boolean;
 
-  def read(): DataFrame;
+  def read[T](): DataStream[T];
 
   def ports(): Seq[String];
 
-  def read(inport: String): DataFrame;
+  def read[T](inport: String): DataStream[T];
 
-  def readProperties() : MMap[String, String];
+  def readProperties(): MMap[String, String];
 
-  def readProperties(inport : String) : MMap[String, String]
+  def readProperties(inport: String): MMap[String, String]
 }
 
 trait JobOutputStream {
-  def makeCheckPoint(pec: JobContext): Unit;
 
-  def loadCheckPoint(pec: JobContext, path : String) : Unit;
+  def write[T](data: DataStream[T]);
 
-  def write(data: DataFrame);
+  def write[T](bundle: String, data: DataStream[T]);
 
-  def write(bundle: String, data: DataFrame);
+  def writeProperties(properties: MMap[String, String]);
 
-  def writeProperties(properties : MMap[String, String]);
-
-  def writeProperties(bundle: String, properties : MMap[String, String]);
+  def writeProperties(bundle: String, properties: MMap[String, String]);
 
   def sendError();
-
-  def getDataCount() : MMap[String, Long];
-
-  def getIncrementalValue(pec: JobContext, incrementalField : String): String;
 }
 
 trait StopJob {
@@ -72,37 +57,10 @@ trait Stop extends Serializable {
   def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit;
 }
 
-trait StreamingStop extends Stop{
-  var batchDuration : Int
-  def getDStream(ssc : StreamingContext): DStream[String];
-}
-
-trait IncrementalStop extends Stop{
-
-  var incrementalField : String
-  var incrementalStart : String
-  var incrementalPath : String
-
-  def init(flowName : String, stopName : String): Unit
-  def readIncrementalStart(): String;
-  def saveIncrementalStart(value : String);
-
-}
-trait VisualizationStop extends Stop{
-
-  var processId : String
-  var stopName : String
-  var visualizationPath : String
-  var visualizationType : String
-
-  def init(stopName : String): Unit
-  def getVisualizationPath(processId : String) : String
-
-}
 
 trait GroupEntry {}
 
-trait Flow extends GroupEntry{
+trait Flow extends GroupEntry {
   def getStopNames(): Seq[String];
 
   def hasCheckPoint(processName: String): Boolean;
@@ -115,51 +73,43 @@ trait Flow extends GroupEntry{
 
   def getFlowName(): String;
 
-  def setFlowName(flowName : String): Unit;
+  def setFlowName(flowName: String): Unit;
 
-  def getCheckpointParentProcessId() : String;
+  def getCheckpointParentProcessId(): String;
 
-  def setCheckpointParentProcessId(checkpointParentProcessId : String);
+  def setCheckpointParentProcessId(checkpointParentProcessId: String);
 
-  def getRunMode() : String;
+  def getRunMode(): String;
 
-  def setRunMode( runMode : String) : Unit;
-
-  def hasStreamingStop() : Boolean;
-
-  def getStreamingStop() : (String, StreamingStop);
-
-  def hasIncrementalStop() : Boolean;
-
-  def getIncrementalStop() : (String, IncrementalStop);
+  def setRunMode(runMode: String): Unit;
 
 
   //Flow Josn String API
-  def setFlowJson(flowJson:String);
+  def setFlowJson(flowJson: String);
 
-  def getFlowJson() : String;
+  def getFlowJson(): String;
 
 
   // Flow resource API
-  def setDriverMemory(driverMem:String) ;
+  def setDriverMemory(driverMem: String);
 
-  def getDriverMemory() : String;
+  def getDriverMemory(): String;
 
-  def setExecutorNum(executorNum:String) ;
+  def setExecutorNum(executorNum: String);
 
-  def getExecutorNum() : String;
+  def getExecutorNum(): String;
 
-  def setExecutorMem(executorMem:String) ;
+  def setExecutorMem(executorMem: String);
 
-  def getExecutorMem() : String;
+  def getExecutorMem(): String;
 
-  def setExecutorCores(executorCores:String) ;
+  def setExecutorCores(executorCores: String);
 
-  def getExecutorCores() : String;
+  def getExecutorCores(): String;
 
-  def setUUID(uuid : String) ;
+  def setUUID(uuid: String);
 
-  def getUUID() : String;
+  def getUUID(): String;
 }
 
 class FlowImpl extends Flow {
@@ -176,7 +126,7 @@ class FlowImpl extends Flow {
   //Flow Resource
   var driverMem = ""
   var executorNum = ""
-  var executorMem= ""
+  var executorMem = ""
   var executorCores = ""
 
   def addStop(name: String, process: Stop) = {
@@ -184,11 +134,6 @@ class FlowImpl extends Flow {
     this;
   };
 
-  override def show(): Unit = {
-    edges.foreach { arrow =>
-      println(arrow.toString());
-    }
-  }
 
   def addCheckPoint(processName: String): Unit = {
     checkpoints += processName;
@@ -208,7 +153,6 @@ class FlowImpl extends Flow {
   }
 
 
-
   override def analyze(): AnalyzedFlowGraph =
     new AnalyzedFlowGraph() {
       val incomingEdges = MMap[String, ArrayBuffer[Edge]]();
@@ -223,7 +167,7 @@ class FlowImpl extends Flow {
         if (!visited.contains(processName)) {
 
           //TODO: need to check whether the checkpoint's data exist!!!!
-          if(flow.hasCheckPoint(processName) && !flow.getCheckpointParentProcessId().equals("")){
+          if (flow.hasCheckPoint(processName) && !flow.getCheckpointParentProcessId().equals("")) {
             val ret = op(processName, null);
             visited(processName) = ret;
             return ret;
@@ -262,7 +206,7 @@ class FlowImpl extends Flow {
 
       }
 
-      override def visitStreaming[T](flow: Flow,streamingStop : String, streamingData: T,op: (String, Map[Edge, T]) => T): Unit = {
+      override def visitStreaming[T](flow: Flow, streamingStop: String, streamingData: T, op: (String, Map[Edge, T]) => T): Unit = {
 
         val visited = MMap[String, T]();
         visited(streamingStop) = streamingData
@@ -278,16 +222,16 @@ class FlowImpl extends Flow {
     this.name
   }
 
-  override def setFlowName(flowName : String): Unit = {
+  override def setFlowName(flowName: String): Unit = {
     this.name = flowName;
   }
 
   //get the processId
-  override def getCheckpointParentProcessId() : String = {
+  override def getCheckpointParentProcessId(): String = {
     this.checkpointParentProcessId
   }
 
-  override def setCheckpointParentProcessId(checkpointParentProcessId : String) = {
+  override def setCheckpointParentProcessId(checkpointParentProcessId: String) = {
     this.checkpointParentProcessId = checkpointParentProcessId
   }
 
@@ -299,41 +243,6 @@ class FlowImpl extends Flow {
     this.runMode = runMode
   }
 
-  override def hasStreamingStop() : Boolean ={
-    stops.keys.foreach{ stopName => {
-      if( stops(stopName).isInstanceOf[StreamingStop] ){
-        return true
-      }
-    }}
-    false
-  }
-
-  override def getStreamingStop() : (String, StreamingStop) = {
-    stops.keys.foreach{ stopName => {
-      if( stops(stopName).isInstanceOf[StreamingStop] ){
-        return (stopName, stops(stopName).asInstanceOf[StreamingStop])
-      }
-    }}
-    null
-  }
-
-  override def hasIncrementalStop() : Boolean = {
-    stops.keys.foreach{ stopName => {
-      if( stops(stopName).isInstanceOf[IncrementalStop] ){
-        return true
-      }
-    }}
-    false
-  }
-
-  override def getIncrementalStop() : (String, IncrementalStop) = {
-    stops.keys.foreach{ stopName => {
-      if( stops(stopName).isInstanceOf[StreamingStop] ){
-        return (stopName, stops(stopName).asInstanceOf[IncrementalStop])
-      }
-    }}
-    null
-  }
 
   override def setFlowJson(flowJson: String): Unit = {
     this.flowJson = flowJson
@@ -383,11 +292,14 @@ class FlowImpl extends Flow {
   override def getUUID(): String = {
     this.uuid
   }
+
+  override def show(): Unit = {}
 }
 
 trait AnalyzedFlowGraph {
   def visit[T](flow: Flow, op: (String, Map[Edge, T]) => T): Unit;
-  def visitStreaming[T](flow: Flow, streamingStop : String, streamingData: T, op: (String, Map[Edge, T]) => T): Unit;
+
+  def visitStreaming[T](flow: Flow, streamingStop: String, streamingData: T, op: (String, Map[Edge, T]) => T): Unit;
 }
 
 trait Process {
@@ -410,23 +322,18 @@ trait ProcessContext extends Context {
   def getProcess(): Process;
 }
 
-/*trait FlowGroupContext extends Context {
-  def getFlowGroup() : FlowGroup;
-
-  def getFlowGroupExecution() : FlowGroupExecution;
-}*/
 
 trait GroupContext extends Context {
-  
-  def getGroup() : Group;
 
-  def getGroupExecution() : GroupExecution;
+  def getGroup(): Group;
+
+  def getGroupExecution(): GroupExecution;
 
 }
 
 class JobInputStreamImpl() extends JobInputStream {
   //only returns DataFrame on calling read()
-  val inputs = MMap[String, () => DataFrame]();
+  val inputs = MMap[String, Any]();
   val inputsProperties = MMap[String, () => MMap[String, String]]()
 
   override def isEmpty(): Boolean = inputs.isEmpty;
@@ -444,15 +351,15 @@ class JobInputStreamImpl() extends JobInputStream {
     inputs.keySet.toSeq;
   }
 
-  override def read(): DataFrame = {
+  override def read[T](): DataStream[T] = {
     if (inputs.isEmpty)
       throw new NoInputAvailableException();
 
     read(inputs.head._1);
   };
 
-  override def read(inport: String): DataFrame = {
-    inputs(inport)();
+  override def read[T](inport: String): DataStream[T] = {
+    inputs(inport).asInstanceOf[DataStream[T]];
   }
 
   override def readProperties(): MMap[String, String] = {
@@ -469,180 +376,48 @@ class JobInputStreamImpl() extends JobInputStream {
 class JobOutputStreamImpl() extends JobOutputStream with Logging {
   private val defaultPort = "default"
 
-  override def makeCheckPoint(pec: JobContext) {
 
-    mapDataFrame.foreach(en => {
-      val port = if(en._1.equals("")) defaultPort else en._1
-
-      //
-      val path = pec.get("checkpoint.path").asInstanceOf[String].stripSuffix("/") + "/" + /*pec.getProcessContext().getProcess().pid()*/getAppId(pec) + "/" + pec.getStopJob().getStopName() + "/" + port;
-      println("MakeCheckPoint Path: " + path)
-      //val path = getCheckPointPath(pec)
-      logger.debug(s"writing data on checkpoint: $path");
-
-      en._2.apply().write.parquet(path);
-      mapDataFrame(en._1) = () => {
-        logger.debug(s"loading data from checkpoint: $path");
-        pec.get[SparkSession].read.parquet(path)//default port?
-      };
-    })
-  }
-
-  //load the checkpoint by path and port
-  override def loadCheckPoint(pec: JobContext, checkpointPath : String): Unit = {
-
-    val ports = getCheckPointPorts(pec, checkpointPath)
-    ports.foreach{ port => {
-
-      val mdf = () => {
-        val checkpointPortPath = checkpointPath + "/" + port
-        logger.debug(s"loading data from checkpoint: $checkpointPortPath")
-        println(s"loading data from checkpoint: $checkpointPortPath")
-        pec.get[SparkSession].read.parquet(checkpointPortPath)
-      };
-
-      val newPort = if(port.equals(defaultPort)) "" else port
-      mapDataFrame(newPort) = mdf
-
-    }}
-  }
-
-  //get then checkpoint path
-  private def getCheckPointPath(pec: JobContext) : String = {
-    val pathStr = pec.get("checkpoint.path").asInstanceOf[String].stripSuffix("/") + "/" + /*pec.getProcessContext().getProcess().pid()*/getAppId(pec) + "/" + pec.getStopJob().getStopName();
-    val conf:Configuration = new Configuration()
-    try{
-      val fs:FileSystem = FileSystem.get(URI.create(pathStr), conf)
-      val path = new org.apache.hadoop.fs.Path(pathStr)
-      if(fs.exists(path)){
-        pathStr
-      }else{
-        ""
-      }
-    }catch{
-      case ex:IOException =>{
-        println(ex)
-        ""
-      }
-      case _ => ""
-    }
-  }
-
-  //get the checkpoint ports list
-  private def getCheckPointPorts(pec: JobContext, checkpointPath : String) : List[String] = {
-    HdfsUtil.getFiles(checkpointPath)
-  }
-
-  val mapDataFrame = MMap[String, () => DataFrame]();
+  val mapDataFrame = MMap[String, Any]();
 
   val mapDataFrameProperties = MMap[String, () => MMap[String, String]]();
 
-  override def write(data: DataFrame): Unit = write("", data);
+  override def write[T](data: DataStream[T]): Unit = write("", data);
 
   override def sendError(): Unit = ???
 
-  override def write(outport: String, data: DataFrame): Unit = {
-    mapDataFrame(outport) = () => data;
+  override def write[T](outport: String, data: DataStream[T]): Unit = {
+    mapDataFrame(outport) = data;
   }
 
   def contains(port: String) = mapDataFrame.contains(port);
 
   def getDataFrame(port: String) = mapDataFrame(port);
 
-  def showData(count:Int) = {
-
-      mapDataFrame.foreach(en => {
-        val portName = if(en._1.equals("")) "default" else en._1
-        println(portName + " port: ")
-        en._2.apply().show(count)
-
-      })
-  }
-
-  def saveData(debugPath : String) = {
-
+  def showData[T](count: Int) = {
 
     mapDataFrame.foreach(en => {
-      val portName = if(en._1.equals("")) "default" else en._1
-      val portDataPath = debugPath + "/" + portName
-      val portSchemaPath = debugPath + "/" + portName + "_schema"
-      //println(portDataPath)
-      //println(en._2.apply().schema)
-      val jsonDF = en._2.apply().na.fill("")
-      var schemaStr = ""
-      val schema = jsonDF.schema.foreach(f => {
-        schemaStr =  schemaStr + "," + f.name
-      })
-      schemaStr = schemaStr.stripPrefix(",")
-      HdfsUtil.saveLine(portSchemaPath,schemaStr )
-      jsonDF.write.json(portDataPath)
+      val portName = if (en._1.equals("")) "default" else en._1
+      println(portName + " port: ")
+      en._2.asInstanceOf[DataStream[T]].print()
 
     })
   }
 
-  def saveVisualizationData(visualizationPath : String) = {
-
-
-    mapDataFrame.foreach(en => {
-      val portName = if(en._1.equals("")) "default" else en._1
-      val portDataPath = visualizationPath + "/data"
-      val portSchemaPath = visualizationPath + "/schema"
-      val jsonDF = en._2.apply().na.fill("")
-      var schemaStr = ""
-      val schema = jsonDF.schema.foreach(f => {
-        schemaStr =  schemaStr + "," + f.name
-      })
-      schemaStr = schemaStr.stripPrefix(",")
-      HdfsUtil.saveLine(portSchemaPath,schemaStr )
-      jsonDF.write.json(portDataPath)
-
-    })
-  }
-
-
-
-  def getDataCount() : MMap[String, Long]= {
-
-    var result : MMap[String, Long] = MMap[String, Long]()
-    mapDataFrame.foreach(en => {
-      val portName = if(en._1.equals("")) "default" else en._1
-      result
-      result(portName) = en._2.apply.count()
-    })
-    result
-  }
-
-  private def getAppId(ctx: Context) : String = {
-    val sparkSession = ctx.get(classOf[SparkSession].getName).asInstanceOf[SparkSession]
-    sparkSession.sparkContext.applicationId
-  }
-
-  override def getIncrementalValue(pec: JobContext, incrementalField : String): String = {
-
-    var incrementalValue : String = ""
-    mapDataFrame.foreach(en => {
-      if(!en._2.apply().head(1).isEmpty){
-        val Row(maxValue : Any) = en._2.apply().agg(max(incrementalField)).head()
-        incrementalValue = maxValue.toString
-      }
-    })
-    incrementalValue
-  }
 
   override def writeProperties(properties: MMap[String, String]): Unit = {
 
-    writeProperties("",properties)
+    writeProperties("", properties)
 
   }
 
   override def writeProperties(outport: String, properties: MMap[String, String]): Unit = {
 
-    mapDataFrameProperties(outport) =  () => properties
+    mapDataFrameProperties(outport) = () => properties
 
   }
 
-  def getDataFrameProperties(port : String)  = {
-    if(!mapDataFrameProperties.contains(port)){
+  def getDataFrameProperties(port: String) = {
+    if (!mapDataFrameProperties.contains(port)) {
       mapDataFrameProperties(port) = () => MMap[String, String]()
 
     }
@@ -665,10 +440,59 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
   val latch = new CountDownLatch(1);
   var running = false;
 
-  val workerThread = new Thread(new Runnable() {
+  //val env = StreamExecutionEnvironment.getExecutionEnvironment
+
+  val jobs = MMap[String, StopJobImpl]();
+  flow.getStopNames().foreach { stopName =>
+    val stop = flow.getStop(stopName);
+    stop.initialize(processContext);
+
+    val pe = new StopJobImpl(stopName, stop, processContext);
+    jobs(stopName) = pe;
+    //runnerListener.onJobInitialized(pe.getContext());
+  }
+
+  val analyzed = flow.analyze();
+  val checkpointParentProcessId = flow.getCheckpointParentProcessId()
+
+
+  analyzed.visit[JobOutputStreamImpl](flow, performStopByCheckpoint)
+
+
+  //perform stop use checkpoint
+  def performStopByCheckpoint(stopName: String, inputs: Map[Edge, JobOutputStreamImpl]) = {
+    val pe = jobs(stopName);
+
+    var outputs: JobOutputStreamImpl = null
+    try {
+      //runnerListener.onJobStarted(pe.getContext());
+
+      println("Visit process " + stopName + "!!!!!!!!!!!!!")
+      outputs = pe.perform(inputs);
+
+      //outputs.showData(10)
+
+      //runnerListener.onJobCompleted(pe.getContext());
+
+    }
+    catch {
+      case e: Throwable =>
+        //runnerListener.onJobFailed(pe.getContext());
+        throw e;
+    }
+
+    outputs;
+  }
+
+  //env.execute(flow.getFlowName())
+
+  /*val workerThread = new Thread(new Runnable() {
     def perform() {
-      //initialize all processes
-      //initialize process context
+
+      //val env = processContext.get[StreamExecutionEnvironment]()
+      val env = StreamExecutionEnvironment.getExecutionEnvironment
+      println("StreamExecutionEnvironment in worderThread!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
       val jobs = MMap[String, StopJobImpl]();
       flow.getStopNames().foreach { stopName =>
         val stop = flow.getStop(stopName);
@@ -676,69 +500,15 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
 
         val pe = new StopJobImpl(stopName, stop, processContext);
         jobs(stopName) = pe;
-        runnerListener.onJobInitialized(pe.getContext());
+        //runnerListener.onJobInitialized(pe.getContext());
       }
 
       val analyzed = flow.analyze();
       val checkpointParentProcessId = flow.getCheckpointParentProcessId()
 
-      //TODO: change number by property configuration
-      if(flow.hasStreamingStop()) {
-        val (streamingStopName, streamingStop) = flow.getStreamingStop()
 
-        val pec = jobs(streamingStopName).getContext()
-        val spark = pec.get[SparkSession]();
-        val ssc = new StreamingContext(spark.sparkContext,Seconds(streamingStop.batchDuration))
+      analyzed.visit[JobOutputStreamImpl](flow,performStopByCheckpoint)
 
-        val lines = streamingStop.getDStream(ssc)
-        lines.foreachRDD {
-          rdd => {
-            //println(rdd.count())
-            val spark = pec.get[SparkSession]()
-            import spark.implicits._
-            val df = rdd.toDF("value")
-
-            //show data in log
-            val showDataCount = PropertyUtil.getPropertyValue("data.show").toInt
-            if(showDataCount > 0) {
-              df.show(showDataCount)
-            }
-            val streamingData = new JobOutputStreamImpl()
-            streamingData.write(df)
-
-            analyzed.visitStreaming[JobOutputStreamImpl](flow, streamingStopName, streamingData, performStreamingStop)
-          }
-        }
-        ssc.start()
-        ssc.awaitTermination()
-      }else{
-
-        analyzed.visit[JobOutputStreamImpl](flow,performStopByCheckpoint)
-      }
-
-
-      def performStreamingStop(stopName: String, inputs: Map[Edge, JobOutputStreamImpl]) = {
-        val pe = jobs(stopName);
-        var outputs: JobOutputStreamImpl = null;
-        try {
-          runnerListener.onJobStarted(pe.getContext());
-          outputs = pe.perform(inputs);
-          runnerListener.onJobCompleted(pe.getContext());
-
-          //show data in log
-          val showDataCount = PropertyUtil.getPropertyValue("data.show").toInt
-          if(showDataCount > 0) {
-            outputs.showData(showDataCount)
-          }
-        }
-        catch {
-          case e: Throwable =>
-            runnerListener.onJobFailed(pe.getContext());
-            throw e;
-        }
-
-        outputs;
-      }
 
       //perform stop use checkpoint
       def performStopByCheckpoint(stopName: String, inputs: Map[Edge, JobOutputStreamImpl]) = {
@@ -746,96 +516,42 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
 
         var outputs : JobOutputStreamImpl = null
         try {
-          runnerListener.onJobStarted(pe.getContext());
+          //runnerListener.onJobStarted(pe.getContext());
 
-          val sparkSession = pe.getContext().get(classOf[SparkSession].getName).asInstanceOf[SparkSession]
-          val appId = sparkSession.sparkContext.applicationId
-          val debugPath = pe.getContext().get("debug.path").asInstanceOf[String].stripSuffix("/") + "/" + /*pe.getContext().getProcessContext().getProcess().pid()*/appId  + "/" + pe.getContext().getStopJob().getStopName();
+          println("Visit process " + stopName + "!!!!!!!!!!!!!")
+          outputs = pe.perform(inputs);
 
-          //new flow process
-          if (checkpointParentProcessId.equals("")) {
-            println("Visit process " + stopName + "!!!!!!!!!!!!!")
-            outputs = pe.perform(inputs);
-
-            //TODO: save incremental Field value to hdfs
-            if(pe.getStop().isInstanceOf[IncrementalStop]){
-              val incrementalField = pe.getStop().asInstanceOf[IncrementalStop].incrementalField
-              val incrementalValue = outputs.getIncrementalValue(pe.getContext(), incrementalField)
-              if(incrementalValue != ""){
-                pe.getStop().asInstanceOf[IncrementalStop].saveIncrementalStart(incrementalValue)
-              }
-            }
-
-
-            if (flow.hasCheckPoint(stopName)) {
-              outputs.makeCheckPoint(pe.getContext());
-            }
-
-          }else{//read checkpoint from old process
-            if(flow.hasCheckPoint(stopName)){
-              val pec = pe.getContext()
-              outputs = pec.getOutputStream().asInstanceOf[JobOutputStreamImpl];
-              val checkpointPath = pec.get("checkpoint.path").asInstanceOf[String].stripSuffix("/") + "/" + checkpointParentProcessId + "/" + pec.getStopJob().getStopName();
-              println("Visit process " + stopName + " by Checkpoint!!!!!!!!!!!!!")
-              outputs.loadCheckPoint(pe.getContext(),checkpointPath)
-
-            }else{
-              println("Visit process " + stopName + "!!!!!!!!!!!!!")
-              outputs = pe.perform(inputs);
-
-            }
-          }
-
-          if(pe.getStop().isInstanceOf[VisualizationStop]){
-            val s = pe.getStop().asInstanceOf[VisualizationStop]
-            outputs.saveVisualizationData(s.getVisualizationPath(appId))
-          }
-
-          //show data in log
-          val showDataCount = PropertyUtil.getPropertyValue("data.show").toInt
-          if(showDataCount > 0) {
-            outputs.showData(showDataCount)
-          }
-
-          //save data in debug mode
-          if(flow.getRunMode() == FlowRunMode.DEBUG) {
-            outputs.saveData(debugPath)
-          }
-
-          /*
-          //monitor the throughput
-          if(null != PropertyUtil.getPropertyValue("monitor.throughput") && PropertyUtil.getPropertyValue("monitor.throughput").toBoolean == true) {
-            runnerListener.monitorJobCompleted(pe.getContext(), outputs : JobOutputStream)
-          }
-          */
-
-          runnerListener.onJobCompleted(pe.getContext());
+          //runnerListener.onJobCompleted(pe.getContext());
 
         }
         catch {
           case e: Throwable =>
-            runnerListener.onJobFailed(pe.getContext());
+            //runnerListener.onJobFailed(pe.getContext());
             throw e;
         }
 
         outputs;
       }
+
+
+      //env.execute(flow.getFlowName())
+
     }
 
     override def run(): Unit = {
       running = true;
 
       //onFlowStarted
-      runnerListener.onProcessStarted(processContext);
+      //runnerListener.onProcessStarted(processContext);
       try {
         perform();
         //onFlowCompleted
-        runnerListener.onProcessCompleted(processContext);
+        //runnerListener.onProcessCompleted(processContext);
       }
       //onFlowFailed
       catch {
         case e: Throwable =>
-          runnerListener.onProcessFailed(processContext);
+          //runnerListener.onProcessFailed(processContext);
           throw e;
       }
       finally {
@@ -843,10 +559,10 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
         running = false;
       }
     }
-  });
+  });*/
 
   //IMPORTANT: start thread
-  workerThread.start();
+  //workerThread.start();
 
   override def toString(): String = executionString;
 
@@ -872,6 +588,7 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
     };
   }
 
+
   override def fork(child: Flow): Process = {
     //add flow process stack
     val process = new ProcessImpl(child, runnerContext, runner, Some(this));
@@ -881,12 +598,12 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
 
   //TODO: stopSparkJob()
   override def stop(): Unit = {
-    if (!running)
+    /*if (!running)
       throw new ProcessNotRunningException(this);
 
     workerThread.interrupt();
     runnerListener.onProcessAborted(processContext);
-    latch.countDown();
+    latch.countDown();*/
   }
 }
 

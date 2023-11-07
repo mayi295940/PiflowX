@@ -1,10 +1,10 @@
 package cn.piflow.conf.util
 
-
-import java.io.{BufferedInputStream, ByteArrayOutputStream, FileInputStream}
+import com.sksamuel
+import com.sksamuel.scrimage
 import com.sksamuel.scrimage.Image
 
-
+import java.io.{BufferedInputStream, File}
 
 object ImageUtil {
 
@@ -14,21 +14,21 @@ object ImageUtil {
         val classLoader = this.getClass.getClassLoader
         val imageInputStream = classLoader.getResourceAsStream(imagePath)
         val input = new BufferedInputStream(imageInputStream)
-        return Image.fromStream(input).bytes
+        Image.fromStream(input).bytes(sksamuel.scrimage.writer)
       }catch {
-        case ex => {
+        case ex: Exception => {
           println(ex);
           Array[Byte]()
         }
       }
     }else{
       val pluginManager = PluginManager.getInstance
-      return pluginManager.getConfigurableStopIcon(imagePath, bundle)
+      pluginManager.getConfigurableStopIcon(imagePath, bundle)
     }
   }
 
   def saveImage(imageBytes :  Array[Byte], savePath : String) = {
-    Image(imageBytes).output(savePath)
+    Image(imageBytes).output(new File(savePath))(scrimage.writer)
   }
 
 }

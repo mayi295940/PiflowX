@@ -7,9 +7,7 @@ import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.scaladsl.StreamConverters
-import akka.stream.{ActorMaterializer, IOResult, scaladsl}
-import akka.util.ByteString
+import akka.stream.ActorMaterializer
 import cn.piflow.GroupExecution
 import cn.piflow.api.HTTPService.pluginManager
 import cn.piflow.conf.util.{MapUtil, OptionUtil, PluginManager}
@@ -70,56 +68,30 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
       val appID = req.getUri().query().getOrElse("appID", "")
       if (!appID.equals("")) {
-        //server state in h2db
         var result = API.getFlowInfo(appID)
         println("getFlowInfo result: " + result)
         val resultMap = OptionUtil.getAny(JSON.parseFull(result)).asInstanceOf[Map[String, Any]]
         val flowInfoMap = MapUtil.get(resultMap, "flow").asInstanceOf[Map[String, Any]]
-        val flowState = MapUtil.get(flowInfoMap, "state").asInstanceOf[String]
+        if (!flowInfoMap.contains("state")) {
 
-        //yarn flow state
-        val flowYarnInfoJson = API.getFlowYarnInfo(appID)
-        val map = OptionUtil.getAny(JSON.parseFull(flowYarnInfoJson)).asInstanceOf[Map[String, Any]]
-        val yanrFlowInfoMap = MapUtil.get(map, "app").asInstanceOf[Map[String, Any]]
-        val name = MapUtil.get(yanrFlowInfoMap, "name").asInstanceOf[String]
-        val flowYarnState = MapUtil.get(yanrFlowInfoMap, "state").asInstanceOf[String]
+          val yarnInfoJson = API.getFlowLog(appID)
+          val map = OptionUtil.getAny(JSON.parseFull(yarnInfoJson)).asInstanceOf[Map[String, Any]]
+          val appMap = MapUtil.get(map, "app").asInstanceOf[Map[String, Any]]
+          val name = MapUtil.get(appMap, "name").asInstanceOf[String]
+          val state = MapUtil.get(appMap, "state").asInstanceOf[String]
 
-
-        if (flowInfoMap.contains("state")) {
-          val checkState = StateUtil.FlowStateCheck(flowState, flowYarnState)
-          if (checkState == true) {
-            Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
-          } else {
-            val newflowState = StateUtil.getNewFlowState(flowState, flowYarnState)
-            if (newflowState != flowState) {
-              H2Util.updateFlowState(appID, newflowState)
-            }
-            result = API.getFlowInfo(appID)
-            Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
-          }
-        } else if (yanrFlowInfoMap.contains("state")) {
           var flowInfoMap = Map[String, Any]()
           flowInfoMap += ("id" -> appID)
           flowInfoMap += ("name" -> name)
-          flowInfoMap += ("state" -> flowYarnState)
+          flowInfoMap += ("state" -> state)
           flowInfoMap += ("startTime" -> "")
+          flowInfoMap += ("endTime" -> "")
           flowInfoMap += ("endTime" -> "")
           flowInfoMap += ("stops" -> List())
           result = JsonUtil.format(JsonUtil.toJson(Map("flow" -> flowInfoMap)))
           println("getFlowInfo on Yarn: " + result)
-          Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
-        } else { // Both h2db and yarn do not exist appId
-          var flowInfoMap = Map[String, Any]()
-          flowInfoMap += ("id" -> appID)
-          flowInfoMap += ("name" -> "")
-          flowInfoMap += ("state" -> FlowState.FAILED)
-          flowInfoMap += ("startTime" -> "")
-          flowInfoMap += ("endTime" -> "")
-          flowInfoMap += ("stops" -> List())
-          result = JsonUtil.format(JsonUtil.toJson(Map("flow" -> flowInfoMap)))
-          Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
         }
-
+        Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } else {
         Future.successful(HttpResponse(FAIL_CODE, entity = "appID is null or flow run failed!"))
       }
@@ -145,7 +117,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
       val appID = req.getUri().query().getOrElse("appID", "")
       if (!appID.equals("")) {
-        val result = API.getFlowYarnInfo(appID)
+        val result = API.getFlowLog(appID)
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } else {
         Future.successful(HttpResponse(FAIL_CODE, entity = "appID is null or flow does not exist!"))
@@ -193,76 +165,44 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
     }
 
-    case HttpRequest(GET, Uri.Path("/flow/testDataPath"), headers, entity, protocol) => {
-
-      val testDataPath = ConfigureUtil.getTestDataPath()
-      if (!testDataPath.equals("")) {
-        Future.successful(HttpResponse(SUCCESS_CODE, entity = testDataPath))
-      } else {
-        Future.successful(HttpResponse(FAIL_CODE, entity = "test data path is null!"))
-      }
-
-    }
-
     case HttpRequest(POST, Uri.Path("/flow/start"), headers, entity, protocol) => {
 
 
       try {
-        //       /*entity match {
-        //         case HttpEntity.Strict(_, data) =>{
-        //           var flowJson = data.utf8String
-        //           //          flowJson = flowJson.replaceAll("}","}\n")
-        //           //flowJson = JsonFormatTool.formatJson(flowJson)
-        //           val (appId,process) = API.startFlow(flowJson)
-        //           processMap += (appId -> process)
-        //           val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
-        //           Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
-        //         }
-        //         case otherType => {
-        //           println(otherType)
-        //
-        //           val bodyFeature = Unmarshal(entity).to [String]
-        //           val flowJson = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
-        //           val (appId,process) = API.startFlow(flowJson)
-        //           processMap += (appId -> process)
-        //           val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
-        //           Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
-        //         }
-        //       }*/
+        /*entity match {
+          case HttpEntity.Strict(_, data) =>{
+            var flowJson = data.utf8String
+            //          flowJson = flowJson.replaceAll("}","}\n")
+            //flowJson = JsonFormatTool.formatJson(flowJson)
+            val (appId,process) = API.startFlow(flowJson)
+            processMap += (appId -> process)
+            val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
+            Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
+          }
+          case otherType => {
+            println(otherType)
+
+            val bodyFeature = Unmarshal(entity).to [String]
+            val flowJson = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
+            val (appId,process) = API.startFlow(flowJson)
+            processMap += (appId -> process)
+            val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
+            Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
+          }
+        }*/
         val bodyFeature = Unmarshal(entity).to[String]
         val flowJson = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
         val (appId, process) = API.startFlow(flowJson)
         processMap += (appId -> process)
         val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
-        println("Start Flow Succeed : " + result + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } catch {
         case ex: Exception => {
+          ex.printStackTrace()
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start flow!"))
         }
       }
-      //
-      //     Thread.sleep(1000)
-      //     val entityStream = entity.dataBytes
-      //     // Use fold to concatenate chunks into a single string
-      //     val concatenateChunks: Future[String] = entityStream.runFold("")((acc, chunk) => acc + chunk.utf8String)
-      //     // Construct a successful Future[HttpResponse] in onComplete
-      //     val responseFuture: Future[HttpResponse] = concatenateChunks.flatMap { concatenatedString =>
-      //       val flowJson = concatenatedString
-      //       val (appId, process) = API.startFlow(flowJson)
-      //       processMap += (appId -> process)
-      //       val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
-      //       println("Start Flow Succeed : " + result + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-      //       Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
-      //     }.recover {
-      //       case ex =>
-      //         println(s"An error occurred: ${ex.getMessage}")
-      //         HttpResponse(FAIL_CODE, entity = "Can not start flow!!!")
-      //     }
-      //     responseFuture
-
-
     }
 
 
@@ -302,6 +242,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
           Future.successful(HttpResponse(SUCCESS_CODE, entity = stopInfo))
         } catch {
           case ex => {
+            ex.printStackTrace()
             println(ex)
             Future.successful(HttpResponse(FAIL_CODE, entity = "getPropertyDescriptor or getIcon Method Not Implemented Error!"))
           }
@@ -334,59 +275,52 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
     }
     case HttpRequest(GET, Uri.Path("/stop/listWithGroup"), headers, entity, protocol) => {
-
       try {
         val stops = API.getAllStopsWithGroup()
         Future.successful(HttpResponse(SUCCESS_CODE, entity = stops))
       } catch {
         case ex => {
+          ex.printStackTrace()
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found stop !"))
         }
       }
-
     }
 
     case HttpRequest(POST, Uri.Path("/group/start"), headers, entity, protocol) => {
 
-      //     try{
-      //
-      //       val bodyFeature = Unmarshal(entity).to [String]
-      //       val flowGroupJson = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
-      //
-      //       //use file to run large group
-      //       //val bodyFeature = Unmarshal(entity).to [String]
-      //       //val flowGroupJsonPath = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
-      //       //val flowGroupJson = Source.fromFile(flowGroupJsonPath).getLines().toArray.mkString("\n")
-      //
-      //       val flowGroupExecution = API.startGroup(flowGroupJson)
-      //       flowGroupMap += (flowGroupExecution.getGroupId() -> flowGroupExecution)
-      //       val result = "{\"group\":{\"id\":\"" + flowGroupExecution.getGroupId() + "\"}}"
-      //       Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
-      //     }catch {
-      //       case ex => {
-      //         println(ex)
-      //         Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start group!"))
-      //       }
-      //     }
+      /*try{
 
-      Thread.sleep(1000)
-      val entityStream = entity.dataBytes
-      // Use fold to concatenate chunks into a single string
-      val concatenateChunks: Future[String] = entityStream.runFold("")((acc, chunk) => acc + chunk.utf8String)
-      // Construct a successful Future[HttpResponse] in onComplete
-      val responseFuture: Future[HttpResponse] = concatenateChunks.flatMap { concatenatedString =>
-        val flowGroupJson = concatenatedString
+        val bodyFeature = Unmarshal(entity.withoutSizeLimit())
+        val flowGroupJson = ""//Await.result(bodyFeature,scala.concurrent.duration.Duration(5,"second"))
+
         val flowGroupExecution = API.startGroup(flowGroupJson)
         flowGroupMap += (flowGroupExecution.getGroupId() -> flowGroupExecution)
         val result = "{\"group\":{\"id\":\"" + flowGroupExecution.getGroupId() + "\"}}"
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
-      }.recover {
-        case ex =>
-          println(s"An error occurred: ${ex.getMessage}")
-          HttpResponse(FAIL_CODE, entity = "Can not start flow!!!")
+      }catch {
+        case ex => {
+          println(ex)
+          Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start group!"))
+        }
+      }*/
+      try {
+
+        val bodyFeature = Unmarshal(entity).to[String]
+        val flowGroupJson = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
+        //use file to run large group
+        //val flowGroupJsonPath = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
+        //val flowGroupJson = Source.fromFile(flowGroupJsonPath).getLines().toArray.mkString("\n")*/
+        val flowGroupExecution = API.startGroup(flowGroupJson)
+        flowGroupMap += (flowGroupExecution.getGroupId() -> flowGroupExecution)
+        val result = "{\"group\":{\"id\":\"" + flowGroupExecution.getGroupId() + "\"}}"
+        Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
+      } catch {
+        case ex => {
+          println(ex)
+          Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start group!"))
+        }
       }
-      responseFuture
 
 
     }
@@ -444,71 +378,16 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     //schedule related API
     case HttpRequest(POST, Uri.Path("/schedule/start"), headers, entity, protocol) => {
 
-      //     try{
-      //
-      //       val bodyFeature = Unmarshal(entity).to [String]
-      //       val data = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
-      //
-      //       //use file to load flow or flowGroup
-      //       //val bodyFeature = Unmarshal(entity).to [String]
-      //       //val scheduleJsonPath = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
-      //       //val data = Source.fromFile(scheduleJsonPath).getLines().toArray.mkString("\n")
-      //
-      //       val dataMap = toJson(data)
-      //       val expression = dataMap.get("expression").getOrElse("").asInstanceOf[String]
-      //       val startDateStr = dataMap.get("startDate").getOrElse("").asInstanceOf[String]
-      //       val endDateStr = dataMap.get("endDate").getOrElse("").asInstanceOf[String]
-      //       val scheduleInstance = dataMap.get("schedule").getOrElse(Map[String, Any]()).asInstanceOf[Map[String, Any]]
-      //
-      //
-      //       val id : String = "schedule_" + IdGenerator.uuid() ;
-      //
-      //       var scheduleType = ""
-      //       if(!scheduleInstance.getOrElse("flow","").equals("")){
-      //         scheduleType = ScheduleType.FLOW
-      //       }else if(!scheduleInstance.getOrElse("group","").equals("")){
-      //         scheduleType = ScheduleType.GROUP
-      //       }else{
-      //         Future.successful(HttpResponse(FAIL_CODE, entity = "Can not schedule, please check the json format!"))
-      //       }
-      //       val flowActor = system.actorOf(Props(new ExecutionActor(id,scheduleType)))
-      //       scheduler.createSchedule(id,cronExpression = expression)
-      //       //scheduler.schedule(id,flowActor,JsonUtil.format(JsonUtil.toJson(scheduleInstance)))
-      //       if(startDateStr.equals("")){
-      //         scheduler.schedule(id,flowActor,JsonUtil.format(JsonUtil.toJson(scheduleInstance)))
-      //       }else{
-      //         val startDate : Option[Date] = Some(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startDateStr))
-      //         scheduler.schedule(id,flowActor,JsonUtil.format(JsonUtil.toJson(scheduleInstance)), startDate)
-      //       }
-      //       actorMap += (id -> flowActor)
-      //
-      //       H2Util.addScheduleInstance(id, expression, startDateStr, endDateStr, ScheduleState.STARTED)
-      //
-      //       //save schedule json file
-      //       val flowFile = FlowFileUtil.getScheduleFilePath(id)
-      //       FileUtil.writeFile(data, flowFile)
-      //       Future.successful(HttpResponse(SUCCESS_CODE, entity = id))
-      //     }catch {
-      //
-      //       case ex => {
-      //         println(ex)
-      //         Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start flow!"))
-      //       }
-      //     }
+      try {
 
-      Thread.sleep(1000)
-      val entityStream = entity.dataBytes
-      // Use fold to concatenate chunks into a single string
-      val concatenateChunks: Future[String] = entityStream.runFold("")((acc, chunk) => acc + chunk.utf8String)
-      // Construct a successful Future[HttpResponse] in onComplete
-      val responseFuture: Future[HttpResponse] = concatenateChunks.flatMap { concatenatedString =>
-        val data = concatenatedString
+        val bodyFeature = Unmarshal(entity).to[String]
+        val data = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
+
         val dataMap = toJson(data)
         val expression = dataMap.get("expression").getOrElse("").asInstanceOf[String]
         val startDateStr = dataMap.get("startDate").getOrElse("").asInstanceOf[String]
         val endDateStr = dataMap.get("endDate").getOrElse("").asInstanceOf[String]
         val scheduleInstance = dataMap.get("schedule").getOrElse(Map[String, Any]()).asInstanceOf[Map[String, Any]]
-
 
         val id: String = "schedule_" + IdGenerator.uuid();
 
@@ -537,12 +416,13 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val flowFile = FlowFileUtil.getScheduleFilePath(id)
         FileUtil.writeFile(data, flowFile)
         Future.successful(HttpResponse(SUCCESS_CODE, entity = id))
-      }.recover {
-        case ex =>
-          println(s"An error occurred: ${ex.getMessage}")
-          HttpResponse(FAIL_CODE, entity = "Can not start flow!!!")
+      } catch {
+
+        case ex => {
+          println(ex)
+          Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start flow!"))
+        }
       }
-      responseFuture
 
       /*entity match {
         case HttpEntity.Strict(_, data) =>{
@@ -779,39 +659,57 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
       }
 
     }
-    /*
-    case HttpRequest(GET, Uri.Path("/monitor/throughout"), headers, entity, protocol) => {
 
-      val appId = req.getUri().query().getOrElse("appId", "")
-      val stopName = req.getUri().query().getOrElse("stopName", "")
-      val portName = req.getUri().query().getOrElse("portName", "")
+    case HttpRequest(POST, Uri.Path("/flink/yarn-cluster/flow/start"), headers, entity, protocol) => {
+
+
       try {
-        val pluginInfo = API.getThroughput(appId,stopName,portName)
-        Future.successful(HttpResponse(SUCCESS_CODE, entity = pluginInfo))
+
+        val bodyFeature = Unmarshal(entity).to[String]
+        val flowJson = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
+        val appId = API.startFlinkYarnClusterFlow(flowJson)
+
+        val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
+        Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } catch {
-        case ex => {
+        case ex: Exception => {
           println(ex)
-          Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found plugins !"))
+          Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start flow!"))
         }
       }
     }
-    */
 
-    case HttpRequest(GET, Uri.Path("/visualDataDirectory/data"), headers, entity, protocol) => {
+    case HttpRequest(POST, Uri.Path("/flink/yarn-session/flow/start"), headers, entity, protocol) => {
+
+
       try {
-        val dataCenter = req.getUri().query().getOrElse("dataCenter", "")
-        val appID = req.getUri().query().getOrElse("appID", "")
-        val stopName = req.getUri().query().getOrElse("stopName", "")
-        val visualDataDirectoryPath = PropertyUtil.getVisualDataDirectoryPath() + appID + "/" + stopName
-        val visualDataDirectoryData = API.getHdfsDataByPath(visualDataDirectoryPath)
-        val returnValue: scaladsl.Source[ByteString, Future[IOResult]] = StreamConverters.fromInputStream(() => visualDataDirectoryData)
-        Future.successful(HttpResponse(SUCCESS_CODE, entity = HttpEntity(ContentTypes.`application/octet-stream`, returnValue)))
+
+        val bodyFeature = Unmarshal(entity).to[String]
+        val flowJson = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
+        //val appId = API.startFlinkYarnClusterFlow(flowJson)
+        API.startFlinkYarnSessionFlow(flowJson)
+
+        val appId = ""
+
+        val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
+        Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } catch {
-        case ex => {
+        case ex: Exception => {
           println(ex)
-          Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found visualDataDirectory path !"))
+          Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start flow!"))
         }
       }
+    }
+    case HttpRequest(GET, Uri.Path("/flink/flow/log"), headers, entity, protocol) => {
+
+      val appID = req.getUri().query().getOrElse("appID", "")
+      if (!appID.equals("")) {
+        val result = API.getFlowLog(appID)
+        Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
+      } else {
+        Future.successful(HttpResponse(FAIL_CODE, entity = "appID is null or flow does not exist!"))
+      }
+
     }
 
     case _: HttpRequest =>
@@ -822,6 +720,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
   def run = {
 
     val ip = InetAddress.getLocalHost.getHostAddress
+    //val ip="223.193.3.32"
     //write ip to server.ip file
     FileUtil.writeFile("server.ip=" + ip, ServerIpUtil.getServerIpFile())
 
@@ -834,7 +733,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
   }
 
-  class MonitorScheduler extends Thread {
+  private class MonitorScheduler extends Thread {
 
     override def run(): Unit = {
       while (true) {
@@ -856,7 +755,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     }
   }
 
-  def initSchedule() = {
+  private def initSchedule() = {
     val scheduleList = H2Util.getStartedSchedule()
     scheduleList.foreach(id => {
       val scheduleContent = FlowFileUtil.readFlowFile(FlowFileUtil.getScheduleFilePath(id))

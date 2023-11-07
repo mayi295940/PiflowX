@@ -19,7 +19,7 @@ class PluginManager {
 
   def PlugInManager() = {}
 
-  def getPluginPath() : String = {
+  def getPluginPath(): String = {
     this.pluginPath
   }
 
@@ -64,14 +64,14 @@ class PluginManager {
   }
 
 
-  def getConfigurableStopIcon(imagePath:String, bundleName:String): Array[Byte] = {
+  def getConfigurableStopIcon(imagePath: String, bundleName: String): Array[Byte] = {
     val it = pluginMap.keys.iterator
     while (it.hasNext) {
       val plugin = it.next
       try {
         val forName = Class.forName(bundleName, true, getLoader(plugin))
         val ins = forName.newInstance.asInstanceOf[ConfigurableStop]
-        val  imageInputStream = getLoader(plugin).getResourceAsStream(imagePath)
+        val imageInputStream = getLoader(plugin).getResourceAsStream(imagePath)
         val input = new BufferedInputStream(imageInputStream)
         return Image.fromStream(input).bytes
 
@@ -93,17 +93,14 @@ class PluginManager {
     var stopList = List[ConfigurableStop]()
     val pluginIterator = pluginMap.keys.iterator
     while (pluginIterator.hasNext) {
-      val plugin : String = pluginIterator.next
+      val plugin: String = pluginIterator.next
       val finder = ClassFinder(Seq(new File(plugin)))
       val classes = finder.getClasses
-      try{
 
-        for( externalClass <- classes){
-
+      try {
+        for (externalClass <- classes) {
           try {
-            if(externalClass.superClassName.equals(ClassUtil.configurableStopClass) &&
-              !externalClass.name.equals(ClassUtil.configurableStreamingStop) &&
-              !externalClass.name.equals(ClassUtil.configurableIncrementalStop)){
+            if (externalClass.superClassName.equals(ClassUtil.configurableStopClass)) {
               val forName = Class.forName(externalClass.name, true, getLoader(plugin))
               val ins = forName.newInstance.asInstanceOf[ConfigurableStop]
               System.out.println("Find ConfigurableStop: " + externalClass.name + " in " + plugin)
@@ -115,36 +112,39 @@ class PluginManager {
               e.printStackTrace()
             case e: InstantiationException =>
               System.err.println(externalClass.name + " can not be instantiation in " + plugin)
-            //e.printStackTrace()
+              e.printStackTrace()
             case e: ClassNotFoundException =>
+              e.printStackTrace()
               System.err.println(externalClass.name + " can not be found in " + plugin)
+            case e: Exception =>
+              e.printStackTrace()
           }
         }
-      }catch {
+      } catch {
         case e: UnsupportedOperationException => {
           System.err.println("external plugin throw UnsupportedOperationException.")
-          //e.printStackTrace()
+          e.printStackTrace()
         }
       }
     }
     stopList
   }
 
-  def getPluginConfigurableStops(pluginName : String): List[ConfigurableStop] = {
+  def getPluginConfigurableStops(pluginName: String): List[ConfigurableStop] = {
 
     var stopList = List[ConfigurableStop]()
-    val plugin = this.getPluginPath() + pluginName
-    if(pluginMap.contains(plugin)){
+    var plugin = this.getPluginPath() + pluginName
+    //temp
+    plugin = plugin.replace("/", "\\")
+    if (pluginMap.contains(plugin)) {
 
       val finder = ClassFinder(Seq(new File(plugin)))
       val classes = finder.getClasses
-      try{
-        for( externalClass <- classes){
+      try {
+        for (externalClass <- classes) {
 
           try {
-            if(externalClass.superClassName.equals(ClassUtil.configurableStopClass) &&
-              !externalClass.name.equals(ClassUtil.configurableStreamingStop) &&
-              !externalClass.name.equals(ClassUtil.configurableIncrementalStop)){
+            if (externalClass.superClassName.equals(ClassUtil.configurableStopClass)) {
               val forName = Class.forName(externalClass.name, true, getLoader(plugin))
               val ins = forName.newInstance.asInstanceOf[ConfigurableStop]
               System.out.println("Find ConfigurableStop: " + externalClass.name + " in " + plugin)
@@ -161,7 +161,7 @@ class PluginManager {
               System.err.println(externalClass.name + " can not be found in " + plugin)
           }
         }
-      }catch {
+      } catch {
         case e: UnsupportedOperationException => {
           System.err.println("external plugin throw UnsupportedOperationException.")
           //e.printStackTrace()
@@ -175,13 +175,13 @@ class PluginManager {
     this.pluginMap.put(pluginName, loader)
   }
 
-  private def getLoader(pluginName: String) : PluginClassLoader = this.pluginMap(pluginName).asInstanceOf[PluginClassLoader]
+  private def getLoader(pluginName: String): PluginClassLoader = this.pluginMap(pluginName).asInstanceOf[PluginClassLoader]
 
   def loadPlugin(pluginName: String): Unit = {
     this.pluginMap.remove(pluginName)
     val loader = new PluginClassLoader
     val pluginurl = "jar:file:" + pluginName + "!/"
-    var url : URL = null
+    var url: URL = null
     try
       url = new URL(pluginurl)
     catch {
@@ -202,7 +202,8 @@ class PluginManager {
 }
 
 object PluginManager {
-  private var instance : PluginManager = null
+  private var instance: PluginManager = null
+
   def getInstance: PluginManager = {
     if (instance == null)
       instance = new PluginManager()
