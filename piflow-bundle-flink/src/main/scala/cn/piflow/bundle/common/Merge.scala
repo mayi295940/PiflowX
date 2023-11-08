@@ -5,21 +5,22 @@ import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 
-class Merge extends ConfigurableStop{
+class Merge extends ConfigurableStop {
+
   override val authorEmail: String = "xjzhu@cnic.cn"
   override val description: String = "Merge multi source."
   override val inportList: List[String] = List(Port.AnyPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
-  var inports : List[String] = _
+  var inports: List[String] = _
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    val inportStr = MapUtil.get(map,"inports").asInstanceOf[String]
+    val inportStr = MapUtil.get(map, "inports").asInstanceOf[String]
     inports = inportStr.split(",").map(x => x.trim).toList
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
-    var descriptor : List[PropertyDescriptor] = List()
+    var descriptor: List[PropertyDescriptor] = List()
     val inports = new PropertyDescriptor()
       .name("inports")
       .displayName("Inports")

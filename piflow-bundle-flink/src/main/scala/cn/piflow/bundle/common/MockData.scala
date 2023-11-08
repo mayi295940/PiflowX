@@ -21,8 +21,8 @@ class MockData extends ConfigurableStop {
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
-  var schema: String = _
-  var count: Int = _
+  private var schema: String = _
+  private var count: Int = _
 
   override def setProperties(map: Map[String, Any]): Unit = {
     schema = MapUtil.get(map, "schema").asInstanceOf[String]

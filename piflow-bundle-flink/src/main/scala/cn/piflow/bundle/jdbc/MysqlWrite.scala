@@ -4,11 +4,14 @@ import cn.piflow._
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo
+import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcExecutionOptions, JdbcSink, JdbcStatementBuilder}
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.types.Row
 
-import java.sql.PreparedStatement
+import java.sql.{Date, PreparedStatement}
+import java.math.BigDecimal
 
 class MysqlWrite extends ConfigurableStop {
 
@@ -17,28 +20,48 @@ class MysqlWrite extends ConfigurableStop {
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 
-  var url: String = _
-  var user: String = _
-  var password: String = _
-  var dbtable: String = _
-  var driver: String = _
-  var saveMode: String = _
+  private var url: String = _
+  private var user: String = _
+  private var password: String = _
+  private var tableName: String = _
+  private var driver: String = _
+  private var batchSize: Int = _
+  private var saveMode: String = _
+  private var columnReflect: String = _
+  private var partition: String = _
 
   def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
 
     val jdbcDF = in.read().asInstanceOf[DataStream[Row]]
 
-    val jdbcSink = JdbcSink.sink("insert into ws values(?,?,?)",
+    val dataType: RowTypeInfo = jdbcDF.dataType.asInstanceOf[RowTypeInfo]
+    val types = dataType.getFieldTypes
+    val fieldNum = dataType.getTotalFields
+    val placeholders = (0 until fieldNum).map(_ => "?").toList
+    val sql = "insert into %s values(%s)".format(tableName, placeholders.mkString(","))
+
+    val jdbcSink = JdbcSink.sink(sql,
       new JdbcStatementBuilder[Row]() {
         def accept(preparedStatement: PreparedStatement, row: Row): Unit = {
-          preparedStatement.setString(1, "1")
-          preparedStatement.setLong(2, 1L)
-          preparedStatement.setInt(3, 1)
+          (0 until fieldNum).foreach(i => {
+            types(i) match {
+              case BasicTypeInfo.INT_TYPE_INFO => preparedStatement.setInt(i + 1, row.getField(i).asInstanceOf[Int])
+              case BasicTypeInfo.STRING_TYPE_INFO => preparedStatement.setString(i + 1, row.getField(i).asInstanceOf[String])
+              case BasicTypeInfo.DOUBLE_TYPE_INFO => preparedStatement.setDouble(i + 1, row.getField(i).asInstanceOf[Double])
+              case BasicTypeInfo.BYTE_TYPE_INFO => preparedStatement.setByte(i + 1, row.getField(i).asInstanceOf[Byte])
+              case BasicTypeInfo.FLOAT_TYPE_INFO => preparedStatement.setFloat(i + 1, row.getField(i).asInstanceOf[Float])
+              case BasicTypeInfo.LONG_TYPE_INFO => preparedStatement.setLong(i + 1, row.getField(i).asInstanceOf[Long])
+              case BasicTypeInfo.BOOLEAN_TYPE_INFO => preparedStatement.setBoolean(i + 1, row.getField(i).asInstanceOf[Boolean])
+              case BasicTypeInfo.DATE_TYPE_INFO => preparedStatement.setDate(i + 1, row.getField(i).asInstanceOf[Date])
+              case BasicTypeInfo.BIG_DEC_TYPE_INFO => preparedStatement.setBigDecimal(i + 1, row.getField(i).asInstanceOf[BigDecimal])
+              case _ =>
+            }
+          })
         }
       },
       JdbcExecutionOptions.builder()
         .withMaxRetries(3)
-        .withBatchSize(100)
+        .withBatchSize(batchSize)
         .withBatchIntervalMs(3000)
         .build(),
       new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
@@ -61,9 +84,14 @@ class MysqlWrite extends ConfigurableStop {
     url = MapUtil.get(map, "url").asInstanceOf[String]
     user = MapUtil.get(map, "user").asInstanceOf[String]
     password = MapUtil.get(map, "password").asInstanceOf[String]
-    dbtable = MapUtil.get(map, "dbtable").asInstanceOf[String]
+    tableName = MapUtil.get(map, "tableName").asInstanceOf[String]
     saveMode = MapUtil.get(map, "saveMode").asInstanceOf[String]
     driver = MapUtil.get(map, "driver").asInstanceOf[String]
+    batchSize = MapUtil.get(map, "batchSize").asInstanceOf[String].toInt
+    //    columnReflect = MapUtil.get(map, "columnReflect").asInstanceOf[String]
+    //    partition = MapUtil.get(map, "partition").asInstanceOf[String]
+    //    partitions = MapUtil.get(map, "numPartitions").asInstanceOf[String]
+    //    isolationLevel = MapUtil.get(map, "isolationLevel").asInstanceOf[String]
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
@@ -97,14 +125,23 @@ class MysqlWrite extends ConfigurableStop {
       .sensitive(true)
     descriptor = password :: descriptor
 
-    val dbtable = new PropertyDescriptor()
-      .name("dbtable")
+    val tableName = new PropertyDescriptor()
+      .name("tableName")
       .displayName("DBTable")
       .description("The table you want to write")
       .defaultValue("")
       .required(true)
       .example("test")
-    descriptor = dbtable :: descriptor
+    descriptor = tableName :: descriptor
+
+    val batchSize = new PropertyDescriptor()
+      .name("batchSize")
+      .displayName("BatchSize")
+      .description("The size of batch")
+      .defaultValue("100")
+      .required(false)
+      .example("100")
+    descriptor = batchSize :: descriptor
 
     val saveModeOption = Set("Append", "Overwrite", "Ignore")
     val saveMode = new PropertyDescriptor()

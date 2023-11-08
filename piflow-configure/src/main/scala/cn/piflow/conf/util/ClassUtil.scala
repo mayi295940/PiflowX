@@ -217,16 +217,15 @@ object ClassUtil {
           ("icon" -> base64Encoder.encode(iconArrayByte)) ~
           ("properties" ->
             propertyDescriptorList.map { property =>
-              (
-                ("name" -> property.name) ~
-                  ("displayName" -> property.displayName) ~
-                  ("description" -> property.description) ~
-                  ("defaultValue" -> property.defaultValue) ~
-                  ("allowableValues" -> property.allowableValues) ~
-                  ("required" -> property.required.toString) ~
-                  ("sensitive" -> property.sensitive.toString) ~
-                  ("example" -> property.example) ~
-                  ("language" -> property.language))
+              ("name" -> property.name) ~
+                ("displayName" -> property.displayName) ~
+                ("description" -> property.description) ~
+                ("defaultValue" -> property.defaultValue) ~
+                ("allowableValues" -> property.allowableValues) ~
+                ("required" -> property.required.toString) ~
+                ("sensitive" -> property.sensitive.toString) ~
+                ("example" -> property.example) ~
+                ("language" -> property.language)
             }))
     jsonValue
   }

@@ -46,7 +46,7 @@ object HTTPClientScheduleFlow {
         |      },
         |      {
         |        "name": "ShowData",
-        |        "bundle": "cn.piflow.bundle.external.ShowData",
+        |        "bundle": "cn.piflow.bundle.common.ShowData",
         |        "uuid": "8a80d63f720cdd2301723b7461d92602",
         |        "properties": {
         |          "showNumber": "5"
