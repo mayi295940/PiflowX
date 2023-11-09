@@ -1,18 +1,9 @@
 package cn.piflow.bundle.jdbc
 
-import cn.piflow.Constants
 import cn.piflow.bundle.util.RowTypeUtil
-import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
-import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.api.scala.createTypeInformation
-import org.apache.flink.configuration.Configuration
 import org.apache.flink.connector.jdbc.JdbcInputFormat
-import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.types.Row
-
-import java.util.Date
-import scala.util.Random
 
 object MysqlReadTest {
 

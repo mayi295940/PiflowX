@@ -11,14 +11,14 @@ object HTTPClientRemoveSparkJar {
     val json = """{"sparkJarId":"d9c1dfe9-c605-444c-819e-9b5db17ab125"}"""
     val url = "http://10.0.90.119:8001/sparkJar/remove"
     val client = HttpClients.createDefault()
-    val post:HttpPost = new HttpPost(url)
+    val post: HttpPost = new HttpPost(url)
 
     post.addHeader("Content-Type", "application/json")
     post.setEntity(new StringEntity(json))
 
-    val response:CloseableHttpResponse = client.execute(post)
+    val response: CloseableHttpResponse = client.execute(post)
     val entity = response.getEntity
-    val str = EntityUtils.toString(entity,"UTF-8")
+    val str = EntityUtils.toString(entity, "UTF-8")
     println(str)
   }
 }

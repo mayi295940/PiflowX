@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Open Diagram</title>
-    <link rel="stylesheet" type="text/css" href="styles/grapheditor.css" />
+    <link rel="stylesheet" type="text/css" href="styles/grapheditor.css"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <script type="text/javascript">
@@ -194,29 +194,31 @@
 			form.setAttribute('action', window.parent.OPEN_URL);
 		}
 	};
+
 </script>
 <body onload="main();">
 <form method="POST" enctype="multipart/form-data" action="" name="openForm"
-	id="openForm" onsubmit="return handleSubmit();" accept-charset="UTF-8">
-<table style="width:100%;">
-<tr>
-<td style="height:40px;vertical-align:top;" colspan="2">
-<input type="file" name="upfile" onchange="fileChanged()">
-</td>
-</tr>
-<tr>
-<td colspan="2" height="120px" id="openSupported" style="font-family:arial;color:grey;font-size:9pt;vertical-align:top;text-align:left;">
-</td>
-</tr>
-<tr>
-<td>
-</td>
-<td style="vertical-align:middle;text-align:right;white-space:nowrap;">
-<input type="button" id="cancelButton" class="geBtn" value="Cancel" onclick="hideWindow(true);">
-<input type="submit" id="openButton" class="geBtn gePrimaryBtn" value="Open" disabled="disabled">
-</td>
-</tr>
-</table>
+      id="openForm" onsubmit="return handleSubmit();" accept-charset="UTF-8">
+    <table style="width:100%;">
+        <tr>
+            <td style="height:40px;vertical-align:top;" colspan="2">
+                <input type="file" name="upfile" onchange="fileChanged()">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" height="120px" id="openSupported"
+                style="font-family:arial;color:grey;font-size:9pt;vertical-align:top;text-align:left;">
+            </td>
+        </tr>
+        <tr>
+            <td>
+            </td>
+            <td style="vertical-align:middle;text-align:right;white-space:nowrap;">
+                <input type="button" id="cancelButton" class="geBtn" value="Cancel" onclick="hideWindow(true);">
+                <input type="submit" id="openButton" class="geBtn gePrimaryBtn" value="Open" disabled="disabled">
+            </td>
+        </tr>
+    </table>
 </form>
 </body>
 </html>

@@ -16,28 +16,30 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @PropertySources({
-        @PropertySource(value = "classpath:apiConfig.properties", encoding = "utf-8"),
-        @PropertySource(value = "classpath:baseConfig.properties", encoding = "utf-8")
+  @PropertySource(value = "classpath:apiConfig.properties", encoding = "utf-8"),
+  @PropertySource(value = "classpath:baseConfig.properties", encoding = "utf-8")
 })
 @MapperScan(basePackages = "cn.cnic.**.mapper.*.*")
 @EnableTransactionManagement
 @SpringBootApplication
 public class Application {
 
-    static Logger logger = LoggerUtil.getLogger();
+  static Logger logger = LoggerUtil.getLogger();
 
-    public static void main(String[] args) {
-        ApplicationContext context = SpringApplication.run(Application.class, args);
-        SpringContextUtil.setApplicationContext(context);
-        logger.warn("***************************************************************");
-        logger.warn("***************** Spring Boot Startup Success *****************");
-        logger.warn("***************************************************************");
-    }
+  public static void main(String[] args) {
+    ApplicationContext context = SpringApplication.run(Application.class, args);
+    SpringContextUtil.setApplicationContext(context);
+    logger.warn("***************************************************************");
+    logger.warn("***************** Spring Boot Startup Success *****************");
+    logger.warn("***************************************************************");
+  }
 
-    @Bean
-    public ConfigurableServletWebServerFactory webServerFactory() {
-        TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
-        factory.addConnectorCustomizers((TomcatConnectorCustomizer) connector -> connector.setProperty("relaxedQueryChars", "|{}[]\\"));
-        return factory;
-    }
+  @Bean
+  public ConfigurableServletWebServerFactory webServerFactory() {
+    TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
+    factory.addConnectorCustomizers(
+        (TomcatConnectorCustomizer)
+            connector -> connector.setProperty("relaxedQueryChars", "|{}[]\\"));
+    return factory;
+  }
 }

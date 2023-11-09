@@ -2,12 +2,10 @@ package cn.piflow.api
 
 import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
-import cn.piflow.conf.util.OptionUtil
-import cn.piflow.util.FlowFileUtil
+import cn.piflow.util.{FlowFileUtil, JsonUtil}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 
 import java.io.File
-import scala.util.parsing.json.JSON
 
 object StartFlinkFlowMain {
 
@@ -24,7 +22,7 @@ object StartFlinkFlowMain {
     val flowJson = FlowFileUtil.readFlowFile(flowFilePath).trim()
     println(flowJson)
 
-    val map = OptionUtil.getAny(JSON.parseFull(flowJson)).asInstanceOf[Map[String, Any]]
+    val map = JsonUtil.jsonToMap(flowJson)
     println(map)
 
     //create flow

@@ -2,57 +2,53 @@ package cn.cnic.component.stopsComponent.model;
 
 import cn.cnic.base.BaseHibernateModelUUIDNoCorpAgentId;
 import cn.cnic.common.Eunm.PortType;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Stop component table
- */
+/** Stop component table */
 @Getter
 @Setter
 @Entity
 @Table(name = "FLOW_STOPS_TEMPLATE")
 public class StopsComponent extends BaseHibernateModelUUIDNoCorpAgentId {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private String name;
+  private String name;
 
-    private String bundel;
+  private String bundel;
 
-    private String groups;
+  private String groups;
 
-    private String owner;
+  private String owner;
 
-    @Column(columnDefinition = "text(0) COMMENT 'description'")
-    private String description;
+  @Column(columnDefinition = "text(0) COMMENT 'description'")
+  private String description;
 
-    private String inports;
+  private String inports;
 
-    @Enumerated(EnumType.STRING)
-    private PortType inPortType;
+  @Enumerated(EnumType.STRING)
+  private PortType inPortType;
 
-    private String outports;
+  private String outports;
 
-    @Enumerated(EnumType.STRING)
-    private PortType outPortType;
+  @Enumerated(EnumType.STRING)
+  private PortType outPortType;
 
-    private String stopGroup;
+  private String stopGroup;
 
-    private Boolean isCustomized = false;
+  private Boolean isCustomized = false;
 
-    private String visualizationType;
+  private String visualizationType;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "stopsTemplate")
-    @Where(clause = "enable_flag=1")
-    private List<StopsComponentProperty> properties = new ArrayList<StopsComponentProperty>();
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "stopsTemplate")
+  @Where(clause = "enable_flag=1")
+  private List<StopsComponentProperty> properties = new ArrayList<StopsComponentProperty>();
 
-    //    @ManyToMany(mappedBy = "stopsTemplateList")
-    @Transient
-    private List<StopsComponentGroup> stopGroupList = new ArrayList<>();
+  //    @ManyToMany(mappedBy = "stopsTemplateList")
+  @Transient private List<StopsComponentGroup> stopGroupList = new ArrayList<>();
 }

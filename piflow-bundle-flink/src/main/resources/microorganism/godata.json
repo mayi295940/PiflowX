@@ -1,16 +1,16 @@
 {
-  "flow":{
-    "name":"test",
-    "uuid":"1234",
-    "stops":[
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
       {
-        "uuid":"1111",
-        "name":"SelectFilesByName",
-        "bundle":"cn.piflow.bundle.hdfs.SelectFilesByName",
-        "properties":{
-          "HDFSUrl":"hdfs://master2.packone:8020",
-          "HDFSPath":"/yg/microo/go/",
-          "selectionConditions":"go.obo"
+        "uuid": "1111",
+        "name": "SelectFilesByName",
+        "bundle": "cn.piflow.bundle.hdfs.SelectFilesByName",
+        "properties": {
+          "HDFSUrl": "hdfs://master2.packone:8020",
+          "HDFSPath": "/yg/microo/go/",
+          "selectionConditions": "go.obo"
         }
       },
       {
@@ -33,18 +33,18 @@
         }
       }
     ],
-    "paths":[
+    "paths": [
       {
-        "from":"SelectFilesByName",
-        "outport":"",
-        "inport":"",
-        "to":"GoDataParse"
+        "from": "SelectFilesByName",
+        "outport": "",
+        "inport": "",
+        "to": "GoDataParse"
       },
       {
-        "from":"GoDataParse",
-        "outport":"",
-        "inport":"",
-        "to":"putEs"
+        "from": "GoDataParse",
+        "outport": "",
+        "inport": "",
+        "to": "putEs"
       }
     ]
   }

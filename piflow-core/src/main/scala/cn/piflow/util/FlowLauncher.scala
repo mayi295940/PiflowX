@@ -1,10 +1,10 @@
 package cn.piflow.util
 
 import cn.piflow.Flow
-import com.alibaba.fastjson.{JSON, JSONObject}
+import com.alibaba.fastjson2.{JSON, JSONObject}
 import org.apache.flink.client.deployment.StandaloneClusterId
-import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.client.program.rest.RestClusterClient
+import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration.{Configuration, JobManagerOptions, RestOptions}
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpPut}

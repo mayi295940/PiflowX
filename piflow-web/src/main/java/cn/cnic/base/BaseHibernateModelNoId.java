@@ -1,105 +1,101 @@
 package cn.cnic.base;
 
 import cn.cnic.base.util.DateUtils;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.persistence.*;
 
 @MappedSuperclass
 public class BaseHibernateModelNoId implements Serializable {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
-    public static final int DEFAULT_LEN_SHORT = 60;
-    public static final int DEFAULT_LEN_300 = 300;
-    public static final int DEFAULT_LEN_LONG = 4000;
+  /** */
+  private static final long serialVersionUID = 1L;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(nullable = false, updatable = false)
-    private Date crtDttm = new Date();
+  public static final int DEFAULT_LEN_SHORT = 60;
+  public static final int DEFAULT_LEN_300 = 300;
+  public static final int DEFAULT_LEN_LONG = 4000;
 
-    @Column(nullable = false, updatable = false)
-    private String crtUser;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(nullable = false, updatable = false)
+  private Date crtDttm = new Date();
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(nullable = false)
-    private Date lastUpdateDttm = new Date();
+  @Column(nullable = false, updatable = false)
+  private String crtUser;
 
-    @Column(nullable = false)
-    private String lastUpdateUser;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(nullable = false)
+  private Date lastUpdateDttm = new Date();
 
-    @Column(nullable = false)
-    private Boolean enableFlag = Boolean.TRUE;
+  @Column(nullable = false)
+  private String lastUpdateUser;
 
-    @Version
-    @Column
-    private Long version;
+  @Column(nullable = false)
+  private Boolean enableFlag = Boolean.TRUE;
 
-    public Boolean getEnableFlag() {
-        return enableFlag;
-    }
+  @Version @Column private Long version;
 
-    public void setEnableFlag(Boolean enableFlag) {
-        this.enableFlag = enableFlag;
-    }
+  public Boolean getEnableFlag() {
+    return enableFlag;
+  }
 
-    public Date getCrtDttm() {
-        return crtDttm;
-    }
+  public void setEnableFlag(Boolean enableFlag) {
+    this.enableFlag = enableFlag;
+  }
 
-    /**
-     * @return yyyy-MM-dd HH:mm:ss ,such as 2012-12-25 20:20:20
-     */
-    public String getCrtDttmString() {
-        SimpleDateFormat sdf = new SimpleDateFormat(DateUtils.DATE_PATTERN_yyyy_MM_dd_HH_MM_ss);
-        return crtDttm != null ? sdf.format(crtDttm) : "";
-    }
+  public Date getCrtDttm() {
+    return crtDttm;
+  }
 
-    public void setCrtDttm(Date crtDttm) {
-        this.crtDttm = crtDttm;
-    }
+  /**
+   * @return yyyy-MM-dd HH:mm:ss ,such as 2012-12-25 20:20:20
+   */
+  public String getCrtDttmString() {
+    SimpleDateFormat sdf = new SimpleDateFormat(DateUtils.DATE_PATTERN_yyyy_MM_dd_HH_MM_ss);
+    return crtDttm != null ? sdf.format(crtDttm) : "";
+  }
 
-    public String getCrtUser() {
-        return crtUser;
-    }
+  public void setCrtDttm(Date crtDttm) {
+    this.crtDttm = crtDttm;
+  }
 
-    public void setCrtUser(String crtUserId) {
-        this.crtUser = crtUserId;
-    }
+  public String getCrtUser() {
+    return crtUser;
+  }
 
-    public Date getLastUpdateDttm() {
-        return lastUpdateDttm;
-    }
+  public void setCrtUser(String crtUserId) {
+    this.crtUser = crtUserId;
+  }
 
-    /**
-     * @return yyyy-MM-dd HH:mm:ss ,such as 2012-12-25 20:20:20
-     */
-    public String getLastUpdateDttmString() {
-        SimpleDateFormat sdf = new SimpleDateFormat(DateUtils.DATE_PATTERN_yyyy_MM_dd_HH_MM_ss);
-        return lastUpdateDttm != null ? sdf.format(lastUpdateDttm) : "";
-    }
+  public Date getLastUpdateDttm() {
+    return lastUpdateDttm;
+  }
 
-    public void setLastUpdateDttm(Date lastUpdateDttm) {
-        this.lastUpdateDttm = lastUpdateDttm;
-    }
+  /**
+   * @return yyyy-MM-dd HH:mm:ss ,such as 2012-12-25 20:20:20
+   */
+  public String getLastUpdateDttmString() {
+    SimpleDateFormat sdf = new SimpleDateFormat(DateUtils.DATE_PATTERN_yyyy_MM_dd_HH_MM_ss);
+    return lastUpdateDttm != null ? sdf.format(lastUpdateDttm) : "";
+  }
 
-    public String getLastUpdateUser() {
-        return lastUpdateUser;
-    }
+  public void setLastUpdateDttm(Date lastUpdateDttm) {
+    this.lastUpdateDttm = lastUpdateDttm;
+  }
 
-    public void setLastUpdateUser(String lastUpdateUserId) {
-        this.lastUpdateUser = lastUpdateUserId;
-    }
+  public String getLastUpdateUser() {
+    return lastUpdateUser;
+  }
 
-    public Long getVersion() {
-        return version;
-    }
+  public void setLastUpdateUser(String lastUpdateUserId) {
+    this.lastUpdateUser = lastUpdateUserId;
+  }
 
-    public void setVersion(Long version) {
-        this.version = version;
-    }
+  public Long getVersion() {
+    return version;
+  }
+
+  public void setVersion(Long version) {
+    this.version = version;
+  }
 }

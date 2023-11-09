@@ -1,38 +1,35 @@
 {
-  "flow":{
-    "name":"test",
-    "uuid":"1234",
-    "stops":[
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
       {
-        "uuid":"0000",
-        "name":"SelectHiveQL",
-        "bundle":"cn.piflow.bundle.hive.SelectHiveQL",
-        "properties":{
-          "hiveQL":"select * from sparktest.dblp_phdthesis"
+        "uuid": "0000",
+        "name": "SelectHiveQL",
+        "bundle": "cn.piflow.bundle.hive.SelectHiveQL",
+        "properties": {
+          "hiveQL": "select * from sparktest.dblp_phdthesis"
         }
-
       },
       {
-        "uuid":"1111",
-        "name":"ReadFromRedis",
-        "bundle":"cn.piflow.bundle.redis.ReadFromRedis",
-        "properties":{
-          "redis_host":"10.0.88.9",
-          "port":"7000",
-          "password":"bigdata",
-          "column_name":"title",
-          "schema":"author,pages"
+        "uuid": "1111",
+        "name": "ReadFromRedis",
+        "bundle": "cn.piflow.bundle.redis.ReadFromRedis",
+        "properties": {
+          "redis_host": "10.0.88.9",
+          "port": "7000",
+          "password": "bigdata",
+          "column_name": "title",
+          "schema": "author,pages"
         }
-
       }
-
     ],
-    "paths":[
+    "paths": [
       {
-        "from":"SelectHiveQL",
-        "outport":"",
-        "inport":"",
-        "to":"ReadFromRedis"
+        "from": "SelectHiveQL",
+        "outport": "",
+        "inport": "",
+        "to": "ReadFromRedis"
       }
     ]
   }

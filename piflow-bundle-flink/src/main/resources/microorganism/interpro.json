@@ -1,27 +1,27 @@
 {
-  "flow":{
-    "name":"test",
-    "uuid":"1234",
-    "stops":[
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
       {
-        "uuid":"1111",
-        "name":"SelectFilesByName",
-        "bundle":"cn.piflow.bundle.hdfs.SelectFilesByName",
-        "properties":{
-          "HDFSUrl":"hdfs://master2.packone:8020",
-          "HDFSPath":"/yg/microo/interpro/",
-          "selectionConditions":"interpro.xml.gz"
+        "uuid": "1111",
+        "name": "SelectFilesByName",
+        "bundle": "cn.piflow.bundle.hdfs.SelectFilesByName",
+        "properties": {
+          "HDFSUrl": "hdfs://master2.packone:8020",
+          "HDFSPath": "/yg/microo/interpro/",
+          "selectionConditions": "interpro.xml.gz"
         }
-      },{
-        "uuid":"2222",
-        "name":"UnzipFilesOnHDFS",
-        "bundle":"cn.piflow.bundle.hdfs.UnzipFilesOnHDFS",
-        "properties":{
-          "isCustomize":"false",
-          "filePath":"",
-          "hdfsUrl":"hdfs://master2.packone:8020",
-          "savePath":"/yg/microo/interpro/"
-
+      },
+      {
+        "uuid": "2222",
+        "name": "UnzipFilesOnHDFS",
+        "bundle": "cn.piflow.bundle.hdfs.UnzipFilesOnHDFS",
+        "properties": {
+          "isCustomize": "false",
+          "filePath": "",
+          "hdfsUrl": "hdfs://master2.packone:8020",
+          "savePath": "/yg/microo/interpro/"
         }
       },
       {
@@ -44,24 +44,24 @@
         }
       }
     ],
-    "paths":[
+    "paths": [
       {
-        "from":"SelectFilesByName",
-        "outport":"",
-        "inport":"",
-        "to":"UnzipFilesOnHDFS"
+        "from": "SelectFilesByName",
+        "outport": "",
+        "inport": "",
+        "to": "UnzipFilesOnHDFS"
       },
       {
-        "from":"UnzipFilesOnHDFS",
-        "outport":"",
-        "inport":"",
-        "to":"InterprodataParse"
+        "from": "UnzipFilesOnHDFS",
+        "outport": "",
+        "inport": "",
+        "to": "InterprodataParse"
       },
       {
-        "from":"InterprodataParse",
-        "outport":"",
-        "inport":"",
-        "to":"putEs"
+        "from": "InterprodataParse",
+        "outport": "",
+        "inport": "",
+        "to": "putEs"
       }
     ]
   }

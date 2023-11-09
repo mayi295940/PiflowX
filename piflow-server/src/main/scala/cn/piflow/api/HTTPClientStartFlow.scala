@@ -1,9 +1,9 @@
 package cn.piflow.api
 
 import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPost}
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpPost}
 import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.{HttpClientBuilder, HttpClients}
+import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 
 object HTTPClientStartFlow {

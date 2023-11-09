@@ -10,11 +10,11 @@ object HTTPClientGetResourceInfo {
 
     val url = "http://10.0.85.83:8001/resource/info"
     val client = HttpClients.createDefault()
-    val getFlowDebugData:HttpGet = new HttpGet(url)
+    val getFlowDebugData: HttpGet = new HttpGet(url)
 
-    val response:CloseableHttpResponse = client.execute(getFlowDebugData)
+    val response: CloseableHttpResponse = client.execute(getFlowDebugData)
     val entity = response.getEntity
-    val str = EntityUtils.toString(entity,"UTF-8")
+    val str = EntityUtils.toString(entity, "UTF-8")
     println("Code is " + str)
 
   }

@@ -2,15 +2,15 @@ package cn.piflow.bundle.hive
 
 import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
-import cn.piflow.conf.util.{FileUtil, OptionUtil}
+import cn.piflow.conf.util.FileUtil
+import cn.piflow.util.JsonUtil
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.EnvironmentSettings
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.junit.Test
 import org.h2.tools.Server
+import org.junit.Test
 
-import scala.util.parsing.json.JSON
 
 class PutHiveStreamingTest {
 
@@ -20,7 +20,7 @@ class PutHiveStreamingTest {
     //parse flow json
     val file = "src/main/resources/flow/hive/PutHiveStreaming.json"
     val flowJsonStr = FileUtil.fileReader(file)
-    val map = OptionUtil.getAny(JSON.parseFull(flowJsonStr)).asInstanceOf[Map[String, Any]]
+    val map = JsonUtil.jsonToMap(flowJsonStr)
     println(map)
 
     //create flow

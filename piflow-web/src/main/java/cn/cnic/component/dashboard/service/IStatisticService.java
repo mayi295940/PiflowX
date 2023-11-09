@@ -4,39 +4,38 @@ import java.util.Map;
 
 public interface IStatisticService {
 
-    /**
-     * get flow statistic info
-     *
-     * @return statisticInfo
-     */
-    public Map<String,String> getFlowStatisticInfo();
+  /**
+   * get flow statistic info
+   *
+   * @return statisticInfo
+   */
+  public Map<String, String> getFlowStatisticInfo();
 
-    /**
-     * get group statistic info
-     *
-     * @return statisticInfo
-     */
-    public Map<String,String> getGroupStatisticInfo();
+  /**
+   * get group statistic info
+   *
+   * @return statisticInfo
+   */
+  public Map<String, String> getGroupStatisticInfo();
 
-    /**
-     * get schedule statistic info
-     *
-     * @return statisticInfo
-     */
-    public Map<String,String> getScheduleStatisticInfo();
+  /**
+   * get schedule statistic info
+   *
+   * @return statisticInfo
+   */
+  public Map<String, String> getScheduleStatisticInfo();
 
-    /**
-     * get template and dataSource statistic info
-     *
-     * @return statisticInfo
-     */
-    public Map<String,String> getTemplateAndDataSourceStatisticInfo();
+  /**
+   * get template and dataSource statistic info
+   *
+   * @return statisticInfo
+   */
+  public Map<String, String> getTemplateAndDataSourceStatisticInfo();
 
-    /**
-     * get stop statistic info
-     *
-     * @return statisticInfo
-     */
-    public Map<String,String> getStopStatisticInfo();
-
+  /**
+   * get stop statistic info
+   *
+   * @return statisticInfo
+   */
+  public Map<String, String> getStopStatisticInfo();
 }

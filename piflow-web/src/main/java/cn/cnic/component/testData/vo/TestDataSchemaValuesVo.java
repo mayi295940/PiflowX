@@ -7,9 +7,8 @@ import lombok.Setter;
 @Getter
 public class TestDataSchemaValuesVo {
 
-    private String id;
-    private String fieldValue;
-    private int dataRow;
-    private TestDataSchemaVo testDataSchemaVo;
-
+  private String id;
+  private String fieldValue;
+  private int dataRow;
+  private TestDataSchemaVo testDataSchemaVo;
 }

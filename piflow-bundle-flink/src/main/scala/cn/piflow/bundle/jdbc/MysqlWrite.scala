@@ -10,8 +10,8 @@ import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcExecutionOpti
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.types.Row
 
-import java.sql.{Date, PreparedStatement}
 import java.math.BigDecimal
+import java.sql.{Date, PreparedStatement}
 
 class MysqlWrite extends ConfigurableStop {
 

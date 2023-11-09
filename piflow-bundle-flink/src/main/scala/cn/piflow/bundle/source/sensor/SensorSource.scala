@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.piflow.bundle.util
-
-import java.util.Calendar
+package cn.piflow.bundle.source.sensor
 
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 
+import java.util.Calendar
 import scala.util.Random
 
 /**
-  * Flink SourceFunction to generate SensorReadings with random temperature values.
-  *
-  * Each parallel instance of the source simulates 10 sensors which emit one sensor
-  * reading every 100 ms.
-  *
-  * Note: This is a simple data-generating source function that does not checkpoint its state.
-  * In case of a failure, the source does not replay any data.
-  */
+ * Flink SourceFunction to generate SensorReadings with random temperature values.
+ *
+ * Each parallel instance of the source simulates 10 sensors which emit one sensor
+ * reading every 100 ms.
+ *
+ * Note: This is a simple data-generating source function that does not checkpoint its state.
+ * In case of a failure, the source does not replay any data.
+ */
 class SensorSource extends RichParallelSourceFunction[SensorReading] {
 
   // flag indicating whether source is still running.
@@ -53,12 +52,12 @@ class SensorSource extends RichParallelSourceFunction[SensorReading] {
     while (running) {
 
       // update temperature
-      curFTemp = curFTemp.map( t => (t._1, t._2 + (rand.nextGaussian() * 0.5)) )
+      curFTemp = curFTemp.map(t => (t._1, t._2 + (rand.nextGaussian() * 0.5)))
       // get current time
       val curTime = Calendar.getInstance.getTimeInMillis
 
       // emit new SensorReading
-      curFTemp.foreach( t => srcCtx.collect(SensorReading(t._1, curTime, t._2)))
+      curFTemp.foreach(t => srcCtx.collect(SensorReading(t._1, curTime, t._2)))
 
       // wait for 100 ms
       Thread.sleep(100)

@@ -1,12 +1,12 @@
 package cn.piflow.bundle.stream
 
-import cn.piflow.bundle.util.{SensorReading, SensorSource, SensorTimeAssigner}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.bundle.source.sensor.{SensorReading, SensorSource, SensorTimeAssigner}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.ImageUtil
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.api.scala._
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 
 class SensorSourceStop extends ConfigurableStop {
   override val authorEmail: String = "xjzhu@cnic.cn"

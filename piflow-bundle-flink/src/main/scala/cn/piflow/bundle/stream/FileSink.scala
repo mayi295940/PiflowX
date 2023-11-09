@@ -9,21 +9,22 @@ import org.apache.flink.core.fs.Path
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink
 import org.apache.flink.streaming.api.scala.DataStream
 
-class FileSink extends ConfigurableStop{
+class FileSink extends ConfigurableStop {
   override val authorEmail: String = "xjzhu@cnic.cn"
   override val description: String = "Flink stream file sink."
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
 
-  var path : String = _
+  var path: String = _
+
   override def setProperties(map: Map[String, Any]): Unit = {
 
-    path = MapUtil.get(map,"path").asInstanceOf[String]
+    path = MapUtil.get(map, "path").asInstanceOf[String]
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
-    var descriptor : List[PropertyDescriptor] = List()
+    var descriptor: List[PropertyDescriptor] = List()
     val path = new PropertyDescriptor()
       .name("path")
       .displayName("Path")

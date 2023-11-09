@@ -10,11 +10,11 @@ object HTTPClientGetFlowGroupProcess {
 
     val url = "http://10.0.85.83:8001/group/progress?groupId=group_527ff279-a278-41b0-a658-7595a576fbb9"
     val client = HttpClients.createDefault()
-    val getFlowGroupProgressData:HttpGet = new HttpGet(url)
+    val getFlowGroupProgressData: HttpGet = new HttpGet(url)
 
-    val response:CloseableHttpResponse = client.execute(getFlowGroupProgressData)
+    val response: CloseableHttpResponse = client.execute(getFlowGroupProgressData)
     val entity = response.getEntity
-    val str = EntityUtils.toString(entity,"UTF-8")
+    val str = EntityUtils.toString(entity, "UTF-8")
     println("Code is " + str)
   }
 

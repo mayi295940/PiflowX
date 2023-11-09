@@ -1,23 +1,23 @@
 {
-  "flow":{
-    "name":"test",
-    "uuid":"1234",
-    "stops":[
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
       {
-        "uuid":"1111",
-        "name":"SelectFilesByName",
-        "bundle":"cn.piflow.bundle.hdfs.SelectFilesByName",
-        "properties":{
-          "HDFSUrl":"hdfs://master2.packone:8020",
-          "HDFSPath":"/yg/microo/biproject/",
-          "selectionConditions":"bioproject.xml"
+        "uuid": "1111",
+        "name": "SelectFilesByName",
+        "bundle": "cn.piflow.bundle.hdfs.SelectFilesByName",
+        "properties": {
+          "HDFSUrl": "hdfs://master2.packone:8020",
+          "HDFSPath": "/yg/microo/biproject/",
+          "selectionConditions": "bioproject.xml"
         }
       },
       {
-        "uuid":"2222",
-        "name":"BioProjetDataParse",
-        "bundle":"cn.piflow.bundle.microorganism.BioProjetData",
-        "properties":{
+        "uuid": "2222",
+        "name": "BioProjetDataParse",
+        "bundle": "cn.piflow.bundle.microorganism.BioProjetData",
+        "properties": {
           "cachePath": "/yg/microoCache/"
         }
       },
@@ -33,18 +33,18 @@
         }
       }
     ],
-    "paths":[
+    "paths": [
       {
-        "from":"SelectFilesByName",
-        "outport":"",
-        "inport":"",
-        "to":"BioProjetDataParse"
+        "from": "SelectFilesByName",
+        "outport": "",
+        "inport": "",
+        "to": "BioProjetDataParse"
       },
       {
-        "from":"BioProjetDataParse",
-        "outport":"",
-        "inport":"",
-        "to":"putEs"
+        "from": "BioProjetDataParse",
+        "outport": "",
+        "inport": "",
+        "to": "putEs"
       }
     ]
   }

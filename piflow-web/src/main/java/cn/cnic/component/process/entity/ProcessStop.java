@@ -3,15 +3,14 @@ package cn.cnic.component.process.entity;
 import cn.cnic.base.BaseHibernateModelUUIDNoCorpAgentId;
 import cn.cnic.common.Eunm.PortType;
 import cn.cnic.common.Eunm.StopState;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
-
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Setter
 @Getter
@@ -19,49 +18,49 @@ import java.util.List;
 @Table(name = "FLOW_PROCESS_STOP")
 public class ProcessStop extends BaseHibernateModelUUIDNoCorpAgentId {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_FLOW_PROCESS_ID")
-    private Process process;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "FK_FLOW_PROCESS_ID")
+  private Process process;
 
-    private String name;
+  private String name;
 
-    private String bundel;
+  private String bundel;
 
-    private String groups;
+  private String groups;
 
-    private String owner;
+  private String owner;
 
-    private String description;
+  private String description;
 
-    private String inports;
+  private String inports;
 
-    @Enumerated(EnumType.STRING)
-    private PortType inPortType;
+  @Enumerated(EnumType.STRING)
+  private PortType inPortType;
 
-    private String outports;
+  private String outports;
 
-    @Enumerated(EnumType.STRING)
-    private PortType outPortType;
+  @Enumerated(EnumType.STRING)
+  private PortType outPortType;
 
-    @Enumerated(EnumType.STRING)
-    private StopState state = StopState.INIT;
+  @Enumerated(EnumType.STRING)
+  private StopState state = StopState.INIT;
 
-    private Date startTime;
+  private Date startTime;
 
-    private Date endTime;
+  private Date endTime;
 
-    @Column(name = "page_id")
-    private String pageId;
+  @Column(name = "page_id")
+  private String pageId;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "processStop")
-    @Where(clause = "enable_flag=1")
-    @OrderBy(clause = "lastUpdateDttm desc")
-    private List<ProcessStopProperty> processStopPropertyList = new ArrayList<ProcessStopProperty>();
+  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "processStop")
+  @Where(clause = "enable_flag=1")
+  @OrderBy(clause = "lastUpdateDttm desc")
+  private List<ProcessStopProperty> processStopPropertyList = new ArrayList<ProcessStopProperty>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "processStop")
-    @Where(clause = "enable_flag=1")
-    @OrderBy(clause = "lastUpdateDttm desc")
-    private List<ProcessStopCustomizedProperty> processStopCustomizedPropertyList = new ArrayList<>();
+  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "processStop")
+  @Where(clause = "enable_flag=1")
+  @OrderBy(clause = "lastUpdateDttm desc")
+  private List<ProcessStopCustomizedProperty> processStopCustomizedPropertyList = new ArrayList<>();
 }

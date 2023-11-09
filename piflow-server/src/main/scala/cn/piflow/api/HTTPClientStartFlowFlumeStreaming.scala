@@ -9,7 +9,7 @@ object HTTPClientStartFlowFlumeStreaming {
 
   def main(args: Array[String]): Unit = {
     //flume hostname must be one of the cluster worker node, the port should be greater than 10000
-    val json=
+    val json =
       """
         |{
         |  "flow":{
@@ -66,15 +66,15 @@ object HTTPClientStartFlowFlumeStreaming {
 
     val url = "http://10.0.86.98:8001/flow/start"
     val client = HttpClients.createDefault()
-    val post:HttpPost = new HttpPost(url)
+    val post: HttpPost = new HttpPost(url)
 
     post.addHeader("Content-Type", "application/json")
     post.setEntity(new StringEntity(json))
 
 
-    val response:CloseableHttpResponse = client.execute(post)
+    val response: CloseableHttpResponse = client.execute(post)
     val entity = response.getEntity
-    val str = EntityUtils.toString(entity,"UTF-8")
+    val str = EntityUtils.toString(entity, "UTF-8")
     println("Code is " + str)
   }
 

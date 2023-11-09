@@ -11,7 +11,14 @@ import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.ClusterClientProvider;
-import org.apache.flink.configuration.*;
+import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.DeploymentOptions;
+import org.apache.flink.configuration.GlobalConfiguration;
+import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.MemorySize;
+import org.apache.flink.configuration.PipelineOptions;
+import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.yarn.YarnClientYarnClusterInformationRetriever;
 import org.apache.flink.yarn.YarnClusterDescriptor;
 import org.apache.flink.yarn.YarnClusterInformationRetriever;
@@ -23,6 +30,7 @@ import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 
 public class FlinkYarnClusterLauncher {
+
   public static String launch(Flow flow) {
 
     String flowFileName = flow.getFlowName();
@@ -71,7 +79,7 @@ public class FlinkYarnClusterLauncher {
 
     flinkConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar);
 
-    List<String> shipFiles = new ArrayList<String>();
+    List<String> shipFiles = new ArrayList<>();
     shipFiles.add(flowFile);
     flinkConfiguration.set(YarnConfigOptions.SHIP_FILES, shipFiles);
 

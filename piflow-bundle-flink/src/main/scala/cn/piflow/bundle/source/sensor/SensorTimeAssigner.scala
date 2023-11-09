@@ -13,7 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.piflow.bundle.util
+package cn.piflow.bundle.source.sensor
 
-/** Case class to hold the SensorReading data. */
-case class SensorReading(id: String, timestamp: Long, temperature: Double)
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
+import org.apache.flink.streaming.api.windowing.time.Time
+
+/**
+ * Assigns timestamps to SensorReadings based on their internal timestamp and
+ * emits watermarks with five seconds slack.
+ */
+class SensorTimeAssigner
+  extends BoundedOutOfOrdernessTimestampExtractor[SensorReading](Time.seconds(5)) {
+
+  /** Extracts timestamp from SensorReading. */
+  override def extractTimestamp(r: SensorReading): Long = r.timestamp
+
+}

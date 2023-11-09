@@ -1,12 +1,10 @@
 package cn.piflow
 
+import cn.piflow.util._
+
 import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{CountDownLatch, TimeUnit}
-
-import cn.piflow.util._
-import org.apache.spark.launcher.{SparkAppHandle, SparkLauncher}
-
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.util.{Failure, Success, Try}
 
@@ -87,7 +85,9 @@ class GroupExecutionImpl(group: Group, runnerContext: Context, runner: Runner) e
   completedGroupEntry ++= mapGroupEntryWithConditions.map(x => (x._1, false))
   val numWaitingGroupEntry = new AtomicInteger(mapGroupEntryWithConditions.size)
 
-  val startedProcesses = MMap[String, SparkAppHandle]();
+  // todo
+  //  val startedProcesses = MMap[String, SparkAppHandle]();
+  val startedProcesses = MMap[String, Any]();
   val startedGroup = MMap[String, GroupExecution]()
 
   val startedProcessesAppID = MMap[String, String]()
@@ -307,18 +307,20 @@ class GroupExecutionImpl(group: Group, runnerContext: Context, runner: Runner) e
       if (!completed) {
         //pollingThread.interrupt();
         //startedProcesses.filter(x => !isEntryCompleted(x._1)).map(_._2).foreach(_.stop());
-        startedProcesses.synchronized {
-          startedProcesses.filter(x => !isEntryCompleted(x._1)).foreach(x => {
 
-            x._2.stop()
-            val appID: String = startedProcessesAppID.getOrElse(x._1, "")
-            if (!appID.equals("")) {
-              println("Stop Flow " + appID + " by FlowLauncher!")
-              FlowLauncher.stop(appID)
-            }
-
-          });
-        }
+        // todo
+        //        startedProcesses.synchronized {
+        //          startedProcesses.filter(x => !isEntryCompleted(x._1)).foreach(x => {
+        //
+        //            x._2.stop()
+        //            val appID: String = startedProcessesAppID.getOrElse(x._1, "")
+        //            if (!appID.equals("")) {
+        //              println("Stop Flow " + appID + " by FlowLauncher!")
+        //              FlowLauncher.stop(appID)
+        //            }
+        //
+        //          });
+        //        }
         startedGroup.synchronized {
           startedGroup.filter(x => !isEntryCompleted(x._1)).map(_._2).foreach(_.stop());
         }

@@ -2,7 +2,6 @@ package cn.piflow.util
 
 import java.util.{Map => JMap}
 import javax.script.{Compilable, ScriptEngineManager}
-
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import scala.collection.immutable.StringOps
@@ -87,7 +86,9 @@ object Predef {
 
   def Row(value1: Any, value2: Any) = _row(value1, value2);
 
-  private def _row(values: Any*) = org.apache.spark.sql.Row(values: _*);
+  // todo
+  //  private def _row(values: Any*) = org.apache.spark.sql.Row(values: _*);
+  private def _row(values: Any*) = null
 
   def Row(value1: Any, value2: Any, value3: Any) = _row(value1, value2, value3);
 

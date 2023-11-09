@@ -23,7 +23,6 @@
           "hiveQL": "select * from test.student"
         },
         "customizedProperties": {
-
         }
       },
       {
@@ -36,7 +35,6 @@
           "indicatorOption": "COUNT"
         },
         "customizedProperties": {
-
         }
       }
     ]

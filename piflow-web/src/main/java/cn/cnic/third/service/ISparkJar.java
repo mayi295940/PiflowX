@@ -4,10 +4,9 @@ import cn.cnic.third.vo.sparkJar.SparkJarVo;
 
 public interface ISparkJar {
 
-    public String getSparkJarPath();
+  public String getSparkJarPath();
 
-    public SparkJarVo mountSparkJar(String sparkJarName);
+  public SparkJarVo mountSparkJar(String sparkJarName);
 
-    public SparkJarVo unmountSparkJar(String sparkJarMountId);
-
+  public SparkJarVo unmountSparkJar(String sparkJarMountId);
 }

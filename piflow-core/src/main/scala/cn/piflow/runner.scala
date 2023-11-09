@@ -1,10 +1,8 @@
 package cn.piflow
 
-import java.util.Date
-
 import cn.piflow.util._
-import org.apache.spark.sql.SparkSession
 
+import java.util.Date
 import scala.collection.mutable.ArrayBuffer
 
 trait Runner {
@@ -250,8 +248,10 @@ class RunnerLogger extends RunnerListener with Logging {
   }
 
   private def getAppId(ctx: Context): String = {
-    val sparkSession = ctx.get(classOf[SparkSession].getName).asInstanceOf[SparkSession]
-    sparkSession.sparkContext.applicationId
+    // todo
+    //    val sparkSession = ctx.get(classOf[SparkSession].getName).asInstanceOf[SparkSession]
+    //    sparkSession.sparkContext.applicationId
+    ""
   }
 
   override def monitorJobCompleted(ctx: JobContext, outputs: JobOutputStream): Unit = {

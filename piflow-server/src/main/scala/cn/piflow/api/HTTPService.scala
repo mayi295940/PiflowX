@@ -10,11 +10,10 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import cn.piflow.GroupExecution
 import cn.piflow.api.HTTPService.pluginManager
-import cn.piflow.conf.util.{MapUtil, OptionUtil, PluginManager}
+import cn.piflow.conf.util.{MapUtil, PluginManager}
 import cn.piflow.util._
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
-import org.apache.spark.launcher.SparkAppHandle
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.FlywayException
 import org.h2.tools.Server
@@ -25,7 +24,6 @@ import java.net.InetAddress
 import java.text.SimpleDateFormat
 import java.util.Date
 import scala.concurrent.{Await, Future}
-import scala.util.parsing.json.JSON
 
 
 object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSupport {
@@ -38,7 +36,9 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
   var actorMap = Map[String, ActorRef]()
 
 
-  var processMap = Map[String, SparkAppHandle]()
+  // todo
+  //  var processMap = Map[String, SparkAppHandle]()
+  var processMap = Map[String, Any]()
   var flowGroupMap = Map[String, GroupExecution]()
   //var projectMap = Map[String, GroupExecution]()
 
@@ -51,8 +51,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
   def toJson(entity: RequestEntity): Map[String, Any] = {
     entity match {
       case HttpEntity.Strict(_, data) => {
-        val temp = JSON.parseFull(data.utf8String)
-        temp.get.asInstanceOf[Map[String, Any]]
+        JsonUtil.jsonToMap(data.utf8String)
       }
       case _ => Map()
     }
@@ -70,12 +69,12 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
       if (!appID.equals("")) {
         var result = API.getFlowInfo(appID)
         println("getFlowInfo result: " + result)
-        val resultMap = OptionUtil.getAny(JSON.parseFull(result)).asInstanceOf[Map[String, Any]]
+        val resultMap = JsonUtil.jsonToMap(result)
         val flowInfoMap = MapUtil.get(resultMap, "flow").asInstanceOf[Map[String, Any]]
         if (!flowInfoMap.contains("state")) {
 
           val yarnInfoJson = API.getFlowLog(appID)
-          val map = OptionUtil.getAny(JSON.parseFull(yarnInfoJson)).asInstanceOf[Map[String, Any]]
+          val map = JsonUtil.jsonToMap(yarnInfoJson)
           val appMap = MapUtil.get(map, "app").asInstanceOf[Map[String, Any]]
           val name = MapUtil.get(appMap, "name").asInstanceOf[String]
           val state = MapUtil.get(appMap, "state").asInstanceOf[String]
@@ -728,8 +727,9 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     Http().bindAndHandleAsync(route, ip, port)
     println("Server:" + ip + ":" + port + " Started!!!")
 
-    initSchedule()
-    new MonitorScheduler().start()
+    // todo 取消注释
+    // initSchedule()
+    // new MonitorScheduler().start()
 
   }
 
@@ -759,8 +759,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     val scheduleList = H2Util.getStartedSchedule()
     scheduleList.foreach(id => {
       val scheduleContent = FlowFileUtil.readFlowFile(FlowFileUtil.getScheduleFilePath(id))
-      val dataMap = JSON.parseFull(scheduleContent).get.asInstanceOf[Map[String, Any]]
-
+      val dataMap = JsonUtil.jsonToMap(scheduleContent)
 
       val expression = dataMap.get("expression").getOrElse("").asInstanceOf[String]
       val startDateStr = dataMap.get("startDate").getOrElse("").asInstanceOf[String]

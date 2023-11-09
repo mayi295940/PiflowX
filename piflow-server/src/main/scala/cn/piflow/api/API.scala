@@ -5,14 +5,12 @@ import cn.piflow.conf.bean.{FlowBean, GroupBean}
 import cn.piflow.conf.util.{ClassUtil, MapUtil, OptionUtil, PluginManager}
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
 import cn.piflow.util._
-import cn.piflow.{GroupExecution, Process, Runner}
+import cn.piflow.{GroupExecution, Runner}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPut}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
-import org.apache.spark.launcher.SparkAppHandle
-import org.apache.spark.sql.SparkSession
 
 import java.io.File
 import java.text.SimpleDateFormat
@@ -20,7 +18,6 @@ import java.util.Date
 import java.util.concurrent.CountDownLatch
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
-import scala.util.parsing.json.JSON
 
 object API {
 
@@ -136,9 +133,8 @@ object API {
       val response: CloseableHttpResponse = client.execute(get)
       val entity = response.getEntity
       val str = EntityUtils.toString(entity, "UTF-8")
-      val yarnInfo = OptionUtil.getAny(JSON.parseFull(str)).asInstanceOf[Map[String, Any]]
+      val yarnInfo = JsonUtil.jsonToMap(str)
       val matricInfo = MapUtil.get(yarnInfo, "clusterMetrics").asInstanceOf[Map[String, Any]]
-
 
       val totalVirtualCores = matricInfo.getOrElse("totalVirtualCores", "")
       val allocatedVirtualCores = matricInfo.getOrElse("allocatedVirtualCores", "")
@@ -179,7 +175,7 @@ object API {
 
     println("StartGroup API get json: \n" + groupJson)
 
-    val map = OptionUtil.getAny(JSON.parseFull(groupJson)).asInstanceOf[Map[String, Any]]
+    val map = JsonUtil.jsonToMap(groupJson)
     val flowGroupMap = MapUtil.get(map, "group").asInstanceOf[Map[String, Any]]
 
     //create flowGroup
@@ -209,10 +205,11 @@ object API {
     progress
   }
 
-  def startFlow(flowJson: String): (String, SparkAppHandle) = {
+  def startFlow(flowJson: String): (String, Any) = {
 
     var appId: String = null
-    val flowMap = OptionUtil.getAny(JSON.parseFull(flowJson)).asInstanceOf[Map[String, Any]]
+
+    val flowMap = JsonUtil.jsonToMap(flowJson)
 
     //create flow
     val flowBean = FlowBean(flowMap)
@@ -254,13 +251,13 @@ object API {
 
   }
 
-  def stopFlow(appID: String, process: SparkAppHandle): String = {
+  def stopFlow(appID: String, process: Any): String = {
 
     //yarn application kill appId
     stopFlowOnYarn(appID)
 
-    //process kill
-    process.kill()
+    // process kill
+    // process.kill()
 
     //update db
     H2Util.updateFlowState(appID, FlowState.KILLED)
@@ -525,7 +522,7 @@ object API {
   def startFlinkYarnSessionFlow(flowJson: String) = {
 
     println(flowJson)
-    val map = OptionUtil.getAny(JSON.parseFull(flowJson)).asInstanceOf[Map[String, Any]]
+    val map = JsonUtil.jsonToMap(flowJson)
     println(map)
 
     //create flow
@@ -542,7 +539,7 @@ object API {
   def startFlinkYarnClusterFlow(flowJson: String) = {
 
     println(flowJson)
-    val map = OptionUtil.getAny(JSON.parseFull(flowJson)).asInstanceOf[Map[String, Any]]
+    val map = JsonUtil.jsonToMap(flowJson)
     println(map)
 
     //create flow
@@ -555,10 +552,10 @@ object API {
   }
 }
 
-class WaitProcessTerminateRunnable(spark: SparkSession, process: Process) extends Runnable {
-  override def run(): Unit = {
-    process.awaitTermination()
-    //spark.close()
-  }
-}
+//class WaitProcessTerminateRunnable(spark: SparkSession, process: Process) extends Runnable {
+//  override def run(): Unit = {
+//    process.awaitTermination()
+//    //spark.close()
+//  }
+//}
 

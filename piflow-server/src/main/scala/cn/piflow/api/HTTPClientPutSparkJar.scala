@@ -11,14 +11,14 @@ object HTTPClientPutSparkJar {
     val json = """{"sparkJar":"mysql-connector-java-5.1.40-bin.jar"}"""
     val url = "http://10.0.90.119:8001/sparkJar/add"
     val client = HttpClients.createDefault()
-    val post:HttpPost = new HttpPost(url)
+    val post: HttpPost = new HttpPost(url)
 
     post.addHeader("Content-Type", "application/json")
     post.setEntity(new StringEntity(json))
 
-    val response:CloseableHttpResponse = client.execute(post)
+    val response: CloseableHttpResponse = client.execute(post)
     val entity = response.getEntity
-    val str = EntityUtils.toString(entity,"UTF-8")
+    val str = EntityUtils.toString(entity, "UTF-8")
     println(str)
   }
 }

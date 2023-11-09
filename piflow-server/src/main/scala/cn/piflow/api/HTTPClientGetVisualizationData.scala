@@ -10,11 +10,11 @@ object HTTPClientGetVisualizationData {
     //
     val url = "http://10.0.90.119:8001/flow/visualizationData?appID=application_1596710850427_0035&stopName=LineChart"
     val client = HttpClients.createDefault()
-    val getFlowInfo:HttpGet = new HttpGet(url)
+    val getFlowInfo: HttpGet = new HttpGet(url)
 
-    val response:CloseableHttpResponse = client.execute(getFlowInfo)
+    val response: CloseableHttpResponse = client.execute(getFlowInfo)
     val entity = response.getEntity
-    val str = EntityUtils.toString(entity,"UTF-8")
-    println( str)
+    val str = EntityUtils.toString(entity, "UTF-8")
+    println(str)
   }
 }

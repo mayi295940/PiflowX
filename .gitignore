@@ -11,3 +11,6 @@
 /spark-warehouse/
 flowFile/
 target/
+
+server.ip
+/piflow-bundle-flink/dependency-reduced-pom.xml

@@ -1,27 +1,27 @@
 package cn.piflow.bundle.hive
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
+import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.HdfsUtil
+import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api._
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
 
-class PutHiveQL extends ConfigurableStop{
+class PutHiveQL extends ConfigurableStop {
   override val authorEmail: String = "qinghua.liao@outlook.com"
   override val description: String = "Execute hiveQL script"
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
-  var database:String =_
-  var hiveQL_Path:String =_
+  var database: String = _
+  var hiveQL_Path: String = _
 
-  val name            = "myhive"
+  val name = "myhive"
   val defaultDatabase = "mydatabase"
-  val hiveConfDir     = "/piflow-configure/hive-conf"
+  val hiveConfDir = "/piflow-configure/hive-conf"
 
   override def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
 
@@ -42,8 +42,8 @@ class PutHiveQL extends ConfigurableStop{
 
     tableEnv.useDatabase(database)
 
-    var sqlString:String = HdfsUtil.getLines(hiveQL_Path)
-    sqlString.split(";").foreach( s => {
+    var sqlString: String = HdfsUtil.getLines(hiveQL_Path)
+    sqlString.split(";").foreach(s => {
       println("Sql is " + s)
       tableEnv.executeSql(s)
 
@@ -52,13 +52,13 @@ class PutHiveQL extends ConfigurableStop{
   }
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    hiveQL_Path = MapUtil.get(map,"hiveQL_Path").asInstanceOf[String]
-    database = MapUtil.get(map,"database").asInstanceOf[String]
+    hiveQL_Path = MapUtil.get(map, "hiveQL_Path").asInstanceOf[String]
+    database = MapUtil.get(map, "database").asInstanceOf[String]
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
 
-    var descriptor : List[PropertyDescriptor] = List()
+    var descriptor: List[PropertyDescriptor] = List()
 
     val hiveQL_Path = new PropertyDescriptor()
       .name("hiveQL_Path")
@@ -69,7 +69,7 @@ class PutHiveQL extends ConfigurableStop{
       .example("hdfs://192.168.3.138:8020/test/PutHiveQL.hiveql")
     descriptor = hiveQL_Path :: descriptor
 
-    val database=new PropertyDescriptor()
+    val database = new PropertyDescriptor()
       .name("database")
       .displayName("DataBase")
       .description("The database name which the hiveQL will execute on")

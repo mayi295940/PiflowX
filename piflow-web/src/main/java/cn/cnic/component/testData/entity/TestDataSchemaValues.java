@@ -8,11 +8,10 @@ import lombok.Setter;
 @Getter
 public class TestDataSchemaValues extends BaseHibernateModelUUIDNoCorpAgentId {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private String fieldValue;
-    private int dataRow;
-    private TestData testData;
-    private TestDataSchema testDataSchema;
-
+  private String fieldValue;
+  private int dataRow;
+  private TestData testData;
+  private TestDataSchema testDataSchema;
 }

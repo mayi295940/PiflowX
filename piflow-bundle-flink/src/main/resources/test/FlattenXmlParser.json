@@ -1,36 +1,34 @@
 {
-  "flow":{
-    "name":"test",
-    "uuid":"1234",
-    "stops":[
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
       {
-        "uuid":"0000",
-        "name":"FlattenXmlParser",
-        "bundle":"cn.piflow.bundle.xml.FlattenXmlParser",
-        "properties":{
-          "xmlpath":"hdfs://10.0.86.89:9000/cscd.xml",
-          "tagPath":"papers,paper",
-          "openTag":"authorlist",
-          "returnField":""
+        "uuid": "0000",
+        "name": "FlattenXmlParser",
+        "bundle": "cn.piflow.bundle.xml.FlattenXmlParser",
+        "properties": {
+          "xmlpath": "hdfs://10.0.86.89:9000/cscd.xml",
+          "tagPath": "papers,paper",
+          "openTag": "authorlist",
+          "returnField": ""
         }
       },
       {
-        "uuid":"1111",
-        "name":"JsonSave",
-        "bundle":"cn.piflow.bundle.json.JsonSave",
-        "properties":{
-          "jsonSavePath":"hdfs://10.0.86.89:9000/xjzhu/yqd03.json"
+        "uuid": "1111",
+        "name": "JsonSave",
+        "bundle": "cn.piflow.bundle.json.JsonSave",
+        "properties": {
+          "jsonSavePath": "hdfs://10.0.86.89:9000/xjzhu/yqd03.json"
         }
-
       }
-
     ],
-    "paths":[
+    "paths": [
       {
-        "from":"FlattenXmlParser",
-        "outport":"",
-        "inport":"",
-        "to":"JsonSave"
+        "from": "FlattenXmlParser",
+        "outport": "",
+        "inport": "",
+        "to": "JsonSave"
       }
     ]
   }

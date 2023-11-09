@@ -4,78 +4,78 @@ import java.io.Serializable;
 
 public class ProcessStopPropertyVo implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    
-    private ProcessStopVo processStopVo;
-    private String name;
-    private String displayName;
-    private String description;
-    private String customValue;
-    private String allowableValues;
-    private Boolean required;
-    private Boolean sensitive;
+  private static final long serialVersionUID = 1L;
 
-    public ProcessStopVo getProcessStopVo() {
-        return processStopVo;
-    }
+  private ProcessStopVo processStopVo;
+  private String name;
+  private String displayName;
+  private String description;
+  private String customValue;
+  private String allowableValues;
+  private Boolean required;
+  private Boolean sensitive;
 
-    public void setProcessStopVo(ProcessStopVo processStopVo) {
-        this.processStopVo = processStopVo;
-    }
+  public ProcessStopVo getProcessStopVo() {
+    return processStopVo;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public void setProcessStopVo(ProcessStopVo processStopVo) {
+    this.processStopVo = processStopVo;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getDisplayName() {
-        return displayName;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
+  public String getDisplayName() {
+    return displayName;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public String getCustomValue() {
-        return customValue;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public void setCustomValue(String customValue) {
-        this.customValue = customValue;
-    }
+  public String getCustomValue() {
+    return customValue;
+  }
 
-    public String getAllowableValues() {
-        return allowableValues;
-    }
+  public void setCustomValue(String customValue) {
+    this.customValue = customValue;
+  }
 
-    public void setAllowableValues(String allowableValues) {
-        this.allowableValues = allowableValues;
-    }
+  public String getAllowableValues() {
+    return allowableValues;
+  }
 
-    public Boolean getRequired() {
-        return required;
-    }
+  public void setAllowableValues(String allowableValues) {
+    this.allowableValues = allowableValues;
+  }
 
-    public void setRequired(Boolean required) {
-        this.required = required;
-    }
+  public Boolean getRequired() {
+    return required;
+  }
 
-    public Boolean getSensitive() {
-        return sensitive;
-    }
+  public void setRequired(Boolean required) {
+    this.required = required;
+  }
 
-    public void setSensitive(Boolean sensitive) {
-        this.sensitive = sensitive;
-    }
+  public Boolean getSensitive() {
+    return sensitive;
+  }
+
+  public void setSensitive(Boolean sensitive) {
+    this.sensitive = sensitive;
+  }
 }

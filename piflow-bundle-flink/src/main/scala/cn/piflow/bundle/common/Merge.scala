@@ -1,9 +1,9 @@
 package cn.piflow.bundle.common
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
+import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 
 class Merge extends ConfigurableStop {
 

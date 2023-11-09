@@ -1,8 +1,7 @@
 package cn.piflow.api
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPost}
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.{HttpClientBuilder, HttpClients}
+
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
+import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 
 object HTTPClientMonitor {
@@ -15,6 +14,6 @@ object HTTPClientMonitor {
     val response: CloseableHttpResponse = client.execute(getFlowDebugData)
     val entity = response.getEntity
     val str = EntityUtils.toString(entity, "UTF-8")
-    println("Code is " + str  +"  test succesfully")
+    println("Code is " + str + "  test succesfully")
   }
 }

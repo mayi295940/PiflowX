@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.piflow.bundle.util
-
-import java.util.Calendar
+package cn.piflow.bundle.source.sensor
 
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.runtime.state.{FunctionInitializationContext, FunctionSnapshotContext}
@@ -23,18 +21,19 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 
+import java.util.Calendar
 import scala.collection.JavaConverters._
 import scala.util.Random
 
 /**
-  * A resettable Flink SourceFunction to generate SensorReadings with random temperature values.
-  *
-  * Each parallel instance of the source simulates 10 sensors which emit one sensor
-  * reading every 100 ms.
-  *
-  * The sink is integrated with Flink's checkpointing mechanism and can be reset to reproduce
-  * previously emitted records.
-  */
+ * A resettable Flink SourceFunction to generate SensorReadings with random temperature values.
+ *
+ * Each parallel instance of the source simulates 10 sensors which emit one sensor
+ * reading every 100 ms.
+ *
+ * The sink is integrated with Flink's checkpointing mechanism and can be reset to reproduce
+ * previously emitted records.
+ */
 class ResettableSensorSource extends RichParallelSourceFunction[SensorReading] with CheckpointedFunction {
 
   // flag indicating whether source is still running.

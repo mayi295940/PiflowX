@@ -9,14 +9,14 @@ import org.apache.flink.table.api._
 import org.apache.flink.table.api.bridge.scala._
 import org.apache.flink.table.catalog.hive.HiveCatalog
 
-class PutHiveStreaming extends ConfigurableStop{
+class PutHiveStreaming extends ConfigurableStop {
   override val authorEmail: String = "qinghua.liao@outlook.com"
   override val description: String = "Save data to hive"
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
-  var  database: String = _
-  var table:String = _
+  var database: String = _
+  var table: String = _
 
   override def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
     //0.Create the execution environment for the flow
@@ -33,9 +33,9 @@ class PutHiveStreaming extends ConfigurableStop{
     tableEnv.createTemporaryView("resultTable", resultTable)
 
     //connect hive by flink
-    val name            = "myhive"
+    val name = "myhive"
     val defaultDatabase = "mydatabase"
-    val hiveConfDir     = "/piflow-configure/hive-conf"
+    val hiveConfDir = "/piflow-configure/hive-conf"
 
     val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir)
     tableEnv.registerCatalog("myhive", hive)
@@ -45,7 +45,7 @@ class PutHiveStreaming extends ConfigurableStop{
     tableEnv.useDatabase(database)
 
     //save data to hive
-    tableEnv.executeSql("insert into " + database + "." + table +  " select * from " + resultTable)
+    tableEnv.executeSql("insert into " + database + "." + table + " select * from " + resultTable)
   }
 
   override def setProperties(map: Map[String, Any]): Unit = {

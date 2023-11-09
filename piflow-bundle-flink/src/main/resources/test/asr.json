@@ -1,8 +1,8 @@
 {
-  "flow":{
-    "name":"asrFlow",
-    "uuid":"1234",
-    "stops":[
+  "flow": {
+    "name": "asrFlow",
+    "uuid": "1234",
+    "stops": [
       {
         "uuid": "2222",
         "name": "ASR",
@@ -12,17 +12,14 @@
           "url": "http://10.0.86.128:8081/service/classify/asr/"
         }
       }
-
-
     ],
-    "paths":[
+    "paths": [
       {
-        "from":"",
-        "outport":"",
-        "inport":"",
-        "to":""
+        "from": "",
+        "outport": "",
+        "inport": "",
+        "to": ""
       }
-
     ]
   }
 }

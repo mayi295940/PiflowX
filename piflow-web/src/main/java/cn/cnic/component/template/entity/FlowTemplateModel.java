@@ -1,13 +1,13 @@
 package cn.cnic.component.template.entity;
 //
-//import org.hibernate.annotations.GenericGenerator;
+// import org.hibernate.annotations.GenericGenerator;
 //
-//import javax.persistence.*;
-//import java.io.Serializable;
+// import javax.persistence.*;
+// import java.io.Serializable;
 //
-//@Entity
-//@Table(name = "flow_template")
-//public class FlowTemplateModel implements Serializable {
+// @Entity
+// @Table(name = "flow_template")
+// public class FlowTemplateModel implements Serializable {
 //    /**
 //     * flow template
 //     */
@@ -48,4 +48,4 @@ package cn.cnic.component.template.entity;
 //        this.description = description;
 //    }
 //
-//}
+// }

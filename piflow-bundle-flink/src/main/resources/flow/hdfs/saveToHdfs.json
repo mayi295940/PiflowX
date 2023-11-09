@@ -1,20 +1,21 @@
 {
-  "flow":{
-    "name":"test",
-    "uuid":"1234",
-    "stops":[
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
       {
-        "uuid":"0000",
-        "name":"SelectHiveQL",
-        "bundle":"cn.piflow.bundle.hive.SelectHiveQL",
-        "properties":{
-          "hiveQL":"select * from test.user1"
+        "uuid": "0000",
+        "name": "SelectHiveQL",
+        "bundle": "cn.piflow.bundle.hive.SelectHiveQL",
+        "properties": {
+          "hiveQL": "select * from test.user1"
         }
-      }, {
-        "uuid":"1111",
-        "name":"SaveToHdfs",
-        "bundle":"cn.piflow.bundle.hdfs.SaveToHdfs",
-        "properties":{
+      },
+      {
+        "uuid": "1111",
+        "name": "SaveToHdfs",
+        "bundle": "cn.piflow.bundle.hdfs.SaveToHdfs",
+        "properties": {
           "hdfsDirPath": "/work/test/",
           "hdfsUrl": "hdfs://192.168.3.138:8020",
           "fileName": "test.csv",
@@ -23,16 +24,13 @@
           "header": "true"
         }
       }
-
-
-
     ],
-    "paths":[
+    "paths": [
       {
-        "from":"SelectHiveQL",
-        "outport":"",
-        "inport":"",
-        "to":"SaveToHdfs"
+        "from": "SelectHiveQL",
+        "outport": "",
+        "inport": "",
+        "to": "SaveToHdfs"
       }
     ]
   }

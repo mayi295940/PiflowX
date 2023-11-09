@@ -1,14 +1,14 @@
 package cn.piflow.bundle.hive
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
+import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
+import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import org.apache.flink.api.scala._
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.table.api.EnvironmentSettings
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.apache.flink.api.scala._
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.types.Row
 
 class SelectHiveQLAppend extends ConfigurableStop {

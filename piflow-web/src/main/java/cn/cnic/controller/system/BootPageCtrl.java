@@ -8,35 +8,31 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-
 @Controller
 @RequestMapping("/bootPage")
 public class BootPageCtrl {
 
-    @Autowired
-    private ISysInitRecordsService sysInitRecordsServiceImpl;
+  @Autowired private ISysInitRecordsService sysInitRecordsServiceImpl;
 
-    @RequestMapping("/isInBootPage")
-    @ResponseBody
-    public String isInBootPage() {
-        boolean inBootPage = sysInitRecordsServiceImpl.isInBootPage();
-        inBootPage = false;
-        return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("isIn", inBootPage);
-    }
+  @RequestMapping("/isInBootPage")
+  @ResponseBody
+  public String isInBootPage() {
+    boolean inBootPage = sysInitRecordsServiceImpl.isInBootPage();
+    inBootPage = false;
+    return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("isIn", inBootPage);
+  }
 
-    @RequestMapping("/initComponents")
-    @ResponseBody
-    public String initComponents() {
-        String currentUsername = SessionUserUtil.getCurrentUsername();
-        return sysInitRecordsServiceImpl.initComponents(currentUsername);
-    }
+  @RequestMapping("/initComponents")
+  @ResponseBody
+  public String initComponents() {
+    String currentUsername = SessionUserUtil.getCurrentUsername();
+    return sysInitRecordsServiceImpl.initComponents(currentUsername);
+  }
 
-    @RequestMapping("/threadMonitoring")
-    @ResponseBody
-    public String threadMonitoring() {
-        String currentUsername = SessionUserUtil.getCurrentUsername();
-        return sysInitRecordsServiceImpl.threadMonitoring(currentUsername);
-    }
-
-
+  @RequestMapping("/threadMonitoring")
+  @ResponseBody
+  public String threadMonitoring() {
+    String currentUsername = SessionUserUtil.getCurrentUsername();
+    return sysInitRecordsServiceImpl.threadMonitoring(currentUsername);
+  }
 }

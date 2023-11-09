@@ -1,38 +1,35 @@
 {
-  "flow":{
-    "name":"test",
-    "uuid":"1234",
-    "stops":[
-
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
       {
-        "uuid":"1111",
-        "name":"CsvParser",
-        "bundle":"cn.piflow.bundle.csv.CsvParser",
-        "properties":{
-          "csvPath":"hdfs://192.168.3.138:8020/test/csvparse.csv",
+        "uuid": "1111",
+        "name": "CsvParser",
+        "bundle": "cn.piflow.bundle.csv.CsvParser",
+        "properties": {
+          "csvPath": "hdfs://192.168.3.138:8020/test/csvparse.csv",
           "header": "true",
-          "delimiter":",",
-          "schema":"id,name,gender,age"
+          "delimiter": ",",
+          "schema": "id,name,gender,age"
         }
       },
       {
-        "uuid":"1324",
-        "name":"PutHiveStreaming",
-        "bundle":"cn.piflow.bundle.hive.PutHiveStreaming",
-        "properties":{
-         "database": "test",
-         "table": "csvparser"
+        "uuid": "1324",
+        "name": "PutHiveStreaming",
+        "bundle": "cn.piflow.bundle.hive.PutHiveStreaming",
+        "properties": {
+          "database": "test",
+          "table": "csvparser"
         }
-
       }
-
     ],
-    "paths":[
+    "paths": [
       {
-        "from":"CsvParser",
-        "outport":"",
-        "inport":"",
-        "to":"PutHiveStreaming"
+        "from": "CsvParser",
+        "outport": "",
+        "inport": "",
+        "to": "PutHiveStreaming"
       }
     ]
   }

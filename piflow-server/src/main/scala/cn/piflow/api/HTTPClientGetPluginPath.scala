@@ -10,11 +10,11 @@ object HTTPClientGetPluginPath {
 
     val url = "http://10.0.90.119:8001/plugin/path"
     val client = HttpClients.createDefault()
-    val getFlowInfo:HttpGet = new HttpGet(url)
+    val getFlowInfo: HttpGet = new HttpGet(url)
 
-    val response:CloseableHttpResponse = client.execute(getFlowInfo)
+    val response: CloseableHttpResponse = client.execute(getFlowInfo)
     val entity = response.getEntity
-    val str = EntityUtils.toString(entity,"UTF-8")
+    val str = EntityUtils.toString(entity, "UTF-8")
     println("result : " + str)
   }
 

@@ -1389,20 +1389,20 @@ object HTTPClientStartFlinkFlow {
     val url = "http://159.226.193.156:8001/flow/start"
     val timeout = 1800
     val requestConfig = RequestConfig.custom()
-      .setConnectTimeout(timeout*1000)
-      .setConnectionRequestTimeout(timeout*1000)
-      .setSocketTimeout(timeout*1000).build()
+      .setConnectTimeout(timeout * 1000)
+      .setConnectionRequestTimeout(timeout * 1000)
+      .setSocketTimeout(timeout * 1000).build()
 
     val client = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build()
 
-    val post:HttpPost = new HttpPost(url)
+    val post: HttpPost = new HttpPost(url)
     post.addHeader("Content-Type", "application/json")
     post.setEntity(new StringEntity(json))
 
 
-    val response:CloseableHttpResponse = client.execute(post)
+    val response: CloseableHttpResponse = client.execute(post)
     val entity = response.getEntity
-    val str = EntityUtils.toString(entity,"UTF-8")
+    val str = EntityUtils.toString(entity, "UTF-8")
     println("Code is " + str)
   }
 
