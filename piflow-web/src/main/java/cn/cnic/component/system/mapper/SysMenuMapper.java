@@ -16,7 +16,7 @@ public interface SysMenuMapper {
    * @param role
    */
   @SelectProvider(type = SysMenuMapperProvider.class, method = "getSysMenuList")
-  public List<SysMenu> getSysMenuList(@Param("role") String role);
+  public List<SysMenu> getSysMenuList(String role);
 
   @SelectProvider(type = SysMenuMapperProvider.class, method = "getSampleMenuList")
   public List<SysMenu> getSampleMenuList();
