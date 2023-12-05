@@ -6,7 +6,7 @@ import cn.piflow.bundle.util.RowTypeUtil
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 class MockData extends ConfigurableStop {
 
@@ -65,7 +65,7 @@ class MockData extends ConfigurableStop {
 
     val rowTypeInfo = RowTypeUtil.getRowTypeInfo(schema)
 
-    val df = env.addSource(new MockSourceFunction(rowTypeInfo, count))(rowTypeInfo)
+    val df = env.addSource(new MockSourceFunction(rowTypeInfo, count))
 
     out.write(df)
   }

@@ -35,6 +35,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @SuppressWarnings("unused")
@@ -180,6 +181,40 @@ public class SysUserServiceImpl implements ISysUserService {
     userVo.setPassword("");
     rtnMap.put("jwtUser", userVo);
     return JsonUtils.toJsonNoException(rtnMap);
+  }
+
+  @Override
+  @Transactional(rollbackFor = {Exception.class})
+  public void autoAddUser(String username) {
+    SysUser newUser = new SysUser();
+    newUser.setId(UUIDUtils.getUUID32());
+    newUser.setCrtDttm(new Date());
+    newUser.setCrtUser("system");
+    newUser.setLastUpdateDttm(new Date());
+    newUser.setLastUpdateUser("system");
+    newUser.setEnableFlag(true);
+    newUser.setUsername(username);
+    newUser.setName(username);
+
+    String password = username;
+    password = new BCryptPasswordEncoder().encode(password);
+    newUser.setPassword(password);
+
+    List<SysRole> sysRoleList = new ArrayList<>();
+    SysRole sysRole = new SysRole();
+    long maxId = sysUserTransactional.getSysRoleMaxId();
+    sysRole.setId(maxId + 1);
+    sysRole.setRole(SysRoleType.USER);
+    sysRole.setSysUser(newUser);
+
+    sysRoleList.add(sysRole);
+    newUser.setRoles(sysRoleList);
+
+    try {
+      sysUserTransactional.addSysUser(newUser);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private Authentication authenticate(String username, String password) {

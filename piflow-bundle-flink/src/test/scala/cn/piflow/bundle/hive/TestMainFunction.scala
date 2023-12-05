@@ -1,8 +1,7 @@
 package cn.piflow.bundle.hive
 
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.table.api.EnvironmentSettings
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
 import org.junit.Test
 
@@ -10,8 +9,7 @@ class TestMainFunction {
   @Test
   def testFlow(): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    val settings = EnvironmentSettings.newInstance().useBlinkPlanner().build()
-    val tableEnv = StreamTableEnvironment.create(env, settings)
+    val tableEnv = StreamTableEnvironment.create(env)
 
     //connect hive by flink
     val name = "myhive"

@@ -5,9 +5,8 @@ import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.HdfsUtil
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.table.api._
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
 
 class PutHiveQL extends ConfigurableStop {
@@ -26,10 +25,7 @@ class PutHiveQL extends ConfigurableStop {
   override def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
 
     val env = pec.get[StreamExecutionEnvironment]()
-
-    val settings = EnvironmentSettings.newInstance().useBlinkPlanner().build()
-
-    val tableEnv = StreamTableEnvironment.create(env, settings)
+    val tableEnv = pec.get[StreamTableEnvironment]()
 
     val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir)
 

@@ -3,7 +3,7 @@ package cn.piflow
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 
 import cn.piflow.util._
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import org.apache.flink.streaming.api.datastream.DataStream
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 trait JobInputStream {

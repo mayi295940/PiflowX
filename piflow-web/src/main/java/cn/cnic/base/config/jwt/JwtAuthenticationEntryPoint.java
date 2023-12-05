@@ -19,7 +19,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
 
   private static final long serialVersionUID = -8970718410437077606L;
 
-  private Logger logger = LoggerUtil.getLogger();
+  private final Logger logger = LoggerUtil.getLogger();
 
   @Override
   public void commence(
@@ -27,6 +27,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
       HttpServletResponse response,
       AuthenticationException authException)
       throws IOException {
+
+    if ("/pipeline/api/v1/redirect".equals(request.getRequestURI())) {
+      return;
+    }
+
     // 验证为未登陆状态会进入此方法，认证错误
     if (!"OPTIONS".equals(request.getMethod()) && !"options".equals(request.getMethod())) {
       logger.warn("认证失败：" + authException.getMessage());

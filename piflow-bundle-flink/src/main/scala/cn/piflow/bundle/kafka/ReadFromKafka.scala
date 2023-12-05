@@ -4,9 +4,8 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.DataTypes
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.types.DataType
 import org.apache.flink.types.Row
 
@@ -21,11 +20,9 @@ class ReadFromKafka extends ConfigurableStop {
   var schema: String = _
 
   def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
-    val flink = pec.get[StreamExecutionEnvironment]()
-    val tableEnv = StreamTableEnvironment.create(flink)
 
+    val tableEnv = pec.get[StreamTableEnvironment]()
 
-    //    val env: StreamExecutionEnvironment = pec.get[StreamExecutionEnvironment]()
     //    import org.apache.flink.api.scala._
     //    //checkpoint配置
     //    // 每隔100 ms进行启动一个检查点【设置checkpoint的周期】

@@ -4,13 +4,11 @@ import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
 import cn.piflow.conf.util.FileUtil
 import cn.piflow.util.JsonUtil
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.table.api.EnvironmentSettings
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
 import org.h2.tools.Server
 import org.junit.Test
-
 
 class PutHiveQLTest {
 
@@ -35,9 +33,7 @@ class PutHiveQLTest {
 
     //execute flow
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    val settings = EnvironmentSettings.newInstance().useBlinkPlanner().build()
-    //create a TableEnvironment for specific planner streaming
-    val tableEnv = StreamTableEnvironment.create(env, settings)
+    val tableEnv = StreamTableEnvironment.create(env)
 
     val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir)
     tableEnv.registerCatalog("myhive", hive)

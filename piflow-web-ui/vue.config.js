@@ -93,7 +93,7 @@ module.exports = {
   // indexPath: 'index.html',
 
   devServer: {
-    port: 9000,
+    port: 8083,
     // sockHost: 'http://127.0.0.1',
     // disableHostCheck: true,
     // open: true,
@@ -101,16 +101,15 @@ module.exports = {
     proxy: {
       '/piflow-web': {
         target: 'http://127.0.0.1:6002',
-        // target: 'http://10.0.85.80:6002/piflow-web/admin',
         changeOrigin: true,
+        logLevel: 'debug',
         ws: true, // 是否启用websockets
         secure: false, // 使用的是http协议则设置为false，https协议则设置为true
-        // pathRewrite: {
-        //   '^/piflow-web': '/'
-        // }
+        pathRewrite: {
+          '^/piflow-web': '/pipeline'
+        }
       }
     },
   },
-  lintOnSave: false,   // 取消 eslint 验证
-
+  lintOnSave: false
 }

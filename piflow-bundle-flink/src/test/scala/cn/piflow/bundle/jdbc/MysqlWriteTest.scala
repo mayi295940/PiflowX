@@ -2,10 +2,11 @@ package cn.piflow.bundle.jdbc
 
 import cn.piflow.bundle.source.mock.MockSourceFunction
 import cn.piflow.bundle.util.RowTypeUtil
+import cn.piflow.enums.DataBaseType
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo
 import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcExecutionOptions, JdbcSink, JdbcStatementBuilder}
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.types.Row
 
 import java.math.BigDecimal
@@ -15,22 +16,21 @@ object MysqlWriteTest {
 
   def main(args: Array[String]): Unit = {
 
-    val env = StreamExecutionEnvironment.createLocalEnvironment()
+    val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     val url = "jdbc:mysql://192.168.56.100:3306/test?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false&allowMultiQueries=true"
     val user: String = "root"
     val password: String = "rootroothdp"
     val schema: String = "id:String,name:String,age:Int"
     val count: Int = 10
-    val driver = "com.mysql.cj.jdbc.Driver";
     val tableName = "test"
 
     val rowTypeInfo = RowTypeUtil.getRowTypeInfo(schema)
 
-    val df = env.addSource(new MockSourceFunction(rowTypeInfo, count))(rowTypeInfo)
+    val df = env.addSource(new MockSourceFunction(rowTypeInfo, count))
     df.print()
 
-    val dataType: RowTypeInfo = df.dataType.asInstanceOf[RowTypeInfo]
+    val dataType: RowTypeInfo = df.getType.asInstanceOf[RowTypeInfo]
     val types = dataType.getFieldTypes
     val fieldNum = dataType.getTotalFields
     val placeholders = (0 until fieldNum).map(_ => "?").toList
@@ -64,7 +64,7 @@ object MysqlWriteTest {
         .withUrl(url)
         .withUsername(user)
         .withPassword(password)
-        .withDriverName(driver)
+        .withDriverName(DataBaseType.MySQL8.getDriverClassName)
         .withConnectionCheckTimeoutSeconds(60)
         .build()
     )

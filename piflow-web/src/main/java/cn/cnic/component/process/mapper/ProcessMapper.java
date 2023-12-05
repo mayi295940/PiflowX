@@ -181,7 +181,7 @@ public interface ProcessMapper {
    * @return
    */
   @SelectProvider(type = ProcessMapperProvider.class, method = "getRunningProcessList")
-  public List<Process> getRunningProcessList(@Param("flowId") String flowId);
+  public List<Process> getRunningProcessList(String flowId);
 
   /**
    * Query process according to process appid

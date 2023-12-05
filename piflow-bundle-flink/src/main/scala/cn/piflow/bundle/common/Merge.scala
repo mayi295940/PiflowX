@@ -40,8 +40,7 @@ class Merge extends ConfigurableStop {
   }
 
   override def initialize(ctx: ProcessContext): Unit = {}
-
   override def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
-    out.write(in.ports().map(in.read(_)).reduce((x, y) => x.union(y)));
+    out.write(in.ports().map(in.read).reduce((x, y) => x.union(y)))
   }
 }

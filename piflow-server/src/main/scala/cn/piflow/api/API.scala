@@ -6,7 +6,7 @@ import cn.piflow.conf.util.{ClassUtil, MapUtil, OptionUtil, PluginManager}
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
 import cn.piflow.util._
 import cn.piflow.{GroupExecution, Runner}
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPut}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients

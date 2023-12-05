@@ -2,56 +2,35 @@ package cn.piflow.bundle.common
 
 import cn.piflow.bundle.source.mock.MockSourceFunction
 import cn.piflow.bundle.util.RowTypeUtil
-import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
-import org.apache.flink.api.common.typeinfo.Types
-import org.apache.flink.api.scala.createTypeInformation
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.KeyedProcessFunction
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.types.Row
-import org.apache.flink.util.Collector
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
 object ShowDataTest {
 
   def main(args: Array[String]): Unit = {
 
-    val env = StreamExecutionEnvironment.createLocalEnvironment()
+    val env = StreamExecutionEnvironment.getExecutionEnvironment
+    val tableEnv = StreamTableEnvironment.create(env)
 
     val schema: String = "id:String,name:string,age:int,salary:double,time:date"
 
     val rowTypeInfo = RowTypeUtil.getRowTypeInfo(schema)
 
-    val df = env.addSource(new MockSourceFunction(rowTypeInfo))(rowTypeInfo)
+    val df = env.addSource(new MockSourceFunction(rowTypeInfo))
+    df.print()
 
     val showNumber = 5
 
-    val showDf = df.keyBy(row => row.getField(0).asInstanceOf[String])
-      .process(new KeyedProcessFunction[String, Row, Row]() {
+    val inputTable = tableEnv.fromDataStream(df)
 
-        private var showNumberState: ValueState[Integer] = _
+    tableEnv.createTemporaryView("tableShowTmp", inputTable)
 
-        override def open(parameters: Configuration): Unit = {
-          super.open(parameters)
-          showNumberState = getRuntimeContext.getState(new ValueStateDescriptor[Integer]("showNumberState", Types.INT))
-        }
+    val resultTable = tableEnv.sqlQuery("SELECT * FROM tableShowTmp LIMIT " + showNumber)
 
-        @throws[Exception]
-        override def processElement(value: Row, ctx: KeyedProcessFunction[String, Row, Row]#Context, out: Collector[Row]): Unit = {
-          var showNumberStateValue = showNumberState.value()
-          if (showNumberStateValue == null) {
-            showNumberStateValue = 0;
-          }
-          println("showNumberStateValue = " + showNumberStateValue)
-          if (showNumberStateValue < showNumber) {
-            out.collect(value)
-          }
-          showNumberStateValue = showNumberStateValue + 1;
-          showNumberState.update(showNumberStateValue)
-          println("update showNumberStateValue = " + showNumberState.value())
-        }
-      })
+    val resultStream = tableEnv.toDataStream(resultTable)
 
-    showDf.print()
+    // 将 DataStream 结果打印到控制台
+    resultStream.print()
 
     env.execute
 

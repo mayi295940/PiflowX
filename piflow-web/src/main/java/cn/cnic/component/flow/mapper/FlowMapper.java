@@ -93,7 +93,7 @@ public interface FlowMapper {
                 select = "cn.cnic.component.flow.mapper.PathsMapper.getPathsListByFlowId",
                 fetchType = FetchType.LAZY))
   })
-  public Flow getFlowById(@Param("id") String id);
+  public Flow getFlowById(String id);
 
   @UpdateProvider(type = FlowMapperProvider.class, method = "updateEnableFlagById")
   public int updateEnableFlagById(@Param("username") String username, @Param("id") String id);

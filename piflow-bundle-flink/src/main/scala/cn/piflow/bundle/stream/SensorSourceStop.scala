@@ -5,10 +5,11 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.ImageUtil
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.api.scala._
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 class SensorSourceStop extends ConfigurableStop {
+
   override val authorEmail: String = "xjzhu@cnic.cn"
   override val description: String = "Sensor reading"
   override val inportList: List[String] = List()
@@ -31,11 +32,11 @@ class SensorSourceStop extends ConfigurableStop {
   override def initialize(ctx: ProcessContext): Unit = {}
 
   override def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
+
     val env = pec.get[StreamExecutionEnvironment]()
     val sensorData: DataStream[SensorReading] = env.addSource(new SensorSource)
       .assignTimestampsAndWatermarks(new SensorTimeAssigner)
     out.write(sensorData)
 
-    //env.execute("SensorSourceStop")
   }
 }

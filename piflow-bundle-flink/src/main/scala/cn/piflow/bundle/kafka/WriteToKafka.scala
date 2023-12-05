@@ -4,12 +4,13 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.table.api.Table
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.types.Row
 
 class WriteToKafka extends ConfigurableStop {
+
   val description: String = "Write data to kafka"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
@@ -17,8 +18,8 @@ class WriteToKafka extends ConfigurableStop {
   var topic: String = _
 
   def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
-    val flink = pec.get[StreamExecutionEnvironment]()
-    val tableEnv = StreamTableEnvironment.create(flink)
+
+    val tableEnv = pec.get[StreamTableEnvironment]()
     val inputStream = in.read().asInstanceOf[DataStream[Row]]
     val kafkaTable: Table = tableEnv.fromDataStream(inputStream)
     val fieldNames = kafkaTable.getSchema.getFieldNames
@@ -53,14 +54,23 @@ class WriteToKafka extends ConfigurableStop {
 
   def setProperties(map: Map[String, Any]): Unit = {
     kafka_host = MapUtil.get(map, key = "kafka_host").asInstanceOf[String]
-    //port=Integer.parseInt(MapUtil.get(map,key="port").toString)
     topic = MapUtil.get(map, key = "topic").asInstanceOf[String]
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
-    val kafka_host = new PropertyDescriptor().name("kafka_host").displayName("KAFKA_HOST").defaultValue("").required(true)
-    val topic = new PropertyDescriptor().name("topic").displayName("TOPIC").defaultValue("").required(true)
+    val kafka_host = new PropertyDescriptor()
+      .name("kafka_host")
+      .displayName("KAFKA_HOST")
+      .defaultValue("")
+      .required(true)
+
+    val topic = new PropertyDescriptor()
+      .name("topic")
+      .displayName("TOPIC")
+      .defaultValue("")
+      .required(true)
+
     descriptor = kafka_host :: descriptor
     descriptor = topic :: descriptor
     descriptor
@@ -71,7 +81,7 @@ class WriteToKafka extends ConfigurableStop {
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.KafkaGroup.toString)
+    List(StopGroup.KafkaGroup)
   }
 
   override val authorEmail: String = "liangdchg@163.com"

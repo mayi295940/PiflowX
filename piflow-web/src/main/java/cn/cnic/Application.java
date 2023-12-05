@@ -11,6 +11,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
   @PropertySource(value = "classpath:baseConfig.properties", encoding = "utf-8")
 })
 @MapperScan(basePackages = "cn.cnic.**.mapper.*.*")
+@ComponentScan(basePackages="cn.cnic,com.webank.wedatasphere")
 @EnableTransactionManagement
 @SpringBootApplication
 public class Application {

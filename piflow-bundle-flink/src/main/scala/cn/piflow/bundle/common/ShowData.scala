@@ -2,11 +2,11 @@ package cn.piflow.bundle.common
 
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.conf.{ConfigurableStop, Port}
+import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.api.scala.createTypeInformation
-import org.apache.flink.streaming.api.scala
-import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.types.Row
 
 class ShowData extends ConfigurableStop {
@@ -29,16 +29,22 @@ class ShowData extends ConfigurableStop {
   // write data by "out.write(data, outportName)", the default port is ""
   def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
 
-    val df: DataStream[Row] = in.read().asInstanceOf[scala.DataStream[Row]]
+    val env = pec.get[StreamExecutionEnvironment]()
 
-    // todo
-    var i = 0
-    df.map(x => {
-      if (i <= showNumber) {
-        i = i + 1
-        println(x)
-      }
-    })
+    val tableEnv = StreamTableEnvironment.create(env)
+
+    val df: DataStream[Row] = in.read().asInstanceOf[DataStream[Row]]
+
+    val inputTable = tableEnv.fromDataStream(df)
+
+    tableEnv.createTemporaryView("tableShowTmp", inputTable)
+
+    val resultTable = tableEnv.sqlQuery("SELECT * FROM tableShowTmp LIMIT " + showNumber)
+
+    val resultStream = tableEnv.toDataStream(resultTable)
+
+    // 将 DataStream 结果打印到控制台
+    resultStream.print()
 
     out.write(df)
   }
@@ -74,7 +80,7 @@ class ShowData extends ConfigurableStop {
 
   // get group of Stop
   override def getGroup(): List[String] = {
-    List("External")
+    List(StopGroup.CommonGroup)
   }
 
 }

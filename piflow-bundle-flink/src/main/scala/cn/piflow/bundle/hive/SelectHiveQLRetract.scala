@@ -4,15 +4,14 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.api.scala._
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.EnvironmentSettings
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.SqlDialect
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.apache.flink.types.Row
 
 
 class SelectHiveQLRetract extends ConfigurableStop {
+
   override val authorEmail: String = "qinghua.liao@outlook.com"
   override val description: String = "Execute select clause of hiveQL with RetractStream"
   override val inportList: List[String] = List(Port.DefaultPort)
@@ -28,9 +27,7 @@ class SelectHiveQLRetract extends ConfigurableStop {
   override def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
 
     val env = pec.get[StreamExecutionEnvironment]()
-    val settings = EnvironmentSettings.newInstance().useBlinkPlanner().build()
-
-    val tableEnv = StreamTableEnvironment.create(env, settings)
+    val tableEnv = StreamTableEnvironment.create(env)
 
     val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir)
 
@@ -38,15 +35,13 @@ class SelectHiveQLRetract extends ConfigurableStop {
 
     tableEnv.useCatalog("myhive")
 
-    import org.apache.flink.table.api.SqlDialect
-
     tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE)
 
     tableEnv.useDatabase(database)
 
     val resultTable = tableEnv.sqlQuery(hiveQL)
 
-    val result: DataStream[(Boolean, Row)] = tableEnv.toRetractStream[Row](resultTable)
+    val result = tableEnv.toChangelogStream(resultTable)
 
     out.write(result)
   }
@@ -67,6 +62,7 @@ class SelectHiveQLRetract extends ConfigurableStop {
       .language(Language.Text)
       .example("select * from test.user1")
     descriptor = hiveQL :: descriptor
+
     val database = new PropertyDescriptor()
       .name("database")
       .displayName("DataBase")

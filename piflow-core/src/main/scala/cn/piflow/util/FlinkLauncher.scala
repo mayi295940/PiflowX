@@ -1,14 +1,12 @@
 package cn.piflow.util
 
 import cn.piflow.Flow
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 object FlinkLauncher {
 
   def launchYarnSession(flow: Flow): StreamExecutionEnvironment = {
 
-    //val env = ExecutionEnvironment.getExecutionEnvironment
-    //val env = StreamExecutionEnvironment.createLocalEnvironment(1)
     val env = StreamExecutionEnvironment.createRemoteEnvironment(
       PropertyUtil.getPropertyValue("flink.host"),
       PropertyUtil.getPropertyValue("flink.port").toInt,

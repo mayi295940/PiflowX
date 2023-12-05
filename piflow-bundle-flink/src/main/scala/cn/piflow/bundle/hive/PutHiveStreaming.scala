@@ -4,9 +4,9 @@ import cn.piflow._
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.flink.streaming.api.scala._
-import org.apache.flink.table.api._
-import org.apache.flink.table.api.bridge.scala._
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.{EnvironmentSettings, Table}
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
 
 class PutHiveStreaming extends ConfigurableStop {

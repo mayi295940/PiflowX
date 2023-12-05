@@ -5,10 +5,9 @@ import cn.piflow.bundle.util.RowTypeUtil
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.flink.api.scala.createTypeInformation
+import cn.piflow.enums.DataBaseType
 import org.apache.flink.connector.jdbc.JdbcInputFormat
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 class MysqlRead extends ConfigurableStop {
 
@@ -71,9 +70,9 @@ class MysqlRead extends ConfigurableStop {
       .name("driver")
       .displayName("Driver")
       .description("The Driver of mysql database")
-      .defaultValue("com.mysql.cj.jdbc.Driver")
+      .defaultValue(DataBaseType.MySQL8.getDriverClassName)
       .required(true)
-      .example("com.mysql.cj.jdbc.Driver")
+      .example(DataBaseType.MySQL8.getDriverClassName)
     descriptor = driver :: descriptor
 
     val user = new PropertyDescriptor()

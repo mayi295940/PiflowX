@@ -4,14 +4,14 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.api.scala._
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.table.api.EnvironmentSettings
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
 import org.apache.flink.types.Row
 
 class SelectHiveQLAppend extends ConfigurableStop {
+
   override val authorEmail: String = "qinghua.liao@outlook.com"
   override val description: String = "Execute select clause of hiveQL with AppendStream"
   override val inportList: List[String] = List(Port.DefaultPort)
@@ -27,8 +27,7 @@ class SelectHiveQLAppend extends ConfigurableStop {
   override def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
 
     val env = pec.get[StreamExecutionEnvironment]()
-    val settings = EnvironmentSettings.newInstance().useBlinkPlanner().build()
-    val tableEnv = StreamTableEnvironment.create(env, settings)
+    val tableEnv = pec.get[StreamTableEnvironment]()
 
     val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir)
 
@@ -43,11 +42,9 @@ class SelectHiveQLAppend extends ConfigurableStop {
 
     val resultTable = tableEnv.sqlQuery(hiveQL)
 
-    val resultStream: DataStream[Row] = tableEnv.toAppendStream[Row](resultTable)
+    val resultStream: DataStream[Row] = tableEnv.toDataStream(resultTable)
 
     out.write(resultStream)
-
-    //env.execute("select hiveQL test job with AppendStream")
 
   }
 

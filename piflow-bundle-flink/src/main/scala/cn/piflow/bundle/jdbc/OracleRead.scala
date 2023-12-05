@@ -5,9 +5,8 @@ import cn.piflow.bundle.util.RowTypeUtil
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.flink.api.scala.createTypeInformation
 import org.apache.flink.connector.jdbc.JdbcInputFormat
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 
 class OracleRead extends ConfigurableStop {

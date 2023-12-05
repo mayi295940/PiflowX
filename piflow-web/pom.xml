@@ -14,6 +14,13 @@
     <name>piflow-web</name>
     <description>piflow-web</description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <dss.version>1.1.2</dss.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -204,6 +211,12 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>25.1-jre</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.webank.wedatasphere.dss</groupId>
+            <artifactId>spring-origin-sso-integration-plugin</artifactId>
+            <version>${dss.version}</version>
         </dependency>
     </dependencies>
 

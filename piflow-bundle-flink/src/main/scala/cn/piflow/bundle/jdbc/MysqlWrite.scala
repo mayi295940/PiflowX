@@ -7,7 +7,7 @@ import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo
 import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcExecutionOptions, JdbcSink, JdbcStatementBuilder}
-import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.types.Row
 
 import java.math.BigDecimal
@@ -34,7 +34,7 @@ class MysqlWrite extends ConfigurableStop {
 
     val jdbcDF = in.read().asInstanceOf[DataStream[Row]]
 
-    val dataType: RowTypeInfo = jdbcDF.dataType.asInstanceOf[RowTypeInfo]
+    val dataType: RowTypeInfo = jdbcDF.getType.asInstanceOf[RowTypeInfo]
     val types = dataType.getFieldTypes
     val fieldNum = dataType.getTotalFields
     val placeholders = (0 until fieldNum).map(_ => "?").toList

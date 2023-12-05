@@ -3,7 +3,8 @@ package cn.piflow.api
 import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
 import cn.piflow.util.{FlowFileUtil, JsonUtil}
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
 import java.io.File
 
@@ -25,16 +26,20 @@ object StartFlinkFlowMain {
     val map = JsonUtil.jsonToMap(flowJson)
     println(map)
 
-    //create flow
+    // create flow
     val flowBean = FlowBean(map)
     val flow = flowBean.constructFlow(false)
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
+    val tableEnv = StreamTableEnvironment.create(env)
     println("StreamExecutionEnvironment is " + env + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     val process = Runner.create()
       .bind(classOf[StreamExecutionEnvironment].getName, env)
+      .bind(classOf[StreamTableEnvironment].getName, tableEnv)
       .start(flow);
+
+    println("pid is " + process.pid() + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     env.execute(flow.getFlowName())
 

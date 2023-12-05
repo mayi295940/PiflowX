@@ -2,13 +2,13 @@ package cn.piflow.bundle.common
 
 import cn.piflow.bundle.source.mock.MockSourceFunction
 import cn.piflow.bundle.util.RowTypeUtil
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 object MockDataTest {
 
   def main(args: Array[String]): Unit = {
 
-    val env = StreamExecutionEnvironment.createLocalEnvironment()
+    val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     val count: Int = 10
 
@@ -16,7 +16,9 @@ object MockDataTest {
 
     val rowTypeInfo = RowTypeUtil.getRowTypeInfo(schema)
 
-    val df = env.addSource(new MockSourceFunction(rowTypeInfo, count))(rowTypeInfo)
+    //val df = env.fromSource(new MockSourceFunction(rowTypeInfo, count), WatermarkStrategy.noWatermarks(), "MockSource")
+
+    val df = env.addSource(new MockSourceFunction(rowTypeInfo, count))
 
     df.print()
 

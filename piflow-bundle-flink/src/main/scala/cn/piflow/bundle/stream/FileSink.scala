@@ -6,10 +6,11 @@ import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.api.common.serialization.SimpleStringEncoder
 import org.apache.flink.core.fs.Path
+import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink
-import org.apache.flink.streaming.api.scala.DataStream
 
 class FileSink extends ConfigurableStop {
+
   override val authorEmail: String = "xjzhu@cnic.cn"
   override val description: String = "Flink stream file sink."
   override val inportList: List[String] = List(Port.DefaultPort)

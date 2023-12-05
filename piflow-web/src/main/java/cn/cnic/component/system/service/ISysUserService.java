@@ -25,4 +25,6 @@ public interface ISysUserService {
   public String registerUser(SysUserVo sysUserVo);
 
   public String jwtLogin(String username, String password);
+
+  void autoAddUser(String userName);
 }
