@@ -106,7 +106,7 @@ module.exports = {
         ws: true, // 是否启用websockets
         secure: false, // 使用的是http协议则设置为false，https协议则设置为true
         pathRewrite: {
-          '^/piflow-web': '/pipeline'
+          '^/piflow-web': '/'
         }
       }
     },
