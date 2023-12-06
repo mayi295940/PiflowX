@@ -58,8 +58,8 @@ public class PipelineRefQueryOperation
         "http://"
             + host
             + ":"
-            // + port
-            + "8083/#/drawingBoard?src=/drawingBoard/page/flow/mxGraph/index.html?load=582a4632b6f04cbe9eb28cba5762ccff&id="
+             + port
+            + "/#/drawingBoard?src=/drawingBoard/page/flow/mxGraph/index.html?load=582a4632b6f04cbe9eb28cba5762ccff&id="
             + projectId
             + "&nodeId=${nodeId}&contextID=${contextID}&nodeName=${nodeName}";
 

@@ -92,8 +92,7 @@ public class SysUserServiceImpl implements ISysUserService {
 
   @Override
   public List<SysUser> getUserList() {
-    List<SysUser> listUser = sysUserTransactional.getUserList();
-    return listUser;
+    return sysUserTransactional.getUserList();
   }
 
   @Override

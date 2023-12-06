@@ -39,7 +39,11 @@ export default new Router({
             {
               path: '/flow',
               name: 'flow',
-              component: () => import('../components/pages/Flow')
+              component: () => import('../components/pages/Flow'),
+              meta: {
+                title: 'flow',
+                publicPage: true, // Permission disclosure(权限公开)
+              }
             },
             {
               path: '/group',
@@ -96,7 +100,11 @@ export default new Router({
         {
           path: '/drawingBoard',
           name: 'drawingboard',
-          component: () => import('../components/pages/DrawingBoard')
+          component: () => import('../components/pages/DrawingBoard'),
+          meta: {
+            title: 'drawingboard',
+            publicPage: true, // Permission disclosure(权限公开)
+          }
         }
       ]
     },

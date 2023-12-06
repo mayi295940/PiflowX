@@ -12,6 +12,8 @@
 flowFile/
 target/
 storage/
+piflow-web/src/main/resources/static
+static
 
 server.ip
 /piflow-bundle-flink/dependency-reduced-pom.xml

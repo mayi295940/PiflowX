@@ -86,7 +86,7 @@ public class FilterOrderConfig {
     filterRegistrationBean.setName("filterRegistrationBean1");
     filterRegistrationBean.setFilter(filter1AuthorizationFilter());
     filterRegistrationBean.addUrlPatterns(APPLICATION_PATH + "/api/v1/*");
-    filterRegistrationBean.setOrder(2);
+    filterRegistrationBean.setOrder(-9998);
     return filterRegistrationBean;
   }
 

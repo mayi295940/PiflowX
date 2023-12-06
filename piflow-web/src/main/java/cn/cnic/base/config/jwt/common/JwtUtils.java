@@ -22,7 +22,7 @@ public class JwtUtils {
   private static final String CLAIM_KEY_USER_ID = "user_id";
   private static final String CLAIM_KEY_AUTHORITIES = "scope";
 
-  private Map<String, String> tokenMap = new ConcurrentHashMap<>(32);
+  private final Map<String, String> tokenMap = new ConcurrentHashMap<>(32);
 
   @Value("${jwt.secret}")
   private String secret;
@@ -127,11 +127,11 @@ public class JwtUtils {
     UserVo jwtUser = (UserVo) userDetails;
     final String userId = getUserIdFromToken(token);
     final String username = getUsernameFromToken(token);
-    //        final Date created = getCreatedDateFromToken(token);
-    return (userId == jwtUser.getId()
+    // final Date created = getCreatedDateFromToken(token);
+    return (userId.equals(jwtUser.getId())
         && username.equals(jwtUser.getUsername())
         && !isTokenExpired(token)
-    //                && !isCreatedBeforeLastPasswordReset(created,
+    //  && !isCreatedBeforeLastPasswordReset(created,
     // userDetail.getLastPasswordResetDate())
     );
   }
@@ -148,17 +148,18 @@ public class JwtUtils {
     tokenMap.put(userName, token);
   }
 
+  public String getToken(String userName) {
+    return tokenMap.get(userName);
+  }
+
   public void deleteToken(String userName) {
     tokenMap.remove(userName);
   }
 
   public boolean containToken(String userName, String token) {
-    if (userName != null
-        && tokenMap.containsKey(userName)
-        && tokenMap.get(userName).equals(token)) {
-      return true;
-    }
-    return false;
+    return userName != null
+            && tokenMap.containsKey(userName)
+            && tokenMap.get(userName).equals(token);
   }
 
   private Claims getClaimsFromToken(String token) {

@@ -132,9 +132,14 @@ import router from './router';
 //// 路由拦截
 const whiteList = ['/task']; //不需要登录能访问的path
 router.beforeEach((to, from, next) => {
-  // let userInfo = JSON.parse(sessionStorage.getItem('state'));//获取缓存看是否登录过
-  // let state = window.sessionStorage.getItem('state'); //获取缓存看是否登录过
-  let state = Cookies.get('state'); //获取缓存看是否登录过
+  //获取缓存看是否登录过
+  // let userInfo = JSON.parse(sessionStorage.getItem('state'));
+  // let state = window.sessionStorage.getItem('state'); 
+
+  let sessionTicket = Cookies.get('token'); 
+  console.log('=====sessionTicket======' +   sessionTicket)
+
+  let state = Cookies.get('state'); 
   // if (whiteList.indexOf(to.path) < 0) {//访问了需要登录才能访问的页面
   if (state == 'jwtok') { //登录过来直接进去
     next();
