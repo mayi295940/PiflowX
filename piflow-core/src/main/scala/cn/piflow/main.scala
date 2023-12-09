@@ -1,73 +1,74 @@
 package cn.piflow
 
 import java.util.concurrent.{CountDownLatch, TimeUnit}
-
 import cn.piflow.util._
-import org.apache.flink.streaming.api.datastream.DataStream
+
+import scala.reflect.ClassTag
+//import org.apache.flink.streaming.api.datastream.DataStream
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-trait JobInputStream {
-  def isEmpty(): Boolean;
+trait JobInputStream[DataStream] {
+  def isEmpty: Boolean
 
-  def read[T](): DataStream[T];
+  def read[DataType: ClassTag](): DataStream
 
-  def ports(): Seq[String];
+  def ports(): Seq[String]
 
-  def read[T](inport: String): DataStream[T];
+  def read[DataType: ClassTag](inport: String): DataStream
 
-  def readProperties(): MMap[String, String];
+  def readProperties(): MMap[String, String]
 
   def readProperties(inport: String): MMap[String, String]
 }
 
-trait JobOutputStream {
+trait JobOutputStream[DataStream] {
 
-  def write[T](data: DataStream[T]);
+  def write[DataType: ClassTag](data: DataStream)
 
-  def write[T](bundle: String, data: DataStream[T]);
+  def write[DataType: ClassTag](bundle: String, data: DataStream)
 
-  def writeProperties(properties: MMap[String, String]);
+  def writeProperties(properties: MMap[String, String])
 
-  def writeProperties(bundle: String, properties: MMap[String, String]);
+  def writeProperties(bundle: String, properties: MMap[String, String])
 
-  def sendError();
+  def sendError()
 }
 
-trait StopJob {
-  def jid(): String;
+trait StopJob[DataStream] {
+  def jid(): String
 
-  def getStopName(): String;
+  def getStopName(): String
 
-  def getStop(): Stop;
+  def getStop(): Stop[DataStream]
 }
 
-trait JobContext extends Context {
-  def getStopJob(): StopJob;
+trait JobContext[DataStream] extends Context[DataStream] {
+  def getStopJob(): StopJob[DataStream]
 
-  def getInputStream(): JobInputStream;
+  def getInputStream(): JobInputStream[DataStream]
 
-  def getOutputStream(): JobOutputStream;
+  def getOutputStream(): JobOutputStream[DataStream]
 
-  def getProcessContext(): ProcessContext;
+  def getProcessContext(): ProcessContext[DataStream]
 }
 
-trait Stop extends Serializable {
-  def initialize(ctx: ProcessContext): Unit;
+trait Stop[DataStream] extends Serializable {
+  def initialize(ctx: ProcessContext[DataStream]): Unit
 
-  def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit;
+  def perform(in: JobInputStream[DataStream], out: JobOutputStream[DataStream], pec: JobContext[DataStream]): Unit;
 }
 
 
-trait GroupEntry {}
+trait GroupEntry[DataStream] {}
 
-trait Flow extends GroupEntry {
+trait Flow[DataStream] extends GroupEntry[DataStream] {
   def getStopNames(): Seq[String];
 
   def hasCheckPoint(processName: String): Boolean;
 
-  def getStop(name: String): Stop;
+  def getStop(name: String): Stop[DataStream];
 
-  def analyze(): AnalyzedFlowGraph;
+  def analyze(): AnalyzedFlowGraph[DataStream];
 
   def show(): Unit;
 
@@ -112,12 +113,12 @@ trait Flow extends GroupEntry {
   def getUUID(): String;
 }
 
-class FlowImpl extends Flow {
+class FlowImpl[DataStream] extends Flow[DataStream] {
   var name = ""
   var uuid = ""
 
   val edges = ArrayBuffer[Edge]();
-  val stops = MMap[String, Stop]();
+  val stops = MMap[String, Stop[DataStream]]();
   val checkpoints = ArrayBuffer[String]();
   var checkpointParentProcessId = ""
   var runMode = ""
@@ -129,7 +130,7 @@ class FlowImpl extends Flow {
   var executorMem = ""
   var executorCores = ""
 
-  def addStop(name: String, process: Stop) = {
+  def addStop(name: String, process: Stop[DataStream]) = {
     stops(name) = process;
     this;
   };
@@ -147,14 +148,14 @@ class FlowImpl extends Flow {
 
   override def getStopNames(): Seq[String] = stops.map(_._1).toSeq;
 
-  def addPath(path: Path): Flow = {
+  def addPath(path: Path): Flow[DataStream] = {
     edges ++= path.toEdges();
     this;
   }
 
 
-  override def analyze(): AnalyzedFlowGraph =
-    new AnalyzedFlowGraph() {
+  override def analyze(): AnalyzedFlowGraph[DataStream] =
+    new AnalyzedFlowGraph[DataStream]() {
       val incomingEdges = MMap[String, ArrayBuffer[Edge]]();
       val outgoingEdges = MMap[String, ArrayBuffer[Edge]]();
 
@@ -163,7 +164,7 @@ class FlowImpl extends Flow {
         outgoingEdges.getOrElseUpdate(edge.stopFrom, ArrayBuffer[Edge]()) += edge;
       }
 
-      private def _visitProcess[T](flow: Flow, processName: String, op: (String, Map[Edge, T]) => T, visited: MMap[String, T]): T = {
+      private def _visitProcess[T](flow: Flow[DataStream], processName: String, op: (String, Map[Edge, T]) => T, visited: MMap[String, T]): T = {
         if (!visited.contains(processName)) {
 
           //TODO: need to check whether the checkpoint's data exist!!!!
@@ -196,7 +197,7 @@ class FlowImpl extends Flow {
       }
 
 
-      override def visit[T](flow: Flow, op: (String, Map[Edge, T]) => T): Unit = {
+      override def visit[T](flow: Flow[DataStream], op: (String, Map[Edge, T]) => T): Unit = {
 
         val ends = stops.keys.filterNot(outgoingEdges.contains(_));
         val visited = MMap[String, T]();
@@ -206,7 +207,7 @@ class FlowImpl extends Flow {
 
       }
 
-      override def visitStreaming[T](flow: Flow, streamingStop: String, streamingData: T, op: (String, Map[Edge, T]) => T): Unit = {
+      override def visitStreaming[T](flow: Flow[DataStream], streamingStop: String, streamingData: T, op: (String, Map[Edge, T]) => T): Unit = {
 
         val visited = MMap[String, T]();
         visited(streamingStop) = streamingData
@@ -296,70 +297,70 @@ class FlowImpl extends Flow {
   override def show(): Unit = {}
 }
 
-trait AnalyzedFlowGraph {
-  def visit[T](flow: Flow, op: (String, Map[Edge, T]) => T): Unit;
+trait AnalyzedFlowGraph[DataStream] {
+  def visit[T](flow: Flow[DataStream], op: (String, Map[Edge, T]) => T): Unit;
 
-  def visitStreaming[T](flow: Flow, streamingStop: String, streamingData: T, op: (String, Map[Edge, T]) => T): Unit;
+  def visitStreaming[T](flow: Flow[DataStream], streamingStop: String, streamingData: T, op: (String, Map[Edge, T]) => T): Unit;
 }
 
-trait Process {
+trait Process[DataStream] {
   def pid(): String;
 
   def awaitTermination();
 
   def awaitTermination(timeout: Long, unit: TimeUnit);
 
-  def getFlow(): Flow;
+  def getFlow(): Flow[DataStream];
 
-  def fork(child: Flow): Process;
+  def fork(child: Flow[DataStream]): Process[DataStream];
 
   def stop(): Unit;
 }
 
-trait ProcessContext extends Context {
-  def getFlow(): Flow;
+trait ProcessContext[DataStream] extends Context[DataStream] {
+  def getFlow(): Flow[DataStream];
 
-  def getProcess(): Process;
+  def getProcess(): Process[DataStream];
 }
 
 
-trait GroupContext extends Context {
+trait GroupContext[DataStream] extends Context[DataStream] {
 
-  def getGroup(): Group;
+  def getGroup(): Group[DataStream]
 
-  def getGroupExecution(): GroupExecution;
+  def getGroupExecution(): GroupExecution
 
 }
 
-class JobInputStreamImpl() extends JobInputStream {
+class JobInputStreamImpl[DataStream] () extends JobInputStream[DataStream] {
   //only returns DataFrame on calling read()
-  val inputs = MMap[String, Any]();
+  val inputs = MMap[String, DataStream]();
   val inputsProperties = MMap[String, () => MMap[String, String]]()
 
-  override def isEmpty(): Boolean = inputs.isEmpty;
+  override def isEmpty: Boolean = inputs.isEmpty
 
-  def attach(inputs: Map[Edge, JobOutputStreamImpl]) = {
+  def attach(inputs: Map[Edge, JobOutputStreamImpl[DataStream]]) = {
     this.inputs ++= inputs.filter(x => x._2.contains(x._1.outport))
       .map(x => (x._1.inport, x._2.getDataFrame(x._1.outport)));
 
     this.inputsProperties ++= inputs.filter(x => x._2.contains(x._1.outport))
       .map(x => (x._1.inport, x._2.getDataFrameProperties(x._1.outport)));
-  };
+  }
 
 
   override def ports(): Seq[String] = {
     inputs.keySet.toSeq;
   }
 
-  override def read[T](): DataStream[T] = {
+  override def read[DataType: ClassTag](): DataStream = {
     if (inputs.isEmpty)
-      throw new NoInputAvailableException();
+      throw new NoInputAvailableException()
 
     read(inputs.head._1);
-  };
+  }
 
-  override def read[T](inport: String): DataStream[T] = {
-    inputs(inport).asInstanceOf[DataStream[T]];
+  override def read[ataType: ClassTag](inport: String): DataStream = {
+    inputs(inport).asInstanceOf[DataStream]
   }
 
   override def readProperties(): MMap[String, String] = {
@@ -373,19 +374,18 @@ class JobInputStreamImpl() extends JobInputStream {
   }
 }
 
-class JobOutputStreamImpl() extends JobOutputStream with Logging {
+class JobOutputStreamImpl[DataStream]() extends JobOutputStream[DataStream] with Logging {
   private val defaultPort = "default"
 
-
-  val mapDataFrame = MMap[String, Any]();
+  val mapDataFrame = MMap[String, DataStream]();
 
   val mapDataFrameProperties = MMap[String, () => MMap[String, String]]();
 
-  override def write[T](data: DataStream[T]): Unit = write("", data);
+  override def write[DataType: ClassTag](data: DataStream): Unit = write("", data);
 
   override def sendError(): Unit = ???
 
-  override def write[T](outport: String, data: DataStream[T]): Unit = {
+  override def write[DataType: ClassTag](outport: String, data: DataStream): Unit = {
     mapDataFrame(outport) = data;
   }
 
@@ -393,12 +393,12 @@ class JobOutputStreamImpl() extends JobOutputStream with Logging {
 
   def getDataFrame(port: String) = mapDataFrame(port);
 
-  def showData[T](count: Int) = {
+  def showDataDataStream(count: Int) = {
 
     mapDataFrame.foreach(en => {
       val portName = if (en._1.equals("")) "default" else en._1
       println(portName + " port: ")
-      en._2.asInstanceOf[DataStream[T]].print()
+      // en._2.asInstanceOf[DataStream].print()
 
     })
   }
@@ -425,10 +425,10 @@ class JobOutputStreamImpl() extends JobOutputStream with Logging {
   }
 }
 
-class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProcess: Option[Process] = None)
-  extends Process with Logging {
+class ProcessImpl[DataStream](flow: Flow[DataStream], runnerContext: Context[DataStream], runner: Runner[DataStream], parentProcess: Option[Process[DataStream]] = None)
+  extends Process[DataStream] with Logging {
 
-  val id = "process_" + IdGenerator.uuid() + "_" + IdGenerator.nextId[Process];
+  val id = "process_" + IdGenerator.uuid() + "_" + IdGenerator.nextId[Process[DataStream]];
   val executionString = "" + id + parentProcess.map("(parent=" + _.toString + ")").getOrElse("");
 
   logger.debug(s"create process: $this, flow: $flow");
@@ -442,7 +442,7 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
 
   //val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-  val jobs = MMap[String, StopJobImpl]();
+  val jobs = MMap[String, StopJobImpl[DataStream]]();
   flow.getStopNames().foreach { stopName =>
     val stop = flow.getStop(stopName);
     stop.initialize(processContext);
@@ -456,14 +456,14 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
   val checkpointParentProcessId = flow.getCheckpointParentProcessId()
 
 
-  analyzed.visit[JobOutputStreamImpl](flow, performStopByCheckpoint)
+  analyzed.visit[JobOutputStreamImpl[DataStream]](flow, performStopByCheckpoint)
 
 
   //perform stop use checkpoint
-  def performStopByCheckpoint(stopName: String, inputs: Map[Edge, JobOutputStreamImpl]) = {
+  def performStopByCheckpoint(stopName: String, inputs: Map[Edge, JobOutputStreamImpl[DataStream]]) = {
     val pe = jobs(stopName);
 
-    var outputs: JobOutputStreamImpl = null
+    var outputs: JobOutputStreamImpl[DataStream] = null
     try {
       //runnerListener.onJobStarted(pe.getContext());
 
@@ -578,18 +578,18 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
 
   override def pid(): String = id;
 
-  override def getFlow(): Flow = flow;
+  override def getFlow(): Flow[DataStream] = flow;
 
-  private def createContext(runnerContext: Context): ProcessContext = {
-    new CascadeContext(runnerContext) with ProcessContext {
-      override def getFlow(): Flow = flow;
+  private def createContext(runnerContext: Context[DataStream]): ProcessContext[DataStream] = {
 
-      override def getProcess(): Process = process;
-    };
+    new CascadeContext[DataStream](runnerContext) with ProcessContext[DataStream] {
+      override def getFlow(): Flow[DataStream] = flow
+      override def getProcess(): Process[DataStream] = process;
+    }
   }
 
 
-  override def fork(child: Flow): Process = {
+  override def fork(child: Flow[DataStream]): Process[DataStream] = {
     //add flow process stack
     val process = new ProcessImpl(child, runnerContext, runner, Some(this));
     runnerListener.onProcessForked(processContext, process.processContext);
@@ -607,44 +607,45 @@ class ProcessImpl(flow: Flow, runnerContext: Context, runner: Runner, parentProc
   }
 }
 
-class JobContextImpl(job: StopJob, processContext: ProcessContext)
+class JobContextImpl[DataStream](job: StopJob[DataStream], processContext: ProcessContext[DataStream])
   extends CascadeContext(processContext)
-    with JobContext
+    with JobContext[DataStream]
     with Logging {
-  val is: JobInputStreamImpl = new JobInputStreamImpl();
 
-  val os = new JobOutputStreamImpl();
+  val is: JobInputStreamImpl[DataStream] = new JobInputStreamImpl[DataStream]();
+
+  val os = new JobOutputStreamImpl[DataStream]();
 
   def getStopJob() = job;
 
-  def getInputStream(): JobInputStream = is;
+  def getInputStream(): JobInputStream[DataStream] = is;
 
-  def getOutputStream(): JobOutputStream = os;
+  def getOutputStream(): JobOutputStream [DataStream]= os;
 
-  override def getProcessContext(): ProcessContext = processContext;
+  override def getProcessContext(): ProcessContext[DataStream] = processContext;
 }
 
-class StopJobImpl(stopName: String, stop: Stop, processContext: ProcessContext)
-  extends StopJob with Logging {
-  val id = "job_" + IdGenerator.nextId[StopJob];
+class StopJobImpl[DataStream](stopName: String, stop: Stop[DataStream], processContext: ProcessContext[DataStream])
+  extends StopJob[DataStream] with Logging {
+  val id = "job_" + IdGenerator.nextId[StopJob[DataStream]];
   val pec = new JobContextImpl(this, processContext);
 
   override def jid(): String = id;
 
   def getContext() = pec;
 
-  def perform(inputs: Map[Edge, JobOutputStreamImpl]): JobOutputStreamImpl = {
-    pec.getInputStream().asInstanceOf[JobInputStreamImpl].attach(inputs);
+  def perform(inputs: Map[Edge, JobOutputStreamImpl[DataStream]]): JobOutputStreamImpl[DataStream] = {
+    pec.getInputStream().asInstanceOf[JobInputStreamImpl[DataStream]].attach(inputs);
     stop.perform(pec.getInputStream(), pec.getOutputStream(), pec);
-    pec.getOutputStream().asInstanceOf[JobOutputStreamImpl];
+    pec.getOutputStream().asInstanceOf[JobOutputStreamImpl[DataStream]];
   }
 
   override def getStopName(): String = stopName;
 
-  override def getStop(): Stop = stop;
+  override def getStop(): Stop[DataStream] = stop;
 }
 
-trait Context {
+trait Context[DataStream] {
   def get(key: String): Any;
 
   def get(key: String, defaultValue: Any): Any;
@@ -659,7 +660,7 @@ trait Context {
     put(m.runtimeClass.getName, value);
 }
 
-class CascadeContext(parent: Context = null) extends Context with Logging {
+class CascadeContext[DataStream](parent: Context[DataStream] = null) extends Context[DataStream] with Logging {
   val map = MMap[String, Any]();
 
   override def get(key: String): Any = internalGet(key,
@@ -702,16 +703,16 @@ class ParameterNotSetException(key: String) extends FlowException(s"parameter no
 }
 
 //sub flow
-class FlowAsStop(flow: Flow) extends Stop {
-  override def initialize(ctx: ProcessContext): Unit = {
+class FlowAsStop[DataStream](flow: Flow[DataStream]) extends Stop[DataStream] {
+  override def initialize(ctx: ProcessContext[DataStream]): Unit = {
   }
 
-  override def perform(in: JobInputStream, out: JobOutputStream, pec: JobContext): Unit = {
+  override def perform(in: JobInputStream[DataStream], out: JobOutputStream[DataStream], pec: JobContext[DataStream]): Unit = {
     pec.getProcessContext().getProcess().fork(flow).awaitTermination();
   }
 }
 
-class ProcessNotRunningException(process: Process) extends FlowException() {
+class ProcessNotRunningException[DataStream](process: Process[DataStream]) extends FlowException() {
 
 }
 

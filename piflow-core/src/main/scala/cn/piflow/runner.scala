@@ -5,18 +5,18 @@ import cn.piflow.util._
 import java.util.Date
 import scala.collection.mutable.ArrayBuffer
 
-trait Runner {
-  def bind(key: String, value: Any): Runner;
+trait Runner[DataStream] {
+  def bind(key: String, value: Any): Runner[DataStream];
 
-  def start(flow: Flow): Process;
+  def start(flow: Flow[DataStream]): Process[DataStream];
 
-  def start(group: Group): GroupExecution;
+  def start(group: Group[DataStream]): GroupExecution;
 
-  def addListener(listener: RunnerListener);
+  def addListener(listener: RunnerListener[DataStream]);
 
-  def removeListener(listener: RunnerListener);
+  def removeListener(listener: RunnerListener[DataStream]);
 
-  def getListener(): RunnerListener;
+  def getListener(): RunnerListener[DataStream];
 }
 
 object Runner {
@@ -109,40 +109,40 @@ object Runner {
   }
 }
 
-trait RunnerListener {
-  def onProcessStarted(ctx: ProcessContext);
+trait RunnerListener[DataStream] {
+  def onProcessStarted(ctx: ProcessContext[DataStream]);
 
-  def onProcessForked(ctx: ProcessContext, child: ProcessContext);
+  def onProcessForked(ctx: ProcessContext[DataStream], child: ProcessContext[DataStream]);
 
-  def onProcessCompleted(ctx: ProcessContext);
+  def onProcessCompleted(ctx: ProcessContext[DataStream]);
 
-  def onProcessFailed(ctx: ProcessContext);
+  def onProcessFailed(ctx: ProcessContext[DataStream]);
 
-  def onProcessAborted(ctx: ProcessContext);
+  def onProcessAborted(ctx: ProcessContext[DataStream]);
 
-  def onJobInitialized(ctx: JobContext);
+  def onJobInitialized(ctx: JobContext[DataStream]);
 
-  def onJobStarted(ctx: JobContext);
+  def onJobStarted(ctx: JobContext[DataStream]);
 
-  def onJobCompleted(ctx: JobContext);
+  def onJobCompleted(ctx: JobContext[DataStream]);
 
-  def onJobFailed(ctx: JobContext);
+  def onJobFailed(ctx: JobContext[DataStream]);
 
-  def monitorJobCompleted(ctx: JobContext, outputs: JobOutputStream);
+  def monitorJobCompleted(ctx: JobContext[DataStream], outputs: JobOutputStream[DataStream]);
 
-  def onGroupStarted(ctx: GroupContext);
+  def onGroupStarted(ctx: GroupContext[DataStream]);
 
-  def onGroupCompleted(ctx: GroupContext);
+  def onGroupCompleted(ctx: GroupContext[DataStream]);
 
-  def onGroupFailed(ctx: GroupContext);
+  def onGroupFailed(ctx: GroupContext[DataStream]);
 
-  def onGroupStoped(ctx: GroupContext);
+  def onGroupStoped(ctx: GroupContext[DataStream]);
 
 }
 
-class RunnerLogger extends RunnerListener with Logging {
+class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
   //TODO: add GroupID or ProjectID
-  override def onProcessStarted(ctx: ProcessContext): Unit = {
+  override def onProcessStarted(ctx: ProcessContext[DataStream]): Unit = {
     val pid = ctx.getProcess().pid();
     val flowName = ctx.getFlow().toString;
     val time = new Date().toString
@@ -155,7 +155,7 @@ class RunnerLogger extends RunnerListener with Logging {
     H2Util.updateFlowStartTime(appId, time)
   };
 
-  override def onJobStarted(ctx: JobContext): Unit = {
+  override def onJobStarted(ctx: JobContext[DataStream]): Unit = {
     val jid = ctx.getStopJob().jid();
     val stopName = ctx.getStopJob().getStopName();
     val time = new Date().toString

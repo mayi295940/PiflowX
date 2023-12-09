@@ -13,7 +13,7 @@ import scala.util.{Failure, Success, Try}
  * Created by xjzhu@cnic.cn on 4/25/19
  */
 
-trait Group extends GroupEntry {
+trait Group[DataStream] extends GroupEntry[DataStream] {
   def addGroupEntry(name: String, flowOrGroup: GroupEntry, con: Condition[GroupExecution] = Condition.AlwaysTrue[GroupExecution]);
 
   def mapFlowWithConditions(): Map[String, (GroupEntry, Condition[GroupExecution])];
