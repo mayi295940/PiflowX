@@ -35,7 +35,7 @@ class ImpalaRead extends ConfigurableStop[DataFrame] {
 
     val con: Connection = DriverManager.getConnection("jdbc:hive2://" + url + "/;auth=noSasl", user, password)
     val stmt: Statement = con.createStatement()
-    val rs: ResultSet = stmt.executeQuery(sql
+    val rs: ResultSet = stmt.executeQuery(sql)
     val filedNames: Array[String] = schameString.split(",").map(x => x.trim)
     val rowsArr: ArrayBuffer[ArrayBuffer[String]] = ArrayBuffer()
 
