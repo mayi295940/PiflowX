@@ -3,7 +3,6 @@ package cn.piflow.conf
 import cn.piflow.Stop
 import cn.piflow.conf.bean.PropertyDescriptor
 
-
 abstract class ConfigurableStop[DataStream] extends Stop[DataStream] {
 
   val authorEmail: String
@@ -18,9 +17,9 @@ abstract class ConfigurableStop[DataStream] extends Stop[DataStream] {
   val customizedAllowKey = List[String]()
   val customizedAllowValue = List[String]()
 
-  var customizedProperties: Map[String, String] = null
+  var customizedProperties: Map[String, String] = _
 
-  def setProperties(map: Map[String, Any])
+  def setProperties(map: Map[String, Any]): Unit
 
   def getPropertyDescriptor(): List[PropertyDescriptor]
 
@@ -28,7 +27,7 @@ abstract class ConfigurableStop[DataStream] extends Stop[DataStream] {
 
   def getGroup(): List[String]
 
-  def setCustomizedProperties(customizedProperties: Map[String, String]) = {
+  def setCustomizedProperties(customizedProperties: Map[String, String]): Unit = {
     this.customizedProperties = customizedProperties
   }
 

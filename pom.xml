@@ -37,8 +37,8 @@
         <module>piflow-core</module>
         <module>piflow-server</module>
         <module>piflow-configure</module>
-        <module>piflow-web</module>
         <module>piflow-bundle</module>
+        <module>piflow-web</module>
     </modules>
 
     <dependencies>
@@ -465,10 +465,6 @@
                     <exclusion>
                         <artifactId>commons-compress</artifactId>
                         <groupId>org.apache.commons</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>paranamer</artifactId>
-                        <groupId>com.thoughtworks.paranamer</groupId>
                     </exclusion>
                     <exclusion>
                         <artifactId>snappy-java</artifactId>

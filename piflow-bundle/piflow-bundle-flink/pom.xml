@@ -142,10 +142,6 @@
                     <groupId>com.sun.jersey</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>paranamer</artifactId>
-                    <groupId>com.thoughtworks.paranamer</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>snappy-java</artifactId>
                     <groupId>org.xerial.snappy</groupId>
                 </exclusion>
@@ -160,6 +156,10 @@
                 <exclusion>
                     <artifactId>jackson-mapper-asl</artifactId>
                     <groupId>org.codehaus.jackson</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>paranamer</artifactId>
+                    <groupId>com.thoughtworks.paranamer</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -195,6 +195,10 @@
                 </exclusion>
                 <exclusion>
                     <artifactId>commons-lang3</artifactId>
+                    <groupId>org.apache.commons</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-text</artifactId>
                     <groupId>org.apache.commons</groupId>
                 </exclusion>
             </exclusions>

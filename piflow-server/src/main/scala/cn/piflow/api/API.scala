@@ -6,7 +6,9 @@ import cn.piflow.conf.util.{ClassUtil, MapUtil, OptionUtil, PluginManager}
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
 import cn.piflow.util._
 import cn.piflow.{GroupExecution, Runner}
+import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.types.Row
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPut}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
@@ -60,7 +62,7 @@ object API {
 
   def addPlugin(pluginManager: PluginManager, pluginName: String): String = {
     var id = ""
-    val classpathFile = new File(pluginManager.getPluginPath())
+    val classpathFile = new File(pluginManager.getPluginPath)
     val jarFile = FileUtil.getJarFile(classpathFile)
     breakable {
       jarFile.foreach(i => {
@@ -80,7 +82,7 @@ object API {
     var result = false
     val pluginName = H2Util.getPluginInfoMap(pluginId).getOrElse("name", "")
     if (pluginName != "") {
-      val classpathFile = new File(pluginManager.getPluginPath())
+      val classpathFile = new File(pluginManager.getPluginPath)
       val jarFile = FileUtil.getJarFile(classpathFile)
       breakable {
         jarFile.foreach(i => {
@@ -123,7 +125,7 @@ object API {
     jsonString
   }
 
-  def getResourceInfo(): String = {
+  def getResourceInfo: String = {
 
     try {
       val matricsURL = ConfigureUtil.getYarnResourceMatrics()
@@ -215,8 +217,8 @@ object API {
     val flowBean = FlowBean(flowMap)
     val flow = flowBean.constructFlow()
 
-    val uuid = flow.getUUID()
-    val appName = flow.getFlowName()
+    val uuid = flow.getUUID
+    val appName = flow.getFlowName
     val (stdout, stderr) = getLogFile(uuid, appName)
 
     println("StartFlow API get json: \n" + flowJson)
@@ -526,14 +528,14 @@ object API {
     println(map)
 
     //create flow
-    val flowBean = FlowBean(map)
+    val flowBean = FlowBean.apply[DataStream[Row]](map)
     val flow = flowBean.constructFlow(false)
     val env = FlinkLauncher.launchYarnSession(flow)
 
-    val process = Runner.create()
+    val process = Runner.create[DataStream[Row]]()
       .bind(classOf[StreamExecutionEnvironment].getName, env)
       .start(flow)
-    env.execute(flow.getFlowName())
+    env.execute(flow.getFlowName)
   }
 
   def startFlinkYarnClusterFlow(flowJson: String) = {

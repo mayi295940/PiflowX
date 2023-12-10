@@ -1,20 +1,19 @@
 package cn.piflow.conf.util
 
 import java.io.PrintWriter
-
 import cn.piflow.conf.bean.FlowBean
 import cn.piflow.util.{ConfigureUtil, PropertyUtil}
-import sys.process._
 
+import sys.process._
 object ScalaExecutorUtil {
 
-  val userDir = System.getProperty("user.dir")
+  val userDir: String = System.getProperty("user.dir")
   //val scalaDir =  s"$userDir/scala"
-  val scalaDir = PropertyUtil.getScalaPath()
+  val scalaDir: String = PropertyUtil.getScalaPath()
   var packageName : String = "cn.piflow.bundle.script"
   val className : String = "ScalaFile1"
-  def construct(className : String, script : String) : String = {
 
+  def construct(className : String, script : String) : String = {
 
     val path = s"$scalaDir/$className.scala"
     val code =
@@ -52,7 +51,7 @@ object ScalaExecutorUtil {
     jarFile
   }
 
-  def buildScalaExcutorJar( flowBean : FlowBean) : List[String] = {
+  def buildScalaExcutorJar[DataStream]( flowBean : FlowBean[DataStream]) : List[String] = {
     var scalaPluginList = List[String]()
     flowBean.stops.foreach{s => {
       if(s.bundle.equals("cn.piflow.bundle.script.ExecuteScala")){

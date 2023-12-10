@@ -15,27 +15,27 @@ object ClassUtil {
   val configurableStopClass: String = "cn.piflow.conf.ConfigurableStop"
   val configurableIncrementalStop: String = "cn.piflow.conf.ConfigurableIncrementalStop"
 
-  def findAllConfigurableStop(): List[ConfigurableStop] = {
+  def findAllConfigurableStop[DataStream](): List[ConfigurableStop[DataStream]] = {
 
-    var stopList: List[ConfigurableStop] = List()
+    var stopList: List[ConfigurableStop[DataStream]] = List()
 
     //find internal stop
     val reflections = new Reflections("")
-    val allClasses = reflections.getSubTypesOf(classOf[ConfigurableStop])
-    val it = allClasses.iterator();
+    val allClasses = reflections.getSubTypesOf(classOf[ConfigurableStop[DataStream]])
+    val it = allClasses.iterator()
     while (it.hasNext) {
       breakable {
         val stop = it.next
         val stopName = stop.getName
         val stopClass = Class.forName(stopName)
 
-        if (Modifier.isAbstract(stopClass.getModifiers())) {
+        if (Modifier.isAbstract(stopClass.getModifiers)) {
           println("Stop " + stop.getName + " is interface!")
           break
         }
         else {
           val plugin = stopClass.newInstance()
-          val stop = plugin.asInstanceOf[ConfigurableStop]
+          val stop = plugin.asInstanceOf[ConfigurableStop[DataStream]]
           println("Find ConfigurableStop: " + stopName)
           stopList = stop +: stopList
         }
@@ -44,16 +44,16 @@ object ClassUtil {
 
     //find external stop
     val pluginManager = PluginManager.getInstance
-    val externalStopList = findAllConfigurableStopInClasspath().toList
+    val externalStopList = findAllConfigurableStopInClasspath[DataStream]()
 
     stopList ::: externalStopList
   }
 
 
-  def findAllConfigurableStopInClasspath(): List[ConfigurableStop] = {
+  private def findAllConfigurableStopInClasspath[DataStream](): List[ConfigurableStop[DataStream]] = {
 
     val pluginManager = PluginManager.getInstance
-    val stopList = pluginManager.getPluginConfigurableStops()
+    val stopList = pluginManager.getPluginConfigurableStops[DataStream]
     stopList
 
     /*val pluginManager = PluginManager.getInstance()
@@ -95,7 +95,7 @@ object ClassUtil {
 
   def findAllGroups(): List[String] = {
 
-    val stopList = findAllConfigurableStop();
+    val stopList = findAllConfigurableStop()
 
     val groupList = stopList.flatMap(stop => {
       //stop.getGroup()
@@ -114,11 +114,11 @@ object ClassUtil {
     groupList
   }
 
-  private def findConfigurableStopInClasspath(bundle: String): Option[ConfigurableStop] = {
+  private def findConfigurableStopInClasspath[DataStream](bundle: String): Option[ConfigurableStop[DataStream]] = {
 
     val pluginManager = PluginManager.getInstance
     val stopInstance = pluginManager.getConfigurableStop(bundle)
-    val stop = Some(stopInstance.asInstanceOf[ConfigurableStop])
+    val stop = Some(stopInstance.asInstanceOf[ConfigurableStop[DataStream]])
     stop
 
     /*val pluginManager = PluginManager.getInstance
@@ -147,32 +147,28 @@ object ClassUtil {
   }
 
 
-  def findConfigurableStop(bundle: String): ConfigurableStop = {
+  def findConfigurableStop[DataStream](bundle: String): ConfigurableStop[DataStream] = {
     try {
       println("find ConfigurableStop by Class.forName: " + bundle)
       val stop = Class.forName(bundle).newInstance()
-      stop.asInstanceOf[ConfigurableStop]
+      stop.asInstanceOf[ConfigurableStop[DataStream]]
     } catch {
-
-      case classNotFoundException: ClassNotFoundException => {
+      case classNotFoundException: ClassNotFoundException =>
         val pluginManager = PluginManager.getInstance
         if (pluginManager != null) {
           println("find ConfigurableStop in Classpath: " + bundle)
-          val stop: Option[ConfigurableStop] = ClassUtil.findConfigurableStopInClasspath(bundle)
+          val stop: Option[ConfigurableStop[DataStream]] = ClassUtil.findConfigurableStopInClasspath(bundle)
           stop match {
-            case Some(s) => return s.asInstanceOf[ConfigurableStop]
+            case Some(s) => s
             case _ => throw new ClassNotFoundException(bundle + " is not found!!!")
           }
         } else {
           println("Can not find Configurable: " + bundle)
           throw classNotFoundException
         }
-
-      }
-      case ex: Exception => {
+      case ex: Exception =>
         println("Can not find Configurable: " + bundle)
         throw ex
-      }
     }
   }
 
@@ -181,7 +177,7 @@ object ClassUtil {
     stopPropertyDesc.getPropertyDescriptor()
   }
 
-  def constructStopInfoJValue(bundle: String, stop: ConfigurableStop): JValue = {
+  private def constructStopInfoJValue[DataStream](bundle: String, stop: ConfigurableStop[DataStream]): JValue = {
     val stopName = bundle.split("\\.").last
     val propertyDescriptorList: List[PropertyDescriptor] = stop.getPropertyDescriptor()
     propertyDescriptorList.foreach(p => if (p.allowableValues == null || p.allowableValues == None) p.allowableValues = List(""))
@@ -201,7 +197,7 @@ object ClassUtil {
     //    }
 
     val jsonValue =
-      ("StopInfo" ->
+      "StopInfo" ->
         ("name" -> stopName) ~
           ("bundle" -> bundle) ~
           ("owner" -> stop.authorEmail) ~
@@ -209,10 +205,10 @@ object ClassUtil {
           ("outports" -> stop.outportList.mkString(",")) ~
           ("groups" -> stop.getGroup().mkString(",")) ~
           ("isCustomized" -> stop.getCustomized().toString) ~
-          //          ("isDataSource" -> stop.getIsDataSource().toString) ~
+          // ("isDataSource" -> stop.getIsDataSource().toString) ~
           /*("customizedAllowKey" -> "") ~
           ("customizedAllowValue" -> "")*/
-          //          ("visualizationType" -> visualizationType) ~
+          //("visualizationType" -> visualizationType) ~
           ("description" -> stop.description) ~
           ("icon" -> base64Encoder.encode(iconArrayByte)) ~
           ("properties" ->
@@ -226,7 +222,7 @@ object ClassUtil {
                 ("sensitive" -> property.sensitive.toString) ~
                 ("example" -> property.example) ~
                 ("language" -> property.language)
-            }))
+            })
     jsonValue
   }
 
@@ -245,7 +241,7 @@ object ClassUtil {
       val stopJValue = constructStopInfoJValue(bundle, stop)
       stopInfoJValueList = stopJValue +: stopInfoJValueList
     })
-    val stopInfoJValue = (stopInfoJValueList)
+    val stopInfoJValue = stopInfoJValueList
     val jsonString = compactRender(stopInfoJValue)
     jsonString
   }

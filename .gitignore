@@ -15,3 +15,5 @@ storage/
 
 server.ip
 /piflow-bundle-flink/dependency-reduced-pom.xml
+/piflow-bundle/piflow-bundle-flink/dependency-reduced-pom.xml
+/piflow-core/dependency-reduced-pom.xml

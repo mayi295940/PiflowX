@@ -12,17 +12,36 @@ import scala.util.control.Breaks.{break, breakable}
 object H2Util {
 
   private val QUERY_TIME = 300
-  private val CREATE_PROJECT_TABLE = "create table if not exists project (id varchar(255), name varchar(255), state varchar(255), startTime varchar(255), endTime varchar(255))"
-  private val CREATE_GROUP_TABLE = "create table if not exists flowGroup (id varchar(255), parentId varchar(255), name varchar(255), state varchar(255), startTime varchar(255), endTime varchar(255), childCount int)"
-  private val CREATE_FLOW_TABLE = "create table if not exists flow (id varchar(255), groupId varchar(255), pid varchar(255), name varchar(255), state varchar(255), startTime varchar(255), endTime varchar(255))"
-  private val CREATE_STOP_TABLE = "create table if not exists stop (flowId varchar(255), name varchar(255), state varchar(255), startTime varchar(255), endTime varchar(255))"
-  private val CREATE_THOUGHPUT_TABLE = "create table if not exists thoughput (flowId varchar(255), stopName varchar(255), portName varchar(255), count long)"
-  private val CREATE_FLAG_TABLE = "create table if not exists configFlag(id bigint auto_increment, item varchar(255), flag int, createTime varchar(255))"
-  private val CREATE_SCHEDULE_TABLE = "create table if not exists schedule(id bigint auto_increment, scheduleId varchar(255), scheduleEntryId varchar(255), scheduleEntryType varchar(255))"
-  private val CREATE_PLUGIN_TABLE = "create table if not exists plugin (id varchar(255), name varchar(255), state varchar(255), createTime varchar(255), updateTime varchar(255))"
+
+  private val CREATE_PROJECT_TABLE = "create table if not exists project (id varchar(255), " +
+    "name varchar(255), state varchar(255), startTime varchar(255), endTime varchar(255))"
+
+  private val CREATE_GROUP_TABLE = "create table if not exists flowGroup (id varchar(255), " +
+    "parentId varchar(255), name varchar(255), state varchar(255), startTime varchar(255), " +
+    "endTime varchar(255), childCount int)"
+
+  private val CREATE_FLOW_TABLE = "create table if not exists flow (id varchar(255), " +
+    "groupId varchar(255), pid varchar(255), name varchar(255), state varchar(255), " +
+    "startTime varchar(255), endTime varchar(255))"
+
+  private val CREATE_STOP_TABLE = "create table if not exists stop (flowId varchar(255), " +
+    "name varchar(255), state varchar(255), startTime varchar(255), endTime varchar(255))"
+
+  private val CREATE_THOUGHPUT_TABLE = "create table if not exists thoughput (flowId varchar(255), " +
+    "stopName varchar(255), portName varchar(255), count long)"
+
+  private val CREATE_FLAG_TABLE = "create table if not exists configFlag(id bigint auto_increment, " +
+    "item varchar(255), flag int, createTime varchar(255))"
+
+  private val CREATE_SCHEDULE_TABLE = "create table if not exists schedule(id bigint auto_increment, " +
+    "scheduleId varchar(255), scheduleEntryId varchar(255), scheduleEntryType varchar(255))"
+
+  private val CREATE_PLUGIN_TABLE = "create table if not exists plugin (id varchar(255), " +
+    "name varchar(255), state varchar(255), createTime varchar(255), updateTime varchar(255))"
+
   private val serverIP = ServerIpUtil.getServerIp() + ":" + PropertyUtil.getPropertyValue("h2.port")
   private val CONNECTION_URL = "jdbc:h2:tcp://" + serverIP + "/~/piflow;AUTO_SERVER=true"
-  private var connection: Connection = null
+  private var connection: Connection = _
 
   try {
 
@@ -38,7 +57,7 @@ object H2Util {
     statement.executeUpdate(CREATE_PLUGIN_TABLE)
     statement.close()
   } catch {
-    case ex => println(ex)
+    case ex: Throwable => println(ex)
   }
 
   def getConnectionInstance(): Connection = {
@@ -50,11 +69,16 @@ object H2Util {
     connection
   }
 
-  def cleanDatabase() = {
+  def cleanDatabase(): Unit = {
 
-    val h2Server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", PropertyUtil.getPropertyValue("h2.port")).start()
+    val h2Server = Server.createTcpServer(
+      "-tcp",
+      "-tcpAllowOthers",
+      "-tcpPort",
+      PropertyUtil.getPropertyValue("h2.port")
+    ).start()
+
     try {
-
       val statement = getConnectionInstance().createStatement()
       statement.setQueryTimeout(QUERY_TIME)
       statement.executeUpdate("drop table if exists flowGroup")
@@ -65,13 +89,11 @@ object H2Util {
       statement.executeUpdate("drop table if exists schedule")
       statement.executeUpdate("drop table if exists plugin")
       statement.close()
-
     } catch {
-      case ex => println(ex)
+      case ex: Throwable => println(ex)
     } finally {
       h2Server.shutdown()
     }
-
   }
 
   /*def updateToVersion6() = {
@@ -94,15 +116,15 @@ object H2Util {
     }
   }*/
 
-  def addFlow(appId: String, pId: String, name: String) = {
-    val startTime = new Date().toString
+  def addFlow(appId: String, pId: String, name: String): Unit = {
     val statement = getConnectionInstance().createStatement()
     statement.setQueryTimeout(QUERY_TIME)
-    statement.executeUpdate("insert into flow(id, pid, name) values('" + appId + "','" + pId + "','" + name + "')")
+    statement.executeUpdate("insert into flow(id, pid, name) values('" +
+      appId + "','" + pId + "','" + name + "')")
     statement.close()
   }
 
-  def updateFlowState(appId: String, state: String) = {
+  def updateFlowState(appId: String, state: String): Unit = {
     val statement = getConnectionInstance().createStatement()
     statement.setQueryTimeout(QUERY_TIME)
     val updateSql = "update flow set state='" + state + "' where id='" + appId + "'"
@@ -120,7 +142,7 @@ object H2Util {
     statement.close()
   }
 
-  def updateFlowStartTime(appId: String, startTime: String) = {
+  def updateFlowStartTime(appId: String, startTime: String): Unit = {
     val statement = getConnectionInstance().createStatement()
     statement.setQueryTimeout(QUERY_TIME)
     val updateSql = "update flow set startTime='" + startTime + "' where id='" + appId + "'"
@@ -129,7 +151,7 @@ object H2Util {
     statement.close()
   }
 
-  def updateFlowFinishedTime(appId: String, endTime: String) = {
+  def updateFlowFinishedTime(appId: String, endTime: String): Unit = {
     val statement = getConnectionInstance().createStatement()
     statement.setQueryTimeout(QUERY_TIME)
     val updateSql = "update flow set endTime='" + endTime + "' where id='" + appId + "'"
@@ -138,7 +160,7 @@ object H2Util {
     statement.close()
   }
 
-  def updateFlowGroupId(appId: String, groupId: String) = {
+  def updateFlowGroupId(appId: String, groupId: String): Unit = {
     val statement = getConnectionInstance().createStatement()
     statement.setQueryTimeout(QUERY_TIME)
     val updateSql = "update flow set groupId='" + groupId + "' where id='" + appId + "'"
@@ -869,7 +891,7 @@ object H2Util {
     statement.setQueryTimeout(QUERY_TIME)
     val rs: ResultSet = statement.executeQuery("select * from plugin where name='" + name + "'")
     if (!rs.isBeforeFirst) {
-      id = IdGenerator.uuid()
+      id = IdGenerator.uuid
       val time = new Date().toString
       statement.executeUpdate("insert into plugin(id, name, state, createTime, updateTime) values('" + id + "','" + name + "','" + PluginState.ON + "','" + time + "','" + time + "')")
       state = PluginState.ON
@@ -971,7 +993,7 @@ object H2Util {
     statement.setQueryTimeout(QUERY_TIME)
     val rs: ResultSet = statement.executeQuery("select * from sparkJar where name='" + sparkJarName + "'")
     if (!rs.isBeforeFirst) {
-      id = IdGenerator.uuid()
+      id = IdGenerator.uuid
       val time = new Date().toString
       statement.executeUpdate("insert into sparkJar(id, name, state, createTime, updateTime) values('" + id + "','" + sparkJarName + "','" + PluginState.ON + "','" + time + "','" + time + "')")
       state = SparkJarState.ON

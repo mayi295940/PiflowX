@@ -5,7 +5,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 object FlinkLauncher {
 
-  def launchYarnSession(flow: Flow): StreamExecutionEnvironment = {
+  def launchYarnSession[DataStream](flow: Flow[DataStream]): StreamExecutionEnvironment = {
 
     val env = StreamExecutionEnvironment.createRemoteEnvironment(
       PropertyUtil.getPropertyValue("flink.host"),
@@ -15,8 +15,7 @@ object FlinkLauncher {
     env
   }
 
-  def launchYarnCluster(flow: Flow): String = {
-
+  def launchYarnCluster[DataStream](flow: Flow[DataStream]): String = {
     val appId = FlinkYarnClusterLauncher.launch(flow)
     appId
   }
