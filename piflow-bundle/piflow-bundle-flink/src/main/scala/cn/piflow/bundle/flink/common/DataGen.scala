@@ -19,10 +19,12 @@ class DataGen extends ConfigurableStop[DataStream[Row]] {
 
   private var schema: String = _
   private var count: Int = _
+  private var ratio: Int = _
 
   override def setProperties(map: Map[String, Any]): Unit = {
     schema = MapUtil.get(map, "schema").asInstanceOf[String]
     count = MapUtil.get(map, "count").asInstanceOf[String].toInt
+    ratio = MapUtil.get(map, "ratio").asInstanceOf[String].toInt
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
@@ -48,6 +50,15 @@ class DataGen extends ConfigurableStop[DataStream[Row]] {
       .example("10")
     descriptor = count :: descriptor
 
+    val ratio = new PropertyDescriptor()
+      .name("ratio")
+      .displayName("Ratio")
+      .description("rows per second")
+      .defaultValue("1")
+      .required(false)
+      .example("10")
+    descriptor = ratio :: descriptor
+
     descriptor
   }
 
@@ -68,8 +79,8 @@ class DataGen extends ConfigurableStop[DataStream[Row]] {
     val tableEnv = pec.get[StreamTableEnvironment]()
 
     val tableDescriptor: TableDescriptor = TableDescriptor.forConnector("datagen")
-      .option("number-of-rows", "500")
-      .option("rows-per-second", "5")
+      .option("number-of-rows", count.toString)
+      .option("rows-per-second", ratio.toString)
       //.option(DataGenConnectorOptions.ROWS_PER_SECOND, 100L)
       .schema(RowTypeUtil.getRowSchema(schema))
       .build()

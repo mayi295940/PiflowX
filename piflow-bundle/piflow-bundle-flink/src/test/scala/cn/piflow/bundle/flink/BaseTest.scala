@@ -4,6 +4,7 @@ import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
 import cn.piflow.conf.util.FileUtil
 import cn.piflow.util.JsonUtil
+import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -27,6 +28,8 @@ object BaseTest {
     Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "50001").start()
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
+    env.setRuntimeMode(RuntimeExecutionMode.STREAMING)
+    env.setParallelism(1)
     val tableEnv = StreamTableEnvironment.create(env)
 
     val process = Runner.create[DataStream[Row]]()
@@ -36,9 +39,12 @@ object BaseTest {
       .bind("debug.path", "")
       .start(flow)
 
-    process.awaitTermination()
+    env.execute(flow.getFlowName)
+
     val pid = process.pid()
     println(pid + "!!!!!!!!!!!!!!!!!!!!!")
+
+    process.awaitTermination()
   }
 
 }

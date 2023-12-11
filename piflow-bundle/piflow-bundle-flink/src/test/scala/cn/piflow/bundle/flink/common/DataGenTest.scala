@@ -10,15 +10,16 @@ object DataGenTest {
   def main(args: Array[String]): Unit = {
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
+    env.setParallelism(1)
     val tableEnv = StreamTableEnvironment.create(env)
 
-    val count: Int = 10
+    val count: Int = 50
 
     val schema: String = "id:String,name:string,age:int,salary:double,time:date"
 
     val tableDescriptor: TableDescriptor = TableDescriptor.forConnector("datagen")
       .option("number-of-rows", count.toString)
-      .option("rows-per-second", "5")
+      .option("rows-per-second", "1")
       //.option(DataGenConnectorOptions.ROWS_PER_SECOND, count.toLong)
       .schema(RowTypeUtil.getRowSchema(schema))
       .build()
