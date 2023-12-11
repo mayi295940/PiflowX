@@ -21,9 +21,9 @@ import java.util.Date
  */
 object FlowLauncher {
 
-  def launch(flow: Flow): String = {
+  def launch[DataStream](flow: Flow[DataStream]): String = {
 
-    var flowJson = flow.getFlowJson()
+    val flowJson = flow.getFlowJson
     println("FlowLauncher json:" + flowJson)
 
     val flowObject: JSONObject = JSON.parseObject(flowJson)
@@ -33,14 +33,33 @@ object FlowLauncher {
     val dockerExecutor = new StringBuilder()
     for (i <- 0 until stopsJsonArray.size()) {
       if (stopsJsonArray.getJSONObject(i).getJSONObject("properties").containsKey("ymlPath")) {
-        val ymlPath = stopsJsonArray.getJSONObject(i).getJSONObject("properties").getOrDefault("ymlPath", "").toString
-        val unzipDir = ymlPath.substring(ymlPath.lastIndexOf("/") + 1).replace(".zip", "")
+        val ymlPath = stopsJsonArray
+          .getJSONObject(i)
+          .getJSONObject("properties")
+          .getOrDefault("ymlPath", "")
+          .toString
+
+        val unzipDir = ymlPath.substring(ymlPath.lastIndexOf("/") + 1)
+          .replace(".zip", "")
+
         dockerExecutor.append(ymlPath + "#" + unzipDir)
         dockerExecutor.append(",")
       }
-      if (stopsJsonArray.getJSONObject(i).getJSONObject("properties").containsKey("zipPath")) {
-        val zipPath = stopsJsonArray.getJSONObject(i).getJSONObject("properties").getOrDefault("zipPath", "").toString
-        val unzipDir = zipPath.substring(zipPath.lastIndexOf("/") + 1).replace(".zip", "")
+      if (stopsJsonArray
+        .getJSONObject(i)
+        .getJSONObject("properties")
+        .containsKey("zipPath")) {
+
+        val zipPath = stopsJsonArray
+          .getJSONObject(i)
+          .getJSONObject("properties")
+          .getOrDefault("zipPath", "")
+          .toString
+
+        val unzipDir = zipPath.
+          substring(zipPath.lastIndexOf("/") + 1)
+          .replace(".zip", "")
+
         dockerExecutor.append(zipPath + "#app/" + unzipDir)
         dockerExecutor.append(",")
       }
@@ -54,7 +73,7 @@ object FlowLauncher {
     }
 
 
-    val flowFileName = flow.getFlowName() + new Date().getTime
+    val flowFileName = flow.getFlowName + new Date().getTime
     val flowFile = FlowFileUtil.getFlowFilePath(flowFileName)
     FileUtil.writeFile(flowJson, flowFile)
 
@@ -159,7 +178,7 @@ object FlowLauncher {
     jobId.toString
   }
 
-  def stop(appID: String) = {
+  def stop(appID: String): String = {
 
     println("Stop Flow !!!!!!!!!!!!!!!!!!!!!!!!!!")
     //yarn application kill appId

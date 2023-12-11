@@ -6,11 +6,16 @@ import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable.{Map => MMap}
 
 object IdGenerator {
-  val map = MMap[String, AtomicInteger]();
 
-  def uuid() = UUID.randomUUID().toString;
+  val map: MMap[String, AtomicInteger] = MMap[String, AtomicInteger]()
 
-  def nextId[T](implicit manifest: Manifest[T]): Int =
+  def uuid: String = UUID.randomUUID().toString
+
+//  def nextId[T](implicit manifest: Manifest[T]): Int =
+//    map.getOrElseUpdate(manifest.runtimeClass.getName,
+//      new AtomicInteger()).incrementAndGet()
+
+  def nextId[T]: Int =
     map.getOrElseUpdate(manifest.runtimeClass.getName,
-      new AtomicInteger()).incrementAndGet();
+      new AtomicInteger()).incrementAndGet()
 }

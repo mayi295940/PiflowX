@@ -22,12 +22,9 @@ class ExecutionActor(id: String, scheduleType: String) extends Actor {
           val (appId, process) = API.startFlow(json)
           H2Util.addScheduleEntry(id, appId, ScheduleType.FLOW)
         }
-        case ScheduleType.GROUP => {
-
+        case ScheduleType.GROUP =>
           val groupExecution = API.startGroup(json)
-          H2Util.addScheduleEntry(id, groupExecution.getGroupId(), ScheduleType.GROUP)
-        }
-
+          H2Util.addScheduleEntry(id, groupExecution.getGroupId, ScheduleType.GROUP)
       }
     }
     case _ => println("error type!")

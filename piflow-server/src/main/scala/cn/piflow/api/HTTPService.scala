@@ -13,7 +13,7 @@ import cn.piflow.api.HTTPService.pluginManager
 import cn.piflow.conf.util.{MapUtil, PluginManager}
 import cn.piflow.util._
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.FlywayException
 import org.h2.tools.Server
@@ -23,45 +23,42 @@ import java.io.File
 import java.net.InetAddress
 import java.text.SimpleDateFormat
 import java.util.Date
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
 
 object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSupport {
-  implicit val config = ConfigFactory.load()
-  implicit val system = ActorSystem("PiFlowHTTPService", config)
-  implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
+  implicit val config: Config = ConfigFactory.load()
+  implicit val system: ActorSystem = ActorSystem("PiFlowHTTPService", config)
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  val scheduler = QuartzSchedulerExtension(system)
-  var actorMap = Map[String, ActorRef]()
-
+  private val scheduler: QuartzSchedulerExtension = QuartzSchedulerExtension(system)
+  private var actorMap: Map[String, ActorRef] = Map[String, ActorRef]()
 
   // todo
   //  var processMap = Map[String, SparkAppHandle]()
-  var processMap = Map[String, Any]()
-  var flowGroupMap = Map[String, GroupExecution]()
+  private var processMap = Map[String, Any]()
+  private var flowGroupMap = Map[String, GroupExecution]()
   //var projectMap = Map[String, GroupExecution]()
 
-  val pluginManager = PluginManager.getInstance
+  val pluginManager: PluginManager = PluginManager.getInstance
 
-  val SUCCESS_CODE = 200
-  val FAIL_CODE = 500
-  val UNKNOWN_CODE = 404
+  private val SUCCESS_CODE = 200
+  private val FAIL_CODE = 500
+  private val UNKNOWN_CODE = 404
 
   def toJson(entity: RequestEntity): Map[String, Any] = {
     entity match {
-      case HttpEntity.Strict(_, data) => {
+      case HttpEntity.Strict(_, data) =>
         JsonUtil.jsonToMap(data.utf8String)
-      }
       case _ => Map()
     }
   }
 
-  def route(req: HttpRequest): Future[HttpResponse] = req match {
+  private def route(req: HttpRequest): Future[HttpResponse] = req match {
 
-    case HttpRequest(GET, Uri.Path("/"), headers, entity, protocol) => {
+    case HttpRequest(GET, Uri.Path("/"), headers, entity, protocol) =>
       Future.successful(HttpResponse(SUCCESS_CODE, entity = "Get OK!"))
-    }
 
     case HttpRequest(GET, Uri.Path("/flow/info"), headers, entity, protocol) => {
 
@@ -207,7 +204,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
     case HttpRequest(POST, Uri.Path("/flow/stop"), headers, entity, protocol) => {
       val data = toJson(entity)
-      val appId = data.get("appID").getOrElse("").asInstanceOf[String]
+      val appId = data.getOrElse("appID", "").asInstanceOf[String]
       if (appId.equals("")) {
         Future.failed(new Exception("Can not found application Error!"))
       } else {
@@ -240,7 +237,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
           val stopInfo = API.getStopInfo(bundle)
           Future.successful(HttpResponse(SUCCESS_CODE, entity = stopInfo))
         } catch {
-          case ex => {
+          case ex: Throwable => {
             ex.printStackTrace()
             println(ex)
             Future.successful(HttpResponse(FAIL_CODE, entity = "getPropertyDescriptor or getIcon Method Not Implemented Error!"))
@@ -254,10 +251,9 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val stopGroups = API.getAllGroups()
         Future.successful(HttpResponse(SUCCESS_CODE, entity = stopGroups))
       } catch {
-        case ex => {
+        case ex: Throwable =>
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "getGroup Method Not Implemented Error!"))
-        }
       }
     }
     case HttpRequest(GET, Uri.Path("/stop/list"), headers, entity, protocol) => {
@@ -266,7 +262,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val stops = API.getAllStops()
         Future.successful(HttpResponse(SUCCESS_CODE, entity = stops))
       } catch {
-        case ex => {
+        case ex: Throwable => {
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found stop !"))
         }
@@ -278,11 +274,10 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val stops = API.getAllStopsWithGroup()
         Future.successful(HttpResponse(SUCCESS_CODE, entity = stops))
       } catch {
-        case ex => {
+        case ex: Throwable =>
           ex.printStackTrace()
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found stop !"))
-        }
       }
     }
 
@@ -303,31 +298,28 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start group!"))
         }
       }*/
-      try {
 
+      try {
         val bodyFeature = Unmarshal(entity).to[String]
         val flowGroupJson = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
         //use file to run large group
         //val flowGroupJsonPath = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
         //val flowGroupJson = Source.fromFile(flowGroupJsonPath).getLines().toArray.mkString("\n")*/
         val flowGroupExecution = API.startGroup(flowGroupJson)
-        flowGroupMap += (flowGroupExecution.getGroupId() -> flowGroupExecution)
-        val result = "{\"group\":{\"id\":\"" + flowGroupExecution.getGroupId() + "\"}}"
+        flowGroupMap += (flowGroupExecution.getGroupId -> flowGroupExecution)
+        val result = "{\"group\":{\"id\":\"" + flowGroupExecution.getGroupId + "\"}}"
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } catch {
-        case ex => {
+        case ex: Throwable =>
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start group!"))
-        }
       }
-
-
     }
 
 
     case HttpRequest(POST, Uri.Path("/group/stop"), headers, entity, protocol) => {
       val data = toJson(entity)
-      val groupId = data.get("groupId").getOrElse("").asInstanceOf[String]
+      val groupId = data.getOrElse("groupId", "").asInstanceOf[String]
       if (groupId.equals("") || !flowGroupMap.contains(groupId)) {
         Future.failed(new Exception("Can not found flowGroup Error!"))
       } else {
@@ -341,18 +333,15 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
             println(ex)
             Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found FlowGroup Error!"))
           }
-
         }
-
       }
     }
-
 
     case HttpRequest(GET, Uri.Path("/group/info"), headers, entity, protocol) => {
 
       val groupId = req.getUri().query().getOrElse("groupId", "")
       if (!groupId.equals("")) {
-        var result = API.getFlowGroupInfo(groupId)
+        val result = API.getFlowGroupInfo(groupId)
         println("getFlowGroupInfo result: " + result)
 
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
@@ -365,7 +354,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
       val groupId = req.getUri().query().getOrElse("groupId", "")
       if (!groupId.equals("")) {
-        var result = API.getFlowGroupProgress(groupId)
+        val result = API.getFlowGroupProgress(groupId)
         println("getFlowGroupProgress result: " + result)
 
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
@@ -383,12 +372,12 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val data = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
 
         val dataMap = toJson(data)
-        val expression = dataMap.get("expression").getOrElse("").asInstanceOf[String]
-        val startDateStr = dataMap.get("startDate").getOrElse("").asInstanceOf[String]
-        val endDateStr = dataMap.get("endDate").getOrElse("").asInstanceOf[String]
-        val scheduleInstance = dataMap.get("schedule").getOrElse(Map[String, Any]()).asInstanceOf[Map[String, Any]]
+        val expression = dataMap.getOrElse("expression", "").asInstanceOf[String]
+        val startDateStr = dataMap.getOrElse("startDate", "").asInstanceOf[String]
+        val endDateStr = dataMap.getOrElse("endDate", "").asInstanceOf[String]
+        val scheduleInstance = dataMap.getOrElse("schedule", Map[String, Any]()).asInstanceOf[Map[String, Any]]
 
-        val id: String = "schedule_" + IdGenerator.uuid();
+        val id: String = "schedule_" + IdGenerator.uuid
 
         var scheduleType = ""
         if (!scheduleInstance.getOrElse("flow", "").equals("")) {
@@ -416,11 +405,9 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         FileUtil.writeFile(data, flowFile)
         Future.successful(HttpResponse(SUCCESS_CODE, entity = id))
       } catch {
-
-        case ex => {
+        case ex: Throwable =>
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start flow!"))
-        }
       }
 
       /*entity match {
@@ -432,7 +419,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
           val endDateStr = dataMap.get("endDate").getOrElse("").asInstanceOf[String]
           val scheduleInstance = dataMap.get("schedule").getOrElse(Map[String, Any]()).asInstanceOf[Map[String, Any]]
 
-          val id : String = "schedule_" + IdGenerator.uuid() ;
+          val id : String = "schedule_" + IdGenerator.uuid()
 
           var scheduleType = ""
           if(!scheduleInstance.getOrElse("flow","").equals("")){
@@ -472,7 +459,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     case HttpRequest(POST, Uri.Path("/schedule/stop"), headers, entity, protocol) => {
 
       val data = toJson(entity)
-      val scheduleId = data.get("scheduleId").getOrElse("").asInstanceOf[String]
+      val scheduleId = data.getOrElse("scheduleId", "").asInstanceOf[String]
       if (scheduleId.equals("") || !actorMap.contains(scheduleId)) {
         Future.failed(new Exception("Can not found scheduleId Error!"))
       } else {
@@ -487,18 +474,15 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
             println(ex)
             Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found schedule Error!"))
           }
-
         }
-
       }
-
     }
 
     case HttpRequest(GET, Uri.Path("/schedule/info"), headers, entity, protocol) => {
 
       val scheduleId = req.getUri().query().getOrElse("scheduleId", "")
       if (!scheduleId.equals("")) {
-        var result = API.getScheduleInfo(scheduleId)
+        val result = API.getScheduleInfo(scheduleId)
         println("getScheduleInfo result: " + result)
 
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
@@ -509,13 +493,12 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
     case HttpRequest(GET, Uri.Path("/resource/info"), headers, entity, protocol) => {
 
-      val resourceInfo = API.getResourceInfo()
+      val resourceInfo = API.getResourceInfo
       if (resourceInfo != "") {
         Future.successful(HttpResponse(SUCCESS_CODE, entity = resourceInfo))
       } else {
         Future.successful(HttpResponse(FAIL_CODE, entity = "get resource info error!"))
       }
-
     }
 
     case HttpRequest(POST, Uri.Path("/plugin/add"), headers, entity, protocol) => {
@@ -523,7 +506,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
       entity match {
         case HttpEntity.Strict(_, data) => {
           val data = toJson(entity)
-          val pluginName = data.get("plugin").getOrElse("").asInstanceOf[String]
+          val pluginName = data.getOrElse("plugin", "").asInstanceOf[String]
           val pluginID = API.addPlugin(pluginManager, pluginName)
           if (pluginID != "") {
             val stopsInfo = API.getConfigurableStopInfoInPlugin(pluginManager, pluginName)
@@ -538,7 +521,6 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
           Future.successful(HttpResponse(FAIL_CODE, entity = "Fail"))
         }
       }
-
     }
 
     case HttpRequest(POST, Uri.Path("/plugin/remove"), headers, entity, protocol) => {
@@ -546,13 +528,12 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
       entity match {
         case HttpEntity.Strict(_, data) => {
           val data = toJson(entity)
-          val pluginId = data.get("pluginId").getOrElse("").asInstanceOf[String]
+          val pluginId = data.getOrElse("pluginId", "").asInstanceOf[String]
           val pluginName = H2Util.getPluginInfoMap(pluginId).getOrElse("name", "")
           val stopsInfo = API.getConfigurableStopInfoInPlugin(pluginManager, pluginName)
 
           val isOk = API.removePlugin(pluginManager, pluginId)
-          if (isOk == true) {
-
+          if (isOk) {
             val result = "{\"plugin\":{\"id\":\"" + pluginId + "\"},\"stopsInfo\":" + stopsInfo + "}"
             Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
           } else {
@@ -565,7 +546,6 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
           Future.successful(HttpResponse(FAIL_CODE, entity = "Fail"))
         }
       }
-
     }
 
     case HttpRequest(GET, Uri.Path("/plugin/info"), headers, entity, protocol) => {
@@ -575,22 +555,20 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val pluginInfo = API.getPluginInfo(pluginId)
         Future.successful(HttpResponse(SUCCESS_CODE, entity = pluginInfo))
       } catch {
-        case ex => {
+        case ex: Throwable => {
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found plugins !"))
         }
       }
-
     }
 
     case HttpRequest(GET, Uri.Path("/plugin/path"), headers, entity, protocol) => {
-
       try {
         val pluginPath = PropertyUtil.getClassPath()
         val result = "{\"pluginPath\":\"" + pluginPath + "\"}"
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } catch {
-        case ex => {
+        case ex: Throwable => {
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found plugin path !"))
         }
@@ -604,7 +582,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val result = "{\"sparkJarPath\":\"" + sparkJarPath + "\"}"
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } catch {
-        case ex => {
+        case ex: Throwable => {
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found spark jar path !"))
         }
@@ -616,7 +594,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
       entity match {
         case HttpEntity.Strict(_, data) => {
           val data = toJson(entity)
-          val sparkJarName = data.get("sparkJar").getOrElse("").asInstanceOf[String]
+          val sparkJarName = data.getOrElse("sparkJar", "").asInstanceOf[String]
           val sparkJarID = API.addSparkJar(sparkJarName)
           if (sparkJarID != "") {
 
@@ -631,7 +609,6 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
           Future.successful(HttpResponse(FAIL_CODE, entity = "Fail"))
         }
       }
-
     }
 
     case HttpRequest(POST, Uri.Path("/sparkJar/remove"), headers, entity, protocol) => {
@@ -639,11 +616,9 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
       entity match {
         case HttpEntity.Strict(_, data) => {
           val data = toJson(entity)
-          val sparkJarId = data.get("sparkJarId").getOrElse("").asInstanceOf[String]
+          val sparkJarId = data.getOrElse("sparkJarId", "").asInstanceOf[String]
           val isOK = API.removeSparkJar(sparkJarId)
-
-          if (isOK == true) {
-
+          if (isOK) {
             val result = "{\"sparkJar\":{\"id\":\"" + sparkJarId + "\"}}"
             Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
           } else {
@@ -656,14 +631,10 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
           Future.successful(HttpResponse(FAIL_CODE, entity = "Fail"))
         }
       }
-
     }
 
     case HttpRequest(POST, Uri.Path("/flink/yarn-cluster/flow/start"), headers, entity, protocol) => {
-
-
       try {
-
         val bodyFeature = Unmarshal(entity).to[String]
         val flowJson = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
         val appId = API.startFlinkYarnClusterFlow(flowJson)
@@ -679,10 +650,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     }
 
     case HttpRequest(POST, Uri.Path("/flink/yarn-session/flow/start"), headers, entity, protocol) => {
-
-
       try {
-
         val bodyFeature = Unmarshal(entity).to[String]
         val flowJson = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
         //val appId = API.startFlinkYarnClusterFlow(flowJson)
@@ -693,12 +661,12 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val result = "{\"flow\":{\"id\":\"" + appId + "\"}}"
         Future.successful(HttpResponse(SUCCESS_CODE, entity = result))
       } catch {
-        case ex: Exception => {
+        case ex: Exception =>
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not start flow!"))
-        }
       }
     }
+
     case HttpRequest(GET, Uri.Path("/flink/flow/log"), headers, entity, protocol) => {
 
       val appID = req.getUri().query().getOrElse("appID", "")
@@ -716,10 +684,9 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
   }
 
 
-  def run = {
+  def run(): Unit = {
 
     val ip = InetAddress.getLocalHost.getHostAddress
-    //val ip="223.193.3.32"
     //write ip to server.ip file
     FileUtil.writeFile("server.ip=" + ip, ServerIpUtil.getServerIpFile())
 
@@ -730,7 +697,6 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     // todo 取消注释
     // initSchedule()
     // new MonitorScheduler().start()
-
   }
 
   private class MonitorScheduler extends Thread {
@@ -743,9 +709,8 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
             case Some(actorRef) =>
               system.stop(actorRef)
               processMap.-(scheduleId)
-            case ex => {
+            case ex =>
               println(ex)
-            }
           }
           H2Util.updateScheduleInstanceStatus(scheduleId, ScheduleState.STOPED)
         }
@@ -755,16 +720,16 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     }
   }
 
-  private def initSchedule() = {
+  private def initSchedule(): Unit = {
     val scheduleList = H2Util.getStartedSchedule()
     scheduleList.foreach(id => {
       val scheduleContent = FlowFileUtil.readFlowFile(FlowFileUtil.getScheduleFilePath(id))
       val dataMap = JsonUtil.jsonToMap(scheduleContent)
 
-      val expression = dataMap.get("expression").getOrElse("").asInstanceOf[String]
-      val startDateStr = dataMap.get("startDate").getOrElse("").asInstanceOf[String]
-      val endDateStr = dataMap.get("endDate").getOrElse("").asInstanceOf[String]
-      val scheduleInstance = dataMap.get("schedule").getOrElse(Map[String, Any]()).asInstanceOf[Map[String, Any]]
+      val expression = dataMap.getOrElse("expression", "").asInstanceOf[String]
+      val startDateStr = dataMap.getOrElse("startDate", "").asInstanceOf[String]
+      val endDateStr = dataMap.getOrElse("endDate", "").asInstanceOf[String]
+      val scheduleInstance = dataMap.getOrElse("schedule", Map[String, Any]()).asInstanceOf[Map[String, Any]]
 
       var scheduleType = ""
       if (!scheduleInstance.getOrElse("flow", "").equals("")) {
@@ -790,31 +755,31 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
 object Main {
 
-  def flywayInit() = {
+  private def flywayInit() = {
 
     val ip = InetAddress.getLocalHost.getHostAddress
     // Create the Flyway instance
-    val flyway: Flyway = new Flyway();
-    var url = "jdbc:h2:tcp://" + ip + ":" + PropertyUtil.getPropertyValue("h2.port") + "/~/piflow"
+    val flyway: Flyway = new Flyway()
+    val url = "jdbc:h2:tcp://" + ip + ":" + PropertyUtil.getPropertyValue("h2.port") + "/~/piflow"
     // Point it to the database
-    flyway.setDataSource(url, null, null);
-    flyway.setLocations("db/migrations");
-    flyway.setEncoding("UTF-8");
-    flyway.setTable("FLYWAY_SCHEMA_HISTORY");
-    flyway.setBaselineOnMigrate(true);
+    flyway.setDataSource(url, null, null)
+    flyway.setLocations("db/migrations")
+    flyway.setEncoding("UTF-8")
+    flyway.setTable("FLYWAY_SCHEMA_HISTORY")
+    flyway.setBaselineOnMigrate(true)
     try {
       //Start the migration
-      flyway.migrate();
+      flyway.migrate()
     } catch {
       case e: FlywayException =>
-        flyway.repair();
-        print(e);
+        flyway.repair()
+        print(e)
     }
   }
 
-  def initPlugin() = {
+  private def initPlugin(): Unit = {
     val pluginOnList = H2Util.getPluginOn()
-    val classpathFile = new File(pluginManager.getPluginPath())
+    val classpathFile = new File(pluginManager.getPluginPath)
     val jarFile = FileUtil.getJarFile(classpathFile)
 
     pluginOnList.foreach(pluginName => {
@@ -827,11 +792,17 @@ object Main {
     })
   }
 
-
   def main(argv: Array[String]): Unit = {
-    val h2Server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", PropertyUtil.getPropertyValue("h2.port")).start()
+
+    Server.createTcpServer(
+      "-tcp",
+      "-tcpAllowOthers",
+      "-tcpPort",
+      PropertyUtil.getPropertyValue("h2.port")
+    ).start()
+
     flywayInit()
-    HTTPService.run
+    HTTPService.run()
     initPlugin()
   }
 }

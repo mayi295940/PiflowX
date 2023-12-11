@@ -2,7 +2,6 @@ package cn.piflow
 
 import cn.piflow.util._
 
-import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
@@ -13,36 +12,42 @@ import scala.util.{Failure, Success, Try}
  * Created by xjzhu@cnic.cn on 4/25/19
  */
 
-trait Group extends GroupEntry {
-  def addGroupEntry(name: String, flowOrGroup: GroupEntry, con: Condition[GroupExecution] = Condition.AlwaysTrue[GroupExecution]);
+trait Group[DataStream] extends GroupEntry[DataStream] {
 
-  def mapFlowWithConditions(): Map[String, (GroupEntry, Condition[GroupExecution])];
+  def addGroupEntry(name: String,
+                    flowOrGroup: GroupEntry[DataStream],
+                    con: Condition[GroupExecution] = Condition.AlwaysTrue[GroupExecution]()): Unit
 
-  def getGroupName(): String;
+  def mapFlowWithConditions(): Map[String, (GroupEntry[DataStream], Condition[GroupExecution])]
 
-  def setGroupName(groupName: String): Unit;
+  def getGroupName: String
 
-  def getParentGroupId(): String;
+  def setGroupName(groupName: String): Unit
 
-  def setParentGroupId(groupId: String): Unit;
+  def getParentGroupId: String
+
+  def setParentGroupId(groupId: String): Unit
 
 }
 
-
-class GroupImpl extends Group {
+class GroupImpl[DataStream] extends Group[DataStream] {
   var name = ""
   var uuid = ""
   var parentId = ""
 
-  val _mapFlowWithConditions = MMap[String, (GroupEntry, Condition[GroupExecution])]();
+  private val _mapFlowWithConditions = MMap[String, (GroupEntry[DataStream], Condition[GroupExecution])]()
 
-  def addGroupEntry(name: String, flowOrGroup: GroupEntry, con: Condition[GroupExecution] = Condition.AlwaysTrue[GroupExecution]) = {
-    _mapFlowWithConditions(name) = flowOrGroup -> con;
+  def addGroupEntry(name: String,
+                    flowOrGroup: GroupEntry[DataStream],
+                    con: Condition[GroupExecution] = Condition.AlwaysTrue[GroupExecution]()): Unit = {
+
+    _mapFlowWithConditions(name) = flowOrGroup -> con
   }
 
-  def mapFlowWithConditions(): Map[String, (GroupEntry, Condition[GroupExecution])] = _mapFlowWithConditions.toMap;
+  def mapFlowWithConditions(): Map[String, (GroupEntry[DataStream], Condition[GroupExecution])]
+  = _mapFlowWithConditions.toMap
 
-  override def getGroupName(): String = {
+  override def getGroupName: String = {
     this.name
   }
 
@@ -50,7 +55,7 @@ class GroupImpl extends Group {
     this.name = groupName
   }
 
-  override def getParentGroupId(): String = {
+  override def getParentGroupId: String = {
     this.parentId
   }
 
@@ -62,94 +67,96 @@ class GroupImpl extends Group {
 
 trait GroupExecution extends Execution {
 
-  def stop(): Unit;
+  def stop(): Unit
 
-  def awaitTermination(): Unit;
+  def awaitTermination(): Unit
 
-  def awaitTermination(timeout: Long, unit: TimeUnit): Unit;
+  def awaitTermination(timeout: Long, unit: TimeUnit): Unit
 
-  def getGroupId(): String;
+  def getGroupId: String
 
-  def getChildCount(): Int;
+  def getChildCount: Int
 }
 
-class GroupExecutionImpl(group: Group, runnerContext: Context, runner: Runner) extends GroupExecution {
+class GroupExecutionImpl[DataStream](group: Group[DataStream],
+                                     runnerContext: Context[DataStream],
+                                     runner: Runner[DataStream]) extends GroupExecution {
 
-  val groupContext = createContext(runnerContext);
-  val groupExecution = this;
+  private val groupContext = createContext(runnerContext)
+  val groupExecution: GroupExecutionImpl[DataStream] = this
 
-  val id: String = "group_" + IdGenerator.uuid();
+  val id: String = "group_" + IdGenerator.uuid
 
-  val mapGroupEntryWithConditions: Map[String, (GroupEntry, Condition[GroupExecution])] = group.mapFlowWithConditions();
-  val completedGroupEntry = MMap[String, Boolean]();
+  private val mapGroupEntryWithConditions: Map[String, (GroupEntry[DataStream], Condition[GroupExecution])] =
+    group.mapFlowWithConditions()
+
+  private val completedGroupEntry = MMap[String, Boolean]()
   completedGroupEntry ++= mapGroupEntryWithConditions.map(x => (x._1, false))
-  val numWaitingGroupEntry = new AtomicInteger(mapGroupEntryWithConditions.size)
+
+  private val numWaitingGroupEntry = new AtomicInteger(mapGroupEntryWithConditions.size)
 
   // todo
   //  val startedProcesses = MMap[String, SparkAppHandle]();
-  val startedProcesses = MMap[String, Any]();
-  val startedGroup = MMap[String, GroupExecution]()
+  private val startedProcesses = MMap[String, Any]()
+  private val startedGroup = MMap[String, GroupExecution]()
 
-  val startedProcessesAppID = MMap[String, String]()
+  private val execution = this
+  private val POLLING_INTERVAL = 1000
+  val latch = new CountDownLatch(1)
+  var running = true
 
-  val execution = this;
-  val POLLING_INTERVAL = 1000;
-  val latch = new CountDownLatch(1);
-  var running = true;
+  val listener: RunnerListener[DataStream] = new RunnerListener[DataStream] {
 
-  val listener = new RunnerListener {
+    override def onProcessStarted(ctx: ProcessContext[DataStream]): Unit = {}
 
-    override def onProcessStarted(ctx: ProcessContext): Unit = {}
-
-    override def onProcessFailed(ctx: ProcessContext): Unit = {
+    override def onProcessFailed(ctx: ProcessContext[DataStream]): Unit = {
       //TODO: retry?
     }
 
-    override def onProcessCompleted(ctx: ProcessContext): Unit = {
+    override def onProcessCompleted(ctx: ProcessContext[DataStream]): Unit = {
 
     }
 
-    override def onJobStarted(ctx: JobContext): Unit = {}
+    override def onJobStarted(ctx: JobContext[DataStream]): Unit = {}
 
-    override def onJobCompleted(ctx: JobContext): Unit = {}
+    override def onJobCompleted(ctx: JobContext[DataStream]): Unit = {}
 
-    override def onJobInitialized(ctx: JobContext): Unit = {}
+    override def onJobInitialized(ctx: JobContext[DataStream]): Unit = {}
 
-    override def onProcessForked(ctx: ProcessContext, child: ProcessContext): Unit = {}
+    override def onProcessForked(ctx: ProcessContext[DataStream], child: ProcessContext[DataStream]): Unit = {}
 
-    override def onJobFailed(ctx: JobContext): Unit = {}
+    override def onJobFailed(ctx: JobContext[DataStream]): Unit = {}
 
-    override def onProcessAborted(ctx: ProcessContext): Unit = {}
+    override def onProcessAborted(ctx: ProcessContext[DataStream]): Unit = {}
 
-    override def monitorJobCompleted(ctx: JobContext, outputs: JobOutputStream): Unit = {}
+    override def monitorJobCompleted(ctx: JobContext[DataStream], outputs: JobOutputStream[DataStream]): Unit = {}
 
-    override def onGroupStarted(ctx: GroupContext): Unit = {}
+    override def onGroupStarted(ctx: GroupContext[DataStream]): Unit = {}
 
-    override def onGroupCompleted(ctx: GroupContext): Unit = {
-      startedGroup.filter(_._2 == ctx.getGroupExecution()).foreach { x =>
-        completedGroupEntry(x._1) = true;
-        numWaitingGroupEntry.decrementAndGet();
+    override def onGroupCompleted(ctx: GroupContext[DataStream]): Unit = {
+      startedGroup.filter(_._2 == ctx.getGroupExecution).foreach { x =>
+        completedGroupEntry(x._1) = true
+        numWaitingGroupEntry.decrementAndGet()
       }
     }
 
-    override def onGroupStoped(ctx: GroupContext): Unit = {}
+    override def onGroupStoped(ctx: GroupContext[DataStream]): Unit = {}
 
-    override def onGroupFailed(ctx: GroupContext): Unit = {}
-  };
+    override def onGroupFailed(ctx: GroupContext[DataStream]): Unit = {}
+  }
 
-  runner.addListener(listener);
-  val runnerListener = runner.getListener()
-
+  runner.addListener(listener)
+  val runnerListener: RunnerListener[DataStream] = runner.getListener
 
   def isEntryCompleted(name: String): Boolean = {
     completedGroupEntry(name)
   }
 
-  private def startProcess(name: String, flow: Flow, groupId: String = ""): Unit = {
+  private def startProcess(name: String, flow: Flow[DataStream], groupId: String = ""): Unit = {
 
-    println(flow.getFlowJson())
+    println(flow.getFlowJson)
 
-    var flowJson = flow.getFlowJson()
+    var flowJson = flow.getFlowJson
 
     var appId: String = ""
     val countDownLatch = new CountDownLatch(1)
@@ -204,10 +211,10 @@ class GroupExecutionImpl(group: Group, runnerContext: Context, runner: Runner) e
     //    startedProcessesAppID(name) = appId
   }
 
-  private def startGroup(name: String, group: Group, parentId: String): Unit = {
-    val groupExecution = runner.start(group);
-    startedGroup(name) = groupExecution;
-    val groupId = groupExecution.getGroupId()
+  private def startGroup(name: String, group: Group[DataStream], parentId: String): Unit = {
+    val groupExecution = runner.start(group)
+    startedGroup(name) = groupExecution
+    val groupId = groupExecution.getGroupId
     while (H2Util.getGroupState(groupId).equals("")) {
       Thread.sleep(1000)
     }
@@ -218,8 +225,9 @@ class GroupExecutionImpl(group: Group, runnerContext: Context, runner: Runner) e
 
 
   @volatile
-  var maybeException: Option[Throwable] = None
-  val pollingThread = new Thread(new Runnable() {
+  private var maybeException: Option[Throwable] = None
+
+  private val pollingThread = new Thread(new Runnable() {
     override def run(): Unit = {
 
       runnerListener.onGroupStarted(groupContext)
@@ -227,79 +235,78 @@ class GroupExecutionImpl(group: Group, runnerContext: Context, runner: Runner) e
       try {
         while (numWaitingGroupEntry.get() > 0) {
 
-          val (todosFlow, todosGroup) = getTodos()
+          val (todosFlow, todosGroup) = {
+            getTodos
+          }
 
-          if (todosFlow.size == 0 && todosGroup.size == 0 && H2Util.isGroupChildError(id) && !H2Util.isGroupChildRunning(id)) {
-            val (todosFlow, todosGroup) = getTodos()
-            if (todosFlow.size == 0 && todosGroup.size == 0)
+          if (todosFlow.isEmpty && todosGroup.isEmpty
+            && H2Util.isGroupChildError(id)
+            && !H2Util.isGroupChildRunning(id)) {
+
+            val (todosFlow, todosGroup) = getTodos
+            if (todosFlow.isEmpty && todosGroup.isEmpty)
               throw new GroupException("Group Failed!")
-
           }
 
           startedProcesses.synchronized {
             todosFlow.foreach(en => {
-              startProcess(en._1, en._2.asInstanceOf[Flow], id)
-            });
+              startProcess(en._1, en._2, id)
+            })
           }
           startedGroup.synchronized {
             todosGroup.foreach(en => {
-              startGroup(en._1, en._2.asInstanceOf[Group], id)
+              startGroup(en._1, en._2, id)
             })
           }
 
-          Thread.sleep(POLLING_INTERVAL);
+          Thread.sleep(POLLING_INTERVAL)
         }
 
         runnerListener.onGroupCompleted(groupContext)
 
       } catch {
         case e: Throwable =>
-          runnerListener.onGroupFailed(groupContext);
+          runnerListener.onGroupFailed(groupContext)
           println(e)
           if (e.isInstanceOf[GroupException])
             throw e
       }
       finally {
-        latch.countDown();
-        finalizeExecution(true);
+        latch.countDown()
+        finalizeExecution(true)
       }
     }
-  });
+  })
 
-  val doit = Try {
-    pollingThread.setUncaughtExceptionHandler(new UncaughtExceptionHandler {
-      override def uncaughtException(thread: Thread, throwable: Throwable): Unit = {
-        maybeException = Some(throwable)
-      }
+  private val doit = Try {
+    pollingThread.setUncaughtExceptionHandler((thread: Thread, throwable: Throwable) => {
+      maybeException = Some(throwable)
     })
     pollingThread.start()
     //pollingThread.join()
   }
 
   doit match {
-    case Success(v) => {
+    case Success(_) =>
       println("Did not capture error!")
-    }
-    case Failure(v) => {
+    case Failure(_) =>
       println("Capture error!")
       runnerListener.onGroupFailed(groupContext)
-    }
-
   }
 
   override def awaitTermination(): Unit = {
-    latch.await();
-    finalizeExecution(true);
+    latch.await()
+    finalizeExecution(true)
   }
 
   override def stop(): Unit = {
-    finalizeExecution(false);
+    finalizeExecution(false)
     //runnerListener.onProjectStoped(projectContext)
   }
 
   override def awaitTermination(timeout: Long, unit: TimeUnit): Unit = {
     if (!latch.await(timeout, unit))
-      finalizeExecution(false);
+      finalizeExecution(false)
   }
 
   private def finalizeExecution(completed: Boolean): Unit = {
@@ -322,50 +329,52 @@ class GroupExecutionImpl(group: Group, runnerContext: Context, runner: Runner) e
         //          });
         //        }
         startedGroup.synchronized {
-          startedGroup.filter(x => !isEntryCompleted(x._1)).map(_._2).foreach(_.stop());
+          startedGroup.filter(x => !isEntryCompleted(x._1)).values.foreach(_.stop())
         }
 
-        pollingThread.interrupt();
+        pollingThread.interrupt()
 
       }
 
-      runner.removeListener(listener);
-      running = false;
+      runner.removeListener(listener)
+      running = false
     }
   }
 
-  private def createContext(runnerContext: Context): GroupContext = {
-    new CascadeContext(runnerContext) with GroupContext {
-      override def getGroup(): Group = group
+  private def createContext(runnerContext: Context[DataStream]): GroupContext[DataStream] = {
+    new CascadeContext[DataStream](runnerContext) with GroupContext[DataStream] {
+      override def getGroup: Group[DataStream] = group
 
-      override def getGroupExecution(): GroupExecution = groupExecution
-
-    };
+      override def getGroupExecution: GroupExecution = groupExecution
+    }
   }
 
-  private def getTodos(): (ArrayBuffer[(String, Flow)], ArrayBuffer[(String, Group)]) = {
+  private def getTodos: (ArrayBuffer[(String, Flow[DataStream])], ArrayBuffer[(String, Group[DataStream])]) = {
 
-    val todosFlow = ArrayBuffer[(String, Flow)]();
-    val todosGroup = ArrayBuffer[(String, Group)]();
+    val todosFlow = ArrayBuffer[(String, Flow[DataStream])]()
+    val todosGroup = ArrayBuffer[(String, Group[DataStream])]()
+
     mapGroupEntryWithConditions.foreach { en =>
-      if (en._2._1.isInstanceOf[Flow]) {
-        if (!startedProcesses.contains(en._1) && en._2._2.matches(execution)) {
-          todosFlow += (en._1 -> en._2._1.asInstanceOf[Flow]);
-        }
-      } else if (en._2._1.isInstanceOf[Group]) {
-        if (!startedGroup.contains(en._1) && en._2._2.matches(execution)) {
-          todosGroup += (en._1 -> en._2._1.asInstanceOf[Group]);
-        }
+      en._2._1 match {
+        case flow: Flow[DataStream] =>
+          if (!startedProcesses.contains(en._1) && en._2._2.matches(execution)) {
+            todosFlow += (en._1 -> flow)
+          }
+        case group1: Group[DataStream] =>
+          if (!startedGroup.contains(en._1) && en._2._2.matches(execution)) {
+            todosGroup += (en._1 -> group1)
+          }
+        case _ =>
       }
 
     }
     (todosFlow, todosGroup)
   }
 
-  override def getGroupId(): String = id
+  override def getGroupId: String = id
 
-  override def getChildCount(): Int = {
+  override def getChildCount: Int = {
     mapGroupEntryWithConditions.size
-
   }
+
 }

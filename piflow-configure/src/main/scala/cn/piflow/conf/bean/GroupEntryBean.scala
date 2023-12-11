@@ -8,8 +8,7 @@ trait GroupEntryBean {
   var uuid : String
   var name : String
 
-
-  def init(map : Map[String, Any])
+  def init(map : Map[String, Any]): Unit
 
 }
 

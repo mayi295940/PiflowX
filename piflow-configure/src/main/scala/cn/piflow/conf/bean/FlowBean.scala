@@ -6,35 +6,34 @@ import cn.piflow.{FlowImpl, Path}
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
-class FlowBean extends GroupEntryBean {
+class FlowBean[DataStream] extends GroupEntryBean {
 
   /*@BeanProperty*/
   var uuid: String = _
   var name: String = _
   var checkpoint: String = _
   var checkpointParentProcessId: String = _
-  var runMode: String = _
-  var showData: String = _
+  private var runMode: String = _
+  private var showData: String = _
 
-  var stops: List[StopBean] = List()
+  var stops: List[StopBean[DataStream]] = List()
   var paths: List[PathBean] = List()
 
   //flow resource info
-  var driverMem: String = _
-  var executorNum: String = _
-  var executorMem: String = _
+  private var driverMem: String = _
+  private var executorNum: String = _
+  private var executorMem: String = _
   var executorCores: String = _
 
   //flow json string
   var flowJson: String = _
 
-  def init(map: Map[String, Any]) = {
+  def init(map: Map[String, Any]): Unit = {
 
     val flowJsonOjb = JsonUtil.toJson(map)
     this.flowJson = JsonUtil.format(flowJsonOjb)
 
     val flowMap = MapUtil.get(map, "flow").asInstanceOf[Map[String, Any]]
-
 
     this.uuid = MapUtil.get(flowMap, "uuid").asInstanceOf[String]
     this.name = MapUtil.get(flowMap, "name").asInstanceOf[String]
@@ -51,26 +50,25 @@ class FlowBean extends GroupEntryBean {
     //construct StopBean List
     val stopsList = MapUtil.get(flowMap, "stops").asInstanceOf[List[Map[String, Any]]]
     stopsList.foreach(stopMap => {
-      val stop = StopBean(this.name, stopMap.asInstanceOf[Map[String, Any]])
+      val stop = StopBean[DataStream](this.name, stopMap)
       this.stops = stop +: this.stops
     })
 
     //construct PathBean List
     val pathsList = MapUtil.get(flowMap, "paths").asInstanceOf[List[Map[String, Any]]]
     pathsList.foreach(pathMap => {
-      val path = PathBean(pathMap.asInstanceOf[Map[String, Any]])
+      val path = PathBean(pathMap)
       this.paths = path +: this.paths
     })
-
   }
 
   //create Flow by FlowBean
-  def constructFlow(buildScalaJar: Boolean = true) = {
+  def constructFlow(buildScalaJar: Boolean = true): FlowImpl[DataStream] = {
 
-    if (buildScalaJar == true)
+    if (buildScalaJar)
       ScalaExecutorUtil.buildScalaExcutorJar(this)
 
-    val flow = new FlowImpl();
+    val flow = new FlowImpl[DataStream]()
 
     flow.setFlowJson(this.flowJson)
     flow.setFlowName(this.name)
@@ -86,6 +84,7 @@ class FlowBean extends GroupEntryBean {
     this.stops.foreach(stopBean => {
       flow.addStop(stopBean.name, stopBean.constructStop())
     })
+
     this.paths.foreach(pathBean => {
       flow.addPath(Path.from(pathBean.from).via(pathBean.outport, pathBean.inport).to(pathBean.to))
     })
@@ -98,39 +97,35 @@ class FlowBean extends GroupEntryBean {
     flow
   }
 
-  def toJson(): String = {
+  def toJson: String = {
     val json =
-      ("flow" ->
+      "flow" ->
         ("uuid" -> this.uuid) ~
           ("name" -> this.name) ~
           ("stops" ->
             stops.map { stop =>
-              (
-                ("uuid" -> stop.uuid) ~
-                  ("name" -> stop.name) ~
-                  ("bundle" -> stop.bundle))
+              ("uuid" -> stop.uuid) ~
+                ("name" -> stop.name) ~
+                ("bundle" -> stop.bundle)
             }) ~
           ("paths" ->
             paths.map { path =>
-              (
-                ("from" -> path.from) ~
-                  ("outport" -> path.outport) ~
-                  ("inport" -> path.inport) ~
-                  ("to" -> path.to)
-                )
-            }))
+              ("from" -> path.from) ~
+                ("outport" -> path.outport) ~
+                ("inport" -> path.inport) ~
+                ("to" -> path.to)
+            })
+
     val jsonString = compactRender(json)
-    //println(jsonString)
     jsonString
   }
 
 }
 
 object FlowBean {
-  def apply(map: Map[String, Any]): FlowBean = {
-    val flowBean = new FlowBean()
+  def apply[DataStream](map: Map[String, Any]): FlowBean[DataStream] = {
+    val flowBean = new FlowBean[DataStream]()
     flowBean.init(map)
     flowBean
   }
-
 }
