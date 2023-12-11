@@ -3,11 +3,12 @@ package cn.piflow.bundle.flink.util
 import cn.piflow.Constants
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.java.typeutils.RowTypeInfo
+import org.apache.flink.table.api.{DataTypes, Schema}
 
 object RowTypeUtil {
 
   /**
-   * 生成Row类型的TypeInformation.
+   * 生成Row类型的TypeInformation
    */
   def getRowTypeInfo(schema: String): RowTypeInfo = {
     val field = schema.split(Constants.COMMA)
@@ -45,4 +46,37 @@ object RowTypeUtil {
 
     info
   }
+
+
+  /**
+   * 生成Row类型的TypeInformation.
+   */
+  def getRowSchema(schema: String): Schema = {
+    val schemaBuilder = Schema.newBuilder()
+    val field = schema.split(Constants.COMMA)
+    for (i <- 0 until field.size) {
+      val columnInfo = field(i).trim.split(Constants.COLON)
+      val columnName = columnInfo(0).trim
+      val columnType = columnInfo(1).trim
+      var isNullable = false
+      if (columnInfo.size == 3) {
+        isNullable = columnInfo(2).trim.toBoolean
+      }
+
+      columnType.toLowerCase() match {
+        case "string" => schemaBuilder.column(columnName, DataTypes.STRING())
+        case "int" => schemaBuilder.column(columnName, DataTypes.INT())
+        case "double" => schemaBuilder.column(columnName, DataTypes.DOUBLE())
+        case "float" => schemaBuilder.column(columnName, DataTypes.FLOAT())
+        case "long" => schemaBuilder.column(columnName, DataTypes.BIGINT())
+        case "boolean" => schemaBuilder.column(columnName, DataTypes.BOOLEAN())
+        case "date" => schemaBuilder.column(columnName, DataTypes.DATE())
+        case "timestamp" => schemaBuilder.column(columnName, DataTypes.TIMESTAMP())
+        case _ =>
+          throw new RuntimeException("Unsupported type: " + columnType)
+      }
+    }
+    schemaBuilder.build()
+  }
+
 }

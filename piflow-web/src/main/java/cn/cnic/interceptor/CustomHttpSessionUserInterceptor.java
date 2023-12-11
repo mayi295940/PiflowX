@@ -61,7 +61,7 @@ public class CustomHttpSessionUserInterceptor implements HttpSessionUserIntercep
     cookie.setSecure(true);
     cookie.setPath("/");
 
-    Cookie jwtokCookie = new Cookie("state", "jwtok");
+    Cookie jwtokCookie = new Cookie("state22", "jwtok");
     jwtokCookie.setSecure(true);
     jwtokCookie.setPath("/");
 

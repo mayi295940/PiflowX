@@ -7,7 +7,7 @@ import cn.cnic.component.process.service.IProcessPathService;
 import cn.cnic.component.process.service.IProcessService;
 import cn.cnic.component.process.service.IProcessStopService;
 import cn.cnic.component.process.vo.DebugDataRequest;
-import cn.cnic.third.service.IFlow;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+@Api(tags = "process api")
 @Controller
 @RequestMapping("/process")
 public class ProcessCtrl {
@@ -25,8 +26,6 @@ public class ProcessCtrl {
   Logger logger = LoggerUtil.getLogger();
 
   @Autowired IProcessService processServiceImpl;
-
-  @Autowired IFlow flowImpl;
 
   @Autowired IProcessStopService processStopServiceImpl;
 

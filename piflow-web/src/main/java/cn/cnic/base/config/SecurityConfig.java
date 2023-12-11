@@ -56,14 +56,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/doc.html",
             "/webjars/**",
             "/swagger-resources/**",
-            "/v2/api-docs/**");
+            "/v2/api-docs/**",
+            "/config.json",
+            "/favicon.ico",
+            "/**/*.html",
+            "/**/*.css",
+            "/**/*.css.map",
+            "/**/*.png",
+            "/**/*.js",
+            "/**/*.xml",
+            "/**/*.txt",
+            "/**/*.woff",
+            "/**/*.git",
+            "/fonts/**");
   }
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.userDetailsService(customUserDetailsService)
-        .passwordEncoder(
-            new BCryptPasswordEncoder()); // Add a custom userDetailsService certificate
+    auth.userDetailsService(customUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
     auth.eraseCredentials(false);
   }
 
@@ -95,6 +105,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 除上面外的所有请求全部需要鉴权认证
         .anyRequest()
         .authenticated();
+
     // 禁用缓存
     http.headers().cacheControl();
 

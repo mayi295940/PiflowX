@@ -5,6 +5,8 @@ import cn.cnic.base.util.SessionUserUtil;
 import cn.cnic.component.dataSource.service.IDataSource;
 import cn.cnic.component.dataSource.vo.DataSourceVo;
 import cn.cnic.component.flow.service.IStopsService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+
+@Api(value = "datasource api")
 @Controller
 @RequestMapping("/datasource")
 public class DataSourceCtrl {
@@ -22,6 +26,7 @@ public class DataSourceCtrl {
 
   @Autowired private IStopsService stopsServiceImpl;
 
+  @ApiOperation("getDatasourceList")
   @RequestMapping(value = "/getDatasourceList", method = RequestMethod.POST)
   @ResponseBody
   public String getDatasourceList() {
@@ -30,6 +35,7 @@ public class DataSourceCtrl {
     return dataSourceImpl.getDataSourceVoList(currentUsername, isAdmin);
   }
 
+  @ApiOperation("getDataSourceListPagination")
   @RequestMapping(value = "/getDataSourceListPagination", method = RequestMethod.GET)
   @ResponseBody
   public String getDataSourceListPagination(Integer page, Integer limit, String param) {
@@ -38,6 +44,7 @@ public class DataSourceCtrl {
     return dataSourceImpl.getDataSourceVoListPage(currentUsername, isAdmin, page, limit, param);
   }
 
+  @ApiOperation("getDatasourceById")
   @RequestMapping(value = "/getDatasourceById", method = RequestMethod.POST)
   @ResponseBody
   public String getDatasourceById(String id) {
@@ -46,6 +53,7 @@ public class DataSourceCtrl {
     return dataSourceImpl.getDataSourceVoById(currentUsername, isAdmin, id);
   }
 
+  @ApiOperation("saveOrUpdate")
   @RequestMapping(value = "/saveOrUpdate", method = RequestMethod.POST)
   @ResponseBody
   public String saveOrUpdate(DataSourceVo dataSourceVo, boolean isSynchronize) {
@@ -54,6 +62,7 @@ public class DataSourceCtrl {
     return dataSourceImpl.saveOrUpdate(currentUsername, isAdmin, dataSourceVo, isSynchronize);
   }
 
+  @ApiOperation("getDataSourceInputData")
   @RequestMapping(value = "/getDataSourceInputData", method = RequestMethod.POST)
   @ResponseBody
   public String getDataSourceInputPageData(String dataSourceId) {
@@ -62,6 +71,7 @@ public class DataSourceCtrl {
     return dataSourceImpl.getDataSourceInputPageData(username, isAdmin, dataSourceId);
   }
 
+  @ApiOperation("deleteDataSource")
   @RequestMapping(value = "/deleteDataSource", method = RequestMethod.POST)
   @ResponseBody
   public String deleteDataSource(String dataSourceId) {
@@ -70,6 +80,7 @@ public class DataSourceCtrl {
     return dataSourceImpl.deleteDataSourceById(currentUsername, isAdmin, dataSourceId);
   }
 
+  @ApiOperation("fillDatasource")
   @RequestMapping(value = "/fillDatasource", method = RequestMethod.POST)
   @ResponseBody
   public String fillDatasource(String dataSourceId, String stopId) throws Exception {
@@ -77,6 +88,8 @@ public class DataSourceCtrl {
     return stopsServiceImpl.fillDatasource(username, dataSourceId, stopId);
   }
 
+
+  @ApiOperation("checkDatasourceLinked")
   @RequestMapping(value = "/checkDatasourceLinked", method = RequestMethod.POST)
   @ResponseBody
   public String checkDatasourceLinked(String dataSourceId) throws Exception {
