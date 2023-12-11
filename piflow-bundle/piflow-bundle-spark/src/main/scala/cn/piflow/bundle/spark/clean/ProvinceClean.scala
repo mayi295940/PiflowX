@@ -59,7 +59,7 @@ class ProvinceClean extends ConfigurableStop[DataFrame] {
   }
 
 
-  def initialize(ctx: ProcessContext): Unit = {
+  def initialize(ctx: ProcessContext[DataFrame]): Unit = {
 
   }
 
@@ -84,7 +84,6 @@ class ProvinceClean extends ConfigurableStop[DataFrame] {
 
   override def getIcon(): Array[Byte] = {
     ImageUtil.getImage("icon/clean/ProvinceClean.png")
-
   }
 
   override def getGroup(): List[String] = {

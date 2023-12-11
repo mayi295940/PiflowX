@@ -1,12 +1,13 @@
 package cn.piflow.bundle.spark.util
 
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
+
 import java.text.SimpleDateFormat
 import java.util.{Date, UUID}
 
-import org.apache.spark.sql.Row
-import org.apache.spark.sql.types.{LongType, StringType, StructField, StructType}
-
 object NSFCUtil {
+
   val dateFormat: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
   val add_field = Array(
     StructField("0", StringType, nullable = true),
@@ -17,9 +18,16 @@ object NSFCUtil {
     StructField("home_return_permit", StringType, nullable = true),
     StructField("mainland_travel_permit_for_taiwan_residents", StringType, nullable = true)
   )
-  def buildNewOPersonRow (beforeRowSeq : Seq[Any], beforeSchema:StructType, afterSchema:StructType, idTypeField : String, idField :String, source:String): Row = {
+
+  def buildNewOPersonRow(beforeRowSeq: Seq[Any],
+                         beforeSchema: StructType,
+                         afterSchema: StructType,
+                         idTypeField: String,
+                         idField: String,
+                         source: String): Row = {
+
     var afterSeq = scala.collection.mutable.ArraySeq[Any]()
-    var afterMap = scala.collection.mutable.HashMap[String, Any]()
+    val afterMap = scala.collection.mutable.HashMap[String, Any]()
 
     var card_type: String = ""
     var card_code: String = ""
@@ -31,6 +39,7 @@ object NSFCUtil {
     var four = "null"
     var five = "null"
     var six = "null"
+
     //Seq[V] -> Map[K,V]
     for (index <- 0 until beforeSchema.length) {
       val name = beforeSchema(index).name
@@ -42,6 +51,7 @@ object NSFCUtil {
         case _ => afterMap.put(beforeSchema(index).name, beforeRowSeq(index))
       }
     }
+
     card_type match {
       case id_type.MAINLAND.id => six = card_code //6
       case id_type.FOUR.id => four = card_code //4
@@ -74,14 +84,16 @@ object NSFCUtil {
     Row.fromSeq(afterSeq)
   }
 
-  def ifNUll(value : String): Any = {
+  private def ifNUll(value: String): Any = {
     if (value.equals("null")) null else value
   }
 
-  def mkPersonSchemaWithID(beforeSchema : StructType, idTypeField : String, idField :String) : StructType ={
-    var afterSchema = new StructType(beforeSchema.filter(field => {field.name != idField && field.name != idTypeField}).toArray)
+  def mkPersonSchemaWithID(beforeSchema: StructType, idTypeField: String, idField: String): StructType = {
+    var afterSchema = new StructType(beforeSchema.filter(field => {
+      field.name != idField && field.name != idTypeField
+    }).toArray)
     add_field.foreach(f => {
-      afterSchema = afterSchema.add(f.name, f.dataType,nullable = true)
+      afterSchema = afterSchema.add(f.name, f.dataType, nullable = true)
     })
     afterSchema = afterSchema.add("source", StringType, nullable = true)
     afterSchema = afterSchema.add("uuid", StringType, nullable = true)
@@ -89,20 +101,21 @@ object NSFCUtil {
   }
 
 
-  def getTime(row : Row, timeIndex : Int) : Date = {
+  def getTime(row: Row, timeIndex: Int): Date = {
     if (row.isNullAt(timeIndex)) new Date(0)
     else {
-      var date:java.util.Date = null
+      var date: java.util.Date = null
       val s = row.getString(timeIndex)
       try {
         date = dateFormat.parse(s)
       } catch {
-        case _ => date = new Date(0)
+        case _: Throwable => date = new Date(0)
       }
       date
     }
   }
-  def mkRowKey(schema_result:StructType, row: Row, key : String): String = {
+
+  def mkRowKey(schema_result: StructType, row: Row, key: String): String = {
     var hasNull = false
     var s = ""
     if (key.contains("&")) {
@@ -128,10 +141,12 @@ object NSFCUtil {
     }
     s
   }
-  def generateUUID(): String = {
+
+  private def generateUUID(): String = {
     UUID.randomUUID().toString
   }
 }
+
 object id_type extends Enumeration {
   val MAINLAND: id = id("6", "mainland_travel_permit_for_taiwan_residents")
   val IDENTITY_CARD: id = id("1", "identity_card")
@@ -142,7 +157,8 @@ object id_type extends Enumeration {
   val FOUR: id = id("4", "FOUR")
   type id_type = id
 }
-case class id(id :String, name :String) extends Serializable {
+
+case class id(id: String, name: String) extends Serializable {
   override def equals(obj: scala.Any): Boolean = {
     if (this == obj) return true
     obj match {
