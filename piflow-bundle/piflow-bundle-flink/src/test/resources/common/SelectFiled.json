@@ -15,11 +15,10 @@
       },
       {
         "uuid": "2222",
-        "name": "ExecuteSQL1",
-        "bundle": "cn.piflow.bundle.flink.common.ExecuteSQLStop",
+        "name": "SelectFiled1",
+        "bundle": "cn.piflow.bundle.flink.common.SelectField",
         "properties": {
-          "sql": "select name from  testView",
-          "viewName": "testView"
+          "columnNames": "id,salary"
         }
       },
       {
@@ -36,10 +35,10 @@
         "from": "MockData1",
         "outport": "",
         "inport": "",
-        "to": "ExecuteSQL1"
+        "to": "SelectFiled1"
       },
       {
-        "from": "ExecuteSQL1",
+        "from": "SelectFiled1",
         "outport": "",
         "inport": "",
         "to": "ShowData1"

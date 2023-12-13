@@ -5,7 +5,6 @@ import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
@@ -14,7 +13,7 @@ import org.apache.flink.types.Row
 
 class SelectHiveQLRetract extends ConfigurableStop[DataStream[Row]] {
 
-  override val authorEmail: String = "qinghua.liao@outlook.com"
+  override val authorEmail: String = ""
   override val description: String = "Execute select clause of hiveQL with RetractStream"
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
@@ -30,8 +29,7 @@ class SelectHiveQLRetract extends ConfigurableStop[DataStream[Row]] {
                        out: JobOutputStream[DataStream[Row]],
                        pec: JobContext[DataStream[Row]]): Unit = {
 
-    val env = pec.get[StreamExecutionEnvironment]()
-    val tableEnv = StreamTableEnvironment.create(env)
+    val tableEnv = pec.get[StreamTableEnvironment]()
 
     val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir)
 

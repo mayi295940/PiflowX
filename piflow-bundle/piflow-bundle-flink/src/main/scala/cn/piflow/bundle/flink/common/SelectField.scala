@@ -10,10 +10,11 @@ import org.apache.flink.table.api.Expressions.$
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.types.Row
 
-class DropField extends ConfigurableStop[DataStream[Row]] {
 
-  val authorEmail: String = "ygang@cnic.cn"
-  val description: String = "Delete one or more columns"
+class SelectField extends ConfigurableStop[DataStream[Row]] {
+
+  val authorEmail: String = ""
+  val description: String = "Select data column"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 
@@ -37,12 +38,11 @@ class DropField extends ConfigurableStop[DataStream[Row]] {
       array(x) = $(field(x))
     }
 
-    val resultTable = inputTable.dropColumns(array: _*)
+    val resultTable = inputTable.select(array: _*)
 
     val resultStream = tableEnv.toDataStream(resultTable)
 
     out.write(resultStream)
-
   }
 
   def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
@@ -58,17 +58,17 @@ class DropField extends ConfigurableStop[DataStream[Row]] {
     val inPorts = new PropertyDescriptor()
       .name("columnNames")
       .displayName("ColumnNames")
-      .description("Fill in the columns you want to delete," +
-        "multiple columns names separated by commas")
+      .description("Select the column you want," +
+        "multiple columns separated by commas")
       .defaultValue("")
       .required(true)
-      .example("id")
+      .example("id,name")
     descriptor = inPorts :: descriptor
     descriptor
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/common/DropColumnNames.png")
+    ImageUtil.getImage("icon/common/SelectField.png")
   }
 
   override def getGroup(): List[String] = {

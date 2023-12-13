@@ -5,7 +5,6 @@ import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.types.Row
 
@@ -31,9 +30,7 @@ class ShowData extends ConfigurableStop[DataStream[Row]] {
               out: JobOutputStream[DataStream[Row]],
               pec: JobContext[DataStream[Row]]): Unit = {
 
-    val env = pec.get[StreamExecutionEnvironment]()
-
-    val tableEnv = StreamTableEnvironment.create(env)
+    val tableEnv = pec.get[StreamTableEnvironment]()
 
     val df: DataStream[Row] = in.read()
 
