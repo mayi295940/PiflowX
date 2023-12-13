@@ -3,7 +3,7 @@ package cn.piflow.bundle.flink.common
 import cn.piflow.bundle.flink.BaseTest
 import org.junit.Test
 
-class DripFieldTest {
+class DropFieldTest {
 
   @Test
   def testFlow(): Unit = {
