@@ -1,6 +1,7 @@
 package cn.piflow.bundle.flink.util
 
 import cn.piflow.Constants
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.table.api.{DataTypes, Schema}
@@ -77,6 +78,48 @@ object RowTypeUtil {
       }
     }
     schemaBuilder.build()
+  }
+
+
+  /**
+   * 生成table Schema
+   */
+  def getTableSchema(schema: String): String = {
+
+    var primaryKey:String = ""
+    var sourceDDL = ""
+
+    val field = schema.split(Constants.COMMA)
+    for (i <- 0 until field.size) {
+      val columnInfo = field(i).trim.split(Constants.COLON)
+      val columnName = columnInfo(0).trim
+      val columnType = columnInfo(1).trim
+      var isNullable = false
+      if (columnInfo.size == 3) {
+        isNullable = columnInfo(2).trim.toBoolean
+      }
+
+      columnType.toLowerCase() match {
+        case "string" => sourceDDL += s"  $columnName ${DataTypes.STRING()},"
+        case "int" => sourceDDL += s"  $columnName ${DataTypes.INT()},"
+        case "double" => sourceDDL += s"  $columnName ${DataTypes.DOUBLE()},"
+        case "float" => sourceDDL += s"  $columnName ${DataTypes.FLOAT()},"
+        case "long" => sourceDDL += s"  $columnName ${DataTypes.BIGINT()},"
+        case "boolean" => sourceDDL += s"  $columnName ${DataTypes.BOOLEAN()},"
+        case "date" => sourceDDL += s"  $columnName ${DataTypes.DATE()},"
+        case "timestamp" => sourceDDL += s"  $columnName ${DataTypes.TIMESTAMP()},"
+        case _ =>
+          throw new RuntimeException("Unsupported type: " + columnType)
+      }
+    }
+
+    if (StringUtils.isNotBlank(primaryKey)) {
+      sourceDDL = sourceDDL.stripMargin + s"PRIMARY KEY ($primaryKey) NOT ENFORCED"
+      sourceDDL
+    }
+    else {
+      sourceDDL.stripMargin.dropRight(1)
+    }
   }
 
 }

@@ -1,0 +1,35 @@
+{
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
+      {
+        "uuid": "1111",
+        "name": "CsvParser",
+        "bundle": "cn.piflow.bundle.flink.csv.CsvParser",
+        "properties": {
+          "csvPath": "src/test/resources/csv/user.csv",
+          "header": "true",
+          "delimiter": ",",
+          "schema": "name:string,age:int"
+        }
+      },
+      {
+        "uuid": "2222",
+        "name": "ShowData1",
+        "bundle": "cn.piflow.bundle.flink.common.ShowData",
+        "properties": {
+          "showNumber": "5000"
+        }
+      }
+    ],
+    "paths": [
+      {
+        "from": "CsvParser",
+        "outport": "",
+        "inport": "",
+        "to": "ShowData1"
+      }
+    ]
+  }
+}
