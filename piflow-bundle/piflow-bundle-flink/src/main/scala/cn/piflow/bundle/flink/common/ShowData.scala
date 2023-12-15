@@ -46,7 +46,7 @@ class ShowData extends ConfigurableStop[DataStream[Row]] {
     val resultStream = tableEnv.toDataStream(resultTable)
 
     // 将 DataStream 结果打印到控制台
-    resultStream.print()
+    resultStream.print(tmpTable)
 
     out.write(df)
   }
