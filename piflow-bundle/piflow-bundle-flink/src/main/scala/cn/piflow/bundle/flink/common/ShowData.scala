@@ -3,6 +3,7 @@ package cn.piflow.bundle.flink.common
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.util.IdGenerator
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -36,9 +37,11 @@ class ShowData extends ConfigurableStop[DataStream[Row]] {
 
     val inputTable = tableEnv.fromDataStream(df)
 
-    tableEnv.createTemporaryView("tableShowTmp", inputTable)
+    val tmpTable = "TableShowTmp_" + IdGenerator.uuidWithoutSplit
 
-    val resultTable = tableEnv.sqlQuery("SELECT * FROM tableShowTmp LIMIT " + showNumber)
+    tableEnv.createTemporaryView(tmpTable, inputTable)
+
+    val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable LIMIT $showNumber")
 
     val resultStream = tableEnv.toDataStream(resultTable)
 

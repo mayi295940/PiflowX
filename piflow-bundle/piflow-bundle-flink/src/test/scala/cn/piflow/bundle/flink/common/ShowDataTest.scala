@@ -2,6 +2,7 @@ package cn.piflow.bundle.flink.common
 
 import cn.piflow.bundle.flink.source.mock.MockSourceFunction
 import cn.piflow.bundle.flink.util.RowTypeUtil
+import cn.piflow.util.IdGenerator
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
@@ -23,9 +24,11 @@ object ShowDataTest {
 
     val inputTable = tableEnv.fromDataStream(df)
 
-    tableEnv.createTemporaryView("tableShowTmp", inputTable)
+    val tmpTable = "TableShowTmp_" + IdGenerator.uuidWithoutSplit
 
-    val resultTable = tableEnv.sqlQuery("SELECT * FROM tableShowTmp LIMIT " + showNumber)
+    tableEnv.createTemporaryView(tmpTable, inputTable)
+
+    val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable LIMIT $showNumber")
 
     val resultStream = tableEnv.toDataStream(resultTable)
 
