@@ -10,6 +10,7 @@ import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.types.Row
 
+// todo 暂不支持跳过首行
 class CsvParser extends ConfigurableStop[DataStream[Row]] {
 
   val authorEmail: String = ""
