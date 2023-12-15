@@ -13,7 +13,8 @@ import org.h2.tools.Server
 
 object BaseTest {
 
-  def testFlow(jsonPath: String): Unit = {
+  def testFlow(jsonPath: String,
+               mode: RuntimeExecutionMode = RuntimeExecutionMode.STREAMING): Unit = {
 
     //parse flow json
     val flowJsonStr = FileUtil.fileReader(jsonPath)
@@ -28,7 +29,7 @@ object BaseTest {
     Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "50001").start()
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setRuntimeMode(RuntimeExecutionMode.STREAMING)
+    env.setRuntimeMode(mode)
     env.setParallelism(1)
     val tableEnv = StreamTableEnvironment.create(env)
 
