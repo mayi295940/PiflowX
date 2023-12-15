@@ -5,6 +5,7 @@ import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.util.IdGenerator
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.table.api.TableDescriptor
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -85,9 +86,11 @@ class DataGen extends ConfigurableStop[DataStream[Row]] {
       .schema(RowTypeUtil.getRowSchema(schema))
       .build()
 
-    tableEnv.createTemporaryTable("SourceTable", tableDescriptor)
 
-    val resultTable = tableEnv.sqlQuery("SELECT * FROM SourceTable")
+    val tmpTable = "SourceTable_" + IdGenerator.uuidWithoutSplit
+    tableEnv.createTemporaryTable(tmpTable, tableDescriptor)
+
+    val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
     val df = tableEnv.toDataStream(resultTable)
 
     out.write(df)
