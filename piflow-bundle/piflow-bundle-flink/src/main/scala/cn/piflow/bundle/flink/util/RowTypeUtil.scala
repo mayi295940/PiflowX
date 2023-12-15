@@ -64,6 +64,9 @@ object RowTypeUtil {
         isNullable = columnInfo(2).trim.toBoolean
       }
 
+      // todo more type
+      // todo date format
+
       columnType.toLowerCase() match {
         case "string" => schemaBuilder.column(columnName, DataTypes.STRING())
         case "int" => schemaBuilder.column(columnName, DataTypes.INT())

@@ -1,0 +1,114 @@
+package cn.piflow.bundle.flink.csv
+
+import cn.piflow.bundle.flink.util.RowTypeUtil
+import cn.piflow.conf.bean.PropertyDescriptor
+import cn.piflow.conf.util.{ImageUtil, MapUtil}
+import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import org.apache.commons.lang3.time.DateUtils
+import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.types.Row
+
+class CsvStringParser extends ConfigurableStop[DataStream[Row]] {
+
+  override val authorEmail: String = ""
+  val inportList: List[String] = List(Port.DefaultPort)
+  val outportList: List[String] = List(Port.DefaultPort)
+  override val description: String = "Parse csv string"
+
+  var string: String = _
+  var delimiter: String = _
+  var schema: String = _
+
+  override def perform(in: JobInputStream[DataStream[Row]],
+                       out: JobOutputStream[DataStream[Row]],
+                       pec: JobContext[DataStream[Row]]): Unit = {
+
+    val env = pec.get[StreamExecutionEnvironment]()
+
+    val rowType = RowTypeUtil.getRowTypeInfo(schema)
+    val colNum: Int = rowType.getArity
+
+    val arrStr: Array[String] = string.split("\n").map(x => x.trim)
+
+    val listROW: List[Row] = arrStr.map(line => {
+
+      val seqSTR: Seq[String] = line.split(delimiter).map(x => x.trim).toSeq
+
+      // todo time format
+
+      val row = new Row(colNum)
+      for (i <- 0 until colNum) {
+        val colType = rowType.getTypeAt(i).getTypeClass.getSimpleName.toLowerCase()
+        colType match {
+          case "integer" => row.setField(i, seqSTR(i).toInt)
+          case "long" => row.setField(i, seqSTR(i).toLong)
+          case "double" => row.setField(i, seqSTR(i).toDouble)
+          case "float" => row.setField(i, seqSTR(i).toFloat)
+          case "boolean" => row.setField(i, seqSTR(i).toBoolean)
+          case "date" => row.setField(i, DateUtils.parseDate(seqSTR(i),  "yyyy-MM-dd HH:mm:ss"))
+          case "timestamp" => row.setField(i, seqSTR(i))
+          case _ => row.setField(i, seqSTR(i))
+        }
+      }
+
+      row
+    }).toList
+
+    val rowRDD: DataStream[Row] = env
+      .fromElements(listROW: _*)
+      .returns(rowType)
+
+    out.write(rowRDD)
+  }
+
+  override def setProperties(map: Map[String, Any]): Unit = {
+    string = MapUtil.get(map, "string").asInstanceOf[String]
+    delimiter = MapUtil.get(map, "delimiter").asInstanceOf[String]
+    schema = MapUtil.get(map, "schema").asInstanceOf[String]
+  }
+
+  override def getPropertyDescriptor(): List[PropertyDescriptor] = {
+    var descriptor: List[PropertyDescriptor] = List()
+
+    val string = new PropertyDescriptor()
+      .name("string")
+      .displayName("String")
+      .defaultValue("")
+      .required(true)
+      .example("1,zs\n2,ls\n3,ww")
+    descriptor = string :: descriptor
+
+    val delimiter = new PropertyDescriptor()
+      .name("delimiter")
+      .displayName("Delimiter")
+      .description("The delimiter of CSV string")
+      .defaultValue("")
+      .required(true)
+      .example(",")
+    descriptor = delimiter :: descriptor
+
+    val schema = new PropertyDescriptor()
+      .name("schema")
+      .displayName("Schema")
+      .description("The schema of CSV string")
+      .defaultValue("")
+      .required(false)
+      .example("")
+    descriptor = schema :: descriptor
+
+    descriptor
+  }
+
+  override def getIcon(): Array[Byte] = {
+    ImageUtil.getImage("icon/csv/CsvStringParser.png")
+  }
+
+  override def getGroup(): List[String] = {
+    List(StopGroup.CsvGroup)
+  }
+
+  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+
+}
