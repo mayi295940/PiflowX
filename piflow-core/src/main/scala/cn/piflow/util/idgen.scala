@@ -11,6 +11,8 @@ object IdGenerator {
 
   def uuid: String = UUID.randomUUID().toString
 
+  def uuidWithoutSplit: String = uuid.replaceAll("-", "")
+
 //  def nextId[T](implicit manifest: Manifest[T]): Int =
 //    map.getOrElseUpdate(manifest.runtimeClass.getName,
 //      new AtomicInteger()).incrementAndGet()
