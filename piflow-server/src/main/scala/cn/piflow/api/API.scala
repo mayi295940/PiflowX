@@ -3,6 +3,7 @@ package cn.piflow.api
 import cn.piflow.conf.VisualizationType
 import cn.piflow.conf.bean.{FlowBean, GroupBean}
 import cn.piflow.conf.util.{ClassUtil, MapUtil, OptionUtil, PluginManager}
+import cn.piflow.launcher.flink.{FlinkLauncher, FlowLauncher}
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
 import cn.piflow.util._
 import cn.piflow.{GroupExecution, Runner}

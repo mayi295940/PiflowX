@@ -1,6 +1,7 @@
-package cn.piflow.util
+package cn.piflow.launcher.flink
 
 import cn.piflow.Flow
+import cn.piflow.util.{FileUtil, FlowFileUtil, PropertyUtil}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{ClusterDeploymentException, ClusterSpecification}
 import org.apache.flink.client.program.ClusterClientProvider
@@ -75,7 +76,7 @@ object FlinkYarnClusterLauncher {
     }
     val clusterClient = clusterClientProvider.getClusterClient
     val applicationId = clusterClient.getClusterId
-    System.out.println(applicationId)
+    println(applicationId)
     applicationId.toString
   }
 }

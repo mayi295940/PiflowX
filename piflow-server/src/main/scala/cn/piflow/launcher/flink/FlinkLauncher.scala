@@ -1,6 +1,7 @@
-package cn.piflow.util
+package cn.piflow.launcher.flink
 
 import cn.piflow.Flow
+import cn.piflow.util.{ConfigureUtil, PropertyUtil}
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 object FlinkLauncher {
