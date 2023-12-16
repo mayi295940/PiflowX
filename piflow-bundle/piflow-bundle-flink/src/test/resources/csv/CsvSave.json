@@ -1,0 +1,39 @@
+{
+  "flow": {
+    "name": "test",
+    "uuid": "1234",
+    "stops": [
+      {
+        "uuid": "0000",
+        "name": "MockData1",
+        "bundle": "cn.piflow.bundle.flink.common.DataGen",
+        "properties": {
+          "schema": "id:int,birthday:date",
+          "count": "50",
+          "ratio": "10"
+        }
+      },
+      {
+        "uuid": "1324",
+        "name": "CsvSave",
+        "bundle": "cn.piflow.bundle.flink.csv.CsvSave",
+        "properties": {
+          "csvSavePath": "src/test/resources/csv/CsvSave/",
+          "header": "true",
+          "delimiter": ",",
+          "partition": "",
+          "saveMode": "append",
+          "formatMode": "row"
+        }
+      }
+    ],
+    "paths": [
+      {
+        "from": "MockData1",
+        "outport": "",
+        "inport": "",
+        "to": "CsvSave"
+      }
+    ]
+  }
+}
