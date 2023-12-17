@@ -10,7 +10,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 class GetFile extends ConfigurableStop[DataFrame] {
 
   override val authorEmail: String = "ygang@cnic.cn"
-  override val description: String = "Download fields from hdfs to local"
+  override val description: String = "Download files from hdfs to local"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 

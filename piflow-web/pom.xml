@@ -63,6 +63,13 @@
             <artifactId>spring-security-jwt</artifactId>
             <version>1.0.10.RELEASE</version>
         </dependency>
+
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-core</artifactId>
+            <version>0.9</version>
+        </dependency>
+
         <!-- JwtUtils中使用JsonUtils -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

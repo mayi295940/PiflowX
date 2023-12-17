@@ -4,7 +4,7 @@ import java.net.{MalformedURLException, URL}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil, PluginClassLoader}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.DataFrame
 
 import scala.language.experimental.macros
@@ -85,7 +85,7 @@ class ExecuteScala extends ConfigurableStop[DataFrame] {
     }
     loader.addURLFile(url)
 
-    val className = plugin.split("/").last.split(".jar")(0)
+    val className = plugin.split(Constants.SINGLE_SLASH).last.split(".jar")(0)
     val classMirror = ru.runtimeMirror(loader)
     println("staticModule: " + s"$packageName.$className")
     val classTest = classMirror.staticModule(s"$packageName.$className")

@@ -8,7 +8,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
-import cn.piflow.GroupExecution
+import cn.piflow.{Constants, GroupExecution}
 import cn.piflow.api.HTTPService.pluginManager
 import cn.piflow.conf.util.{MapUtil, PluginManager}
 import cn.piflow.util._
@@ -57,7 +57,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
   private def route(req: HttpRequest): Future[HttpResponse] = req match {
 
-    case HttpRequest(GET, Uri.Path("/"), headers, entity, protocol) =>
+    case HttpRequest(GET, Uri.Path(Constants.SINGLE_SLASH), headers, entity, protocol) =>
       Future.successful(HttpResponse(SUCCESS_CODE, entity = "Get OK!"))
 
     case HttpRequest(GET, Uri.Path("/flow/info"), headers, entity, protocol) => {
@@ -304,7 +304,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
         val flowGroupJson = Await.result(bodyFeature, scala.concurrent.duration.Duration(1, "second"))
         //use file to run large group
         //val flowGroupJsonPath = Await.result(bodyFeature,scala.concurrent.duration.Duration(1,"second"))
-        //val flowGroupJson = Source.fromFile(flowGroupJsonPath).getLines().toArray.mkString("\n")*/
+        //val flowGroupJson = Source.fromFile(flowGroupJsonPath).getLines().toArray.mkString(Constants.LINE_SPLIT_N)*/
         val flowGroupExecution = API.startGroup(flowGroupJson)
         flowGroupMap += (flowGroupExecution.getGroupId -> flowGroupExecution)
         val result = "{\"group\":{\"id\":\"" + flowGroupExecution.getGroupId + "\"}}"

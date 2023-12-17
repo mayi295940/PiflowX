@@ -1,6 +1,6 @@
 package cn.cnic.component.stopsComponent.mapper.provider;
 
-import cn.cnic.base.util.DateUtils;
+import cn.piflow.util.DateUtils;
 import cn.cnic.base.util.SqlUtils;
 import cn.cnic.component.stopsComponent.model.StopsHub;
 import java.util.Date;

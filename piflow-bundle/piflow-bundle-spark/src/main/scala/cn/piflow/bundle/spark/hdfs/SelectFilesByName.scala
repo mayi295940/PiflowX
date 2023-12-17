@@ -1,11 +1,10 @@
 package cn.piflow.bundle.spark.hdfs
 
 import java.util.regex.Pattern
-
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.spark.rdd.RDD
@@ -34,7 +33,7 @@ class SelectFilesByName extends ConfigurableStop[DataFrame] {
     for (each <- statusesARR) {
       val pathStr = each.getPath.toString
       if (each.isFile) {
-        val fileName: String = pathStr.split("/").last
+        val fileName: String = pathStr.split(Constants.SINGLE_SLASH).last
         selectArr = selectionConditions.split(",").map(x => x.trim)
         var b: Boolean = false
         for (x <- selectArr) {
@@ -68,7 +67,7 @@ class SelectFilesByName extends ConfigurableStop[DataFrame] {
     }).toList
 
     val rowRDD: RDD[Row] = session.sparkContext.makeRDD(rows)
-    val fields: Array[StructField] = "path".split("/").map(d => StructField(d, StringType, nullable = true))
+    val fields: Array[StructField] = "path".split(Constants.SINGLE_SLASH).map(d => StructField(d, StringType, nullable = true))
     val schema: StructType = StructType(fields)
     val df: DataFrame = session.createDataFrame(rowRDD, schema)
     df.collect().foreach(println)

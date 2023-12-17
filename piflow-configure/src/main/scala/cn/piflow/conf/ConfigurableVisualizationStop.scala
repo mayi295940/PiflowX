@@ -1,7 +1,7 @@
 package cn.piflow.conf
 
-import cn.piflow.VisualizationStop
 import cn.piflow.util.ConfigureUtil
+import cn.piflow.{Constants, VisualizationStop}
 
 /**
  * Created by xjzhu@cnic.cn on 8/11/202
@@ -21,7 +21,7 @@ abstract class ConfigurableVisualizationStop[DataStream]
   override def getVisualizationPath(processId: String): String = {
     visualizationPath = ConfigureUtil
       .getVisualizationPath()
-      .stripSuffix("/") + "/" + processId + "/" + stopName
+      .stripSuffix(Constants.SINGLE_SLASH) + Constants.SINGLE_SLASH + processId + Constants.SINGLE_SLASH + stopName
     visualizationPath
   }
 

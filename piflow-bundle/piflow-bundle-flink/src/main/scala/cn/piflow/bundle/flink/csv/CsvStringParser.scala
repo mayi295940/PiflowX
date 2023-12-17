@@ -4,8 +4,8 @@ import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.commons.lang3.time.DateUtils
+import cn.piflow.util.DateUtils
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.types.Row
@@ -30,7 +30,7 @@ class CsvStringParser extends ConfigurableStop[DataStream[Row]] {
     val rowType = RowTypeUtil.getRowTypeInfo(schema)
     val colNum: Int = rowType.getArity
 
-    val arrStr: Array[String] = string.split("\n").map(x => x.trim)
+    val arrStr: Array[String] = string.split(Constants.LINE_SPLIT_N).map(x => x.trim)
 
     val listROW: List[Row] = arrStr.map(line => {
 
@@ -40,15 +40,17 @@ class CsvStringParser extends ConfigurableStop[DataStream[Row]] {
 
       val row = new Row(colNum)
       for (i <- 0 until colNum) {
+
         val colType = rowType.getTypeAt(i).getTypeClass.getSimpleName.toLowerCase()
         colType match {
+          case "string" => row.setField(i, seqSTR(i))
           case "integer" => row.setField(i, seqSTR(i).toInt)
           case "long" => row.setField(i, seqSTR(i).toLong)
           case "double" => row.setField(i, seqSTR(i).toDouble)
           case "float" => row.setField(i, seqSTR(i).toFloat)
           case "boolean" => row.setField(i, seqSTR(i).toBoolean)
-          case "date" => row.setField(i, DateUtils.parseDate(seqSTR(i),  "yyyy-MM-dd HH:mm:ss"))
-          case "timestamp" => row.setField(i, seqSTR(i))
+          case "date" => row.setField(i, DateUtils.strToDate(seqSTR(i)))
+          case "timestamp" => row.setField(i, DateUtils.strToSqlTimestamp(seqSTR(i)))
           case _ => row.setField(i, seqSTR(i))
         }
       }

@@ -1,6 +1,6 @@
 package cn.cnic.component.process.vo;
 
-import cn.cnic.base.util.DateUtils;
+import cn.piflow.util.DateUtils;
 import cn.cnic.common.Eunm.PortType;
 import java.io.Serializable;
 import java.util.ArrayList;

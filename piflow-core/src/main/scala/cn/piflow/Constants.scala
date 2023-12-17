@@ -30,4 +30,8 @@ object Constants {
   val QUESTION_MARK = "?"
   val AND_MARK = "&"
 
+  val LINE_SPLIT_N = "\n"
+
+  val TAB_SIGN = "\t"
+
 }

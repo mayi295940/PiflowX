@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.csv
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -25,7 +25,7 @@ class CsvStringParser extends ConfigurableStop[DataFrame] {
 
     val session: SparkSession = pec.get[SparkSession]
     val context: SparkContext = session.sparkContext
-    val arrStr: Array[String] = string.split("\n").map(x => x.trim)
+    val arrStr: Array[String] = string.split(Constants.LINE_SPLIT_N).map(x => x.trim)
     var num: Int = 0
 
     val listROW: List[Row] = arrStr.map(line => {

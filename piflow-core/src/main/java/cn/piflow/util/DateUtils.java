@@ -1,16 +1,21 @@
-package cn.cnic.base.util;
+package cn.piflow.util;
 
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DateUtils {
-  static Logger logger = LoggerUtil.getLogger();
+
+  private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
   /** yyyyMMdd 20121225 */
   public static final String DATE_PATTERN_yyyyMMdd = "yyyyMMdd";
@@ -44,9 +49,6 @@ public class DateUtils {
 
   /** The end of the day 23:59:59 */
   public static final String END_OF_DAY = " 23:59:59";
-
-  /** : */
-  public static final String COLON = ":";
 
   /** 00 */
   public static final String DEFAULT_SECONDS = "00";
@@ -554,5 +556,39 @@ public class DateUtils {
       logger.debug("Converted values：" + date);
     }
     return date;
+  }
+
+  /**
+   * 转换类型 string to LocalDateTime
+   *
+   * @param time time
+   * @return LocalDateTime
+   */
+  public static LocalDateTime strToLocalDateTime(String time) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_PATTERN_yyyy_MM_dd_HH_MM_ss);
+    return LocalDate.parse(time, formatter).atStartOfDay();
+  }
+
+  public static java.sql.Timestamp strToSqlTimestamp(String strDate) {
+    return strToSqlTimestamp(strDate, DATE_PATTERN_yyyy_MM_dd_HH_MM_ss);
+  }
+
+  /**
+   * 将String字符串转换为java.sql.Timestamp格式日期,用于数据库保存
+   *
+   * @param strDate 表示日期的字符串
+   * @param dateFormat 传入字符串的日期表示格式（如："yyyy-MM-dd HH:mm:ss"）
+   * @return java.sql.Timestamp类型日期对象（如果转换失败则返回null）
+   */
+  public static java.sql.Timestamp strToSqlTimestamp(String strDate, String dateFormat) {
+    SimpleDateFormat sf = new SimpleDateFormat(dateFormat);
+    java.util.Date date;
+    try {
+      date = sf.parse(strDate);
+      return new java.sql.Timestamp(date.getTime());
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 }

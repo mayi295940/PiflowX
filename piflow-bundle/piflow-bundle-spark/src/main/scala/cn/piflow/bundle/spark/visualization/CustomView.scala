@@ -4,7 +4,7 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.ImageUtil
 import cn.piflow.conf.{ConfigurableVisualizationStop, Port, StopGroup}
 import cn.piflow.util.PropertyUtil
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class CustomView extends ConfigurableVisualizationStop[DataFrame] {
@@ -43,7 +43,7 @@ class CustomView extends ConfigurableVisualizationStop[DataFrame] {
     val appID = spark.sparkContext.applicationId
 
     val df = in.read()
-    val filePath = hdfs + appID + "/" + pec.getStopJob.getStopName
+    val filePath = hdfs + appID + Constants.SINGLE_SLASH + pec.getStopJob.getStopName
     df.repartition(1).write
       .format("csv")
       .mode("overwrite")
@@ -57,7 +57,7 @@ class CustomView extends ConfigurableVisualizationStop[DataFrame] {
   }
 
   override def getVisualizationPath(processId: String): String = {
-    visualizationPath = processId + "/" + stopName
+    visualizationPath = processId + Constants.SINGLE_SLASH + stopName
     visualizationPath
   }
 }

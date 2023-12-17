@@ -3,8 +3,8 @@ package cn.piflow.bundle.spark.mongodb
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import cn.piflow._
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class PutMongoDB extends ConfigurableStop[DataFrame] {
 
@@ -26,7 +26,8 @@ class PutMongoDB extends ConfigurableStop[DataFrame] {
     val df: DataFrame = in.read()
 
     df.write
-      .options(Map("spark.mongodb.output.uri" -> ("mongodb://" + ip + ":" + port + "/" + dataBase + "." + collection)))
+      .options(Map("spark.mongodb.output.uri" -> ("mongodb://" + ip + ":" + port +
+        Constants.SINGLE_SLASH + dataBase + "." + collection)))
       .mode("append")
       .format("com.mongodb.spark.sql")
       .save()

@@ -26,9 +26,9 @@ class XmlParserColumns extends ConfigurableStop[DataFrame] {
     val df = in.read()
 
     spark.sqlContext.udf.register("xmlToJson", (str: String) => {
-      XmlToJson.xmlParse(str.replaceAll("\n", "\t"))
+      XmlToJson.xmlParse(str.replaceAll(Constants.LINE_SPLIT_N, Constants.TAB_SIGN))
     })
-    val columns: Array[String] = xmlColumns.toLowerCase.split(",").map(x => x.trim)
+    val columns: Array[String] = xmlColumns.toLowerCase.split(Constants.COMMA).map(x => x.trim)
 
     val fields: Array[String] = df.schema.fieldNames
     val fieldString = new StringBuilder
@@ -41,11 +41,14 @@ class XmlParserColumns extends ConfigurableStop[DataFrame] {
     })
 
     df.createOrReplaceTempView("temp")
-    val sqlText = "select " + fieldString.stripSuffix(",") + " from temp"
+    val sqlText = "select " + fieldString.stripSuffix(Constants.COMMA) + " from temp"
     val frame: DataFrame = spark.sql(sqlText)
 
     val rdd: RDD[String] = frame.toJSON.rdd.map(x => {
-      x.toString().replace("\\n", "").replace("}\"", "}").replace(":\"{", ":{").replace("\\", "")
+      x.replace("\\n", "")
+        .replace("}\"", "}")
+        .replace(":\"{", ":{")
+        .replace("\\", "")
     })
 
     val outDF: DataFrame = spark.read.json(rdd)

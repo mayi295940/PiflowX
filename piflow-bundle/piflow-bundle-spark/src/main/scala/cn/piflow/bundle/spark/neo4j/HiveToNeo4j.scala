@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.neo4j
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
@@ -85,7 +85,7 @@ class HiveToNeo4j extends ConfigurableStop[DataFrame] {
     iterationFile(hdfsDir)
 
     val oldPath = new Path(oldFilePath)
-    val newPath = new Path(hdfsDir + "/" + fileName)
+    val newPath = new Path(hdfsDir + Constants.SINGLE_SLASH + fileName)
     fs.rename(oldPath, newPath)
 
     println("csv file has been written to HDFS!!!!!!!!!!!!!!!!!!!! ")
@@ -128,7 +128,7 @@ class HiveToNeo4j extends ConfigurableStop[DataFrame] {
         iterationFile(fsPath)
       } else {
         if (f.getPath.toString.contains("part")) {
-          pathARR += hdfsUrl + hdfsDirPath + "/" + fileName
+          pathARR += hdfsUrl + hdfsDirPath + Constants.SINGLE_SLASH + fileName
           oldFilePath = f.getPath.toString
         }
       }

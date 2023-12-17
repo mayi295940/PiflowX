@@ -5,7 +5,7 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.util.IdGenerator
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -62,7 +62,7 @@ class CsvSave extends ConfigurableStop[DataStream[Row]] {
          |)"""
         .stripMargin
         .replaceAll("\r\n", " ")
-        .replaceAll("\n", " ")
+        .replaceAll(Constants.LINE_SPLIT_N, " ")
 
     println(sinkDDL)
     tableEnv.executeSql(sinkDDL)

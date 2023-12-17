@@ -5,6 +5,7 @@ import cn.cnic.base.config.jwt.JwtAuthenticationEntryPoint;
 import cn.cnic.base.config.jwt.JwtAuthenticationTokenFilter;
 import cn.cnic.base.util.LoggerUtil;
 import cn.cnic.common.constant.SysParamsCache;
+import cn.piflow.Constants;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -98,7 +99,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // .antMatchers("/api/v1/auth", "/api/v1/signout", "/error/**", "/api/**").permitAll()
         .antMatchers("/register", "/checkUserName", "/jwtLogin", "/error", "/login")
         .permitAll()
-        .antMatchers("/")
+        .antMatchers(Constants.SINGLE_SLASH())
         .permitAll()
         .antMatchers()
         .permitAll()

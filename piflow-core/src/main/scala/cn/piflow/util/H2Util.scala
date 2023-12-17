@@ -1,5 +1,6 @@
 package cn.piflow.util
 
+import cn.piflow.Constants
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json.compactRender
 import org.h2.tools.Server
@@ -958,7 +959,7 @@ object H2Util {
     val rs: ResultSet = statement.executeQuery("select * from plugin where id='" + pluginId + "'")
     while (rs.next()) {
 
-      val path = PropertyUtil.getClassPath() + "/" + rs.getString("name")
+      val path = PropertyUtil.getClassPath() + Constants.SINGLE_SLASH + rs.getString("name")
       pluginMap += ("id" -> rs.getString("id"))
       pluginMap += ("name" -> rs.getString("name"))
       pluginMap += ("path" -> path)
@@ -1060,7 +1061,7 @@ object H2Util {
     val rs: ResultSet = statement.executeQuery("select * from sparkJar where id='" + sparkJarId + "'")
     while (rs.next()) {
 
-      val path = PropertyUtil.getSpartJarPath() + "/" + rs.getString("name")
+      val path = PropertyUtil.getSpartJarPath() + Constants.SINGLE_SLASH + rs.getString("name")
       sparkJarMap += ("id" -> rs.getString("id"))
       sparkJarMap += ("name" -> rs.getString("name"))
       sparkJarMap += ("path" -> path)

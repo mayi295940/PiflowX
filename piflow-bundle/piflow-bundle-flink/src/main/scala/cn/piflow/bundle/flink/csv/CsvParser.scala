@@ -44,7 +44,7 @@ class CsvParser extends ConfigurableStop[DataStream[Row]] {
          |)"""
         .stripMargin
         .replaceAll("\r\n", " ")
-        .replaceAll("\n", " ")
+        .replaceAll(Constants.LINE_SPLIT_N, " ")
 
     println(sourceDDL)
 

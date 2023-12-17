@@ -1,6 +1,6 @@
 package cn.cnic.component.sparkJar.mapper.provider;
 
-import cn.cnic.base.util.DateUtils;
+import cn.piflow.util.DateUtils;
 import cn.cnic.base.util.SqlUtils;
 import cn.cnic.component.sparkJar.model.SparkJarComponent;
 import java.util.Date;

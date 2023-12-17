@@ -1,14 +1,9 @@
 package cn.piflow.bundle.spark.internetWorm
 
-import java.io.{BufferedOutputStream, File, FileOutputStream, InputStream}
-import java.net.URL
-import java.text.SimpleDateFormat
-import java.util.Date
-
+import cn.piflow._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -16,6 +11,10 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 
+import java.io.{BufferedOutputStream, File, FileOutputStream, InputStream}
+import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
 import scala.collection.mutable.ArrayBuffer
 
 class spider extends ConfigurableStop[DataFrame] {
@@ -42,18 +41,20 @@ class spider extends ConfigurableStop[DataFrame] {
     val session: SparkSession = pec.get[SparkSession]()
 
     var doc: Document = null
-    val selectArr: Array[String] = jumpDependence.split("/")
+    val selectArr: Array[String] = jumpDependence.split(Constants.SINGLE_SLASH)
     try {
       doc = Jsoup.connect(firstUrl).timeout(50000).get()
     } catch {
-      case e: Exception => throw new RuntimeException("The page specified by firstUrl does not exist." + "\n" + "firstUrl指定的页面不存在")
+      case e: Exception => throw new RuntimeException("The page specified by firstUrl does not exist." +
+        Constants.LINE_SPLIT_N + "firstUrl指定的页面不存在")
     }
 
     var eles: Elements = null
     try {
       eles = doc.select(selectArr(0))
     } catch {
-      case e: Exception => throw new RuntimeException("JumpDependence specified label path does not exist." + "\n" + "jumpDependence指定的标签路径不存在")
+      case e: Exception => throw new RuntimeException("JumpDependence specified label path does not exist." +
+        Constants.LINE_SPLIT_N + "jumpDependence指定的标签路径不存在")
     }
 
     var choiceIntArr: Array[Int] = 0.until(eles.size()).toArray
@@ -71,7 +72,7 @@ class spider extends ConfigurableStop[DataFrame] {
       var textStr: String = ele.text()
       if (textStr.isEmpty) {
         textStr = " "
-        throw new RuntimeException("Label field no value" + "\n" + "标记字段无值")
+        throw new RuntimeException("Label field no value" + Constants.LINE_SPLIT_N + "标记字段无值")
       }
       map += (markupField -> textStr)
       val hrefStr: String = ele.attr("href")
@@ -106,11 +107,12 @@ class spider extends ConfigurableStop[DataFrame] {
       doc = Jsoup.connect(url).timeout(50000).get()
 
     } catch {
-      case e: IllegalArgumentException => throw new RuntimeException("The two level interface path does not exist." + "\n" + "二层界面路径不存在")
+      case e: IllegalArgumentException => throw new RuntimeException("The two level interface path does not exist." +
+        Constants.LINE_SPLIT_N + "二层界面路径不存在")
     }
     var textDownFile: File = null
     for (each <- strArr) {
-      val fileMapArr: Array[String] = each.split("/")
+      val fileMapArr: Array[String] = each.split(Constants.SINGLE_SLASH)
       val els: Elements = doc.select(fileMapArr(1))
       val numEle: Element = els.get(fileMapArr(2).toInt)
       if (fileMapArr(0).indexOf("DOWN") > -1) {
@@ -129,7 +131,7 @@ class spider extends ConfigurableStop[DataFrame] {
           if (!textDownFile.exists()) {
             textDownFile.mkdirs()
           }
-          val eachFile: File = new File(downPath + map.get(markupField).get + "/" + eachFileEle.text())
+          val eachFile: File = new File(downPath + map.get(markupField).get + Constants.SINGLE_SLASH + eachFileEle.text())
           if (!eachFile.exists()) {
             val in: InputStream = new URL(url + eachFileEle.attr("href")).openStream()
             val out: BufferedOutputStream = new BufferedOutputStream(new FileOutputStream(eachFile), 10485760)

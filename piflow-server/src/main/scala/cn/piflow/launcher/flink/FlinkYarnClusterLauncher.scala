@@ -30,7 +30,7 @@ object FlinkYarnClusterLauncher {
     val flinkLibs = PropertyUtil.getPropertyValue("fs.defaultFS") + "/user/flink/lib"
     // 用户jar
     val userJarPath = PropertyUtil.getPropertyValue("fs.defaultFS") + "/user/flink/piflow-server-0.9.jar"
-    // String userJarPath = "file://" + ConfigureUtil.getPiFlowBundlePath().replace("\\","/");
+    // String userJarPath = "file://" + ConfigureUtil.getPiFlowBundlePath().replace("\\", Constants.SINGLE_SLASH);
     // 用户依赖的jar
     val flinkDistJar = PropertyUtil.getPropertyValue("fs.defaultFS") + "/user/flink/flink-yarn_2.11-1.12.2.jar"
     val yarnClient = YarnClient.createYarnClient

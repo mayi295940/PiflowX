@@ -32,7 +32,7 @@ class DeleteHdfs extends ConfigurableStop[DataFrame] {
       val pathARR: Array[String] = pathStr.split("\\/")
       var hdfsUrl: String = ""
       for (x <- (0 until 3)) {
-        hdfsUrl += (pathARR(x) + "/")
+        hdfsUrl += (pathARR(x) + Constants.SINGLE_SLASH)
       }
       configuration.set("fs.defaultFS", hdfsUrl)
 
@@ -45,10 +45,10 @@ class DeleteHdfs extends ConfigurableStop[DataFrame] {
       })
 
     } else {
-      val array = hdfsPath.split(",").map(x => x.trim)
+      val array = hdfsPath.split(Constants.COMMA).map(x => x.trim)
 
       for (i <- array.indices) {
-        val hdfsPath = hdfsUrl + "/" + array(i)
+        val hdfsPath = hdfsUrl + Constants.SINGLE_SLASH + array(i)
         val path = new Path(hdfsPath)
 
         val config = new Configuration()

@@ -6,7 +6,7 @@ import cn.piflow.conf.util.{ClassUtil, MapUtil, OptionUtil, PluginManager}
 import cn.piflow.launcher.flink.{FlinkLauncher, FlowLauncher}
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
 import cn.piflow.util._
-import cn.piflow.{GroupExecution, Runner}
+import cn.piflow.{Constants, GroupExecution, Runner}
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.types.Row
@@ -306,7 +306,7 @@ object API {
   }
 
   def getFlowCheckpoint(appId: String): String = {
-    val checkpointPath = ConfigureUtil.getCheckpointPath().stripSuffix("/") + "/" + appId
+    val checkpointPath = ConfigureUtil.getCheckpointPath().stripSuffix(Constants.SINGLE_SLASH) + Constants.SINGLE_SLASH + appId
     val checkpointList = HdfsUtil.getFiles(checkpointPath)
     """{"checkpoints":"""" + checkpointList.mkString(",") + """"}"""
   }
@@ -314,7 +314,7 @@ object API {
 
   def getFlowDebugData(appId: String, stopName: String, port: String): String = {
 
-    val debugPath: String = ConfigureUtil.getDebugPath().stripSuffix("/") + "/" + appId + "/" + stopName + "/" + port
+    val debugPath: String = ConfigureUtil.getDebugPath().stripSuffix(Constants.SINGLE_SLASH) + Constants.SINGLE_SLASH + appId + Constants.SINGLE_SLASH + stopName + Constants.SINGLE_SLASH + port
     val schema = HdfsUtil.getLine(debugPath + "_schema")
     val result = "{\"schema\":\"" + schema + "\", \"debugDataPath\": \"" + debugPath + "\"}"
     result
@@ -323,7 +323,7 @@ object API {
   def getFlowVisualizationData(appId: String, stopName: String, visualizationType: String): String = {
 
     var dimensionMap = Map[String, List[String]]()
-    val visuanlizationPath: String = ConfigureUtil.getVisualizationPath().stripSuffix("/") + "/" + appId + "/" + stopName + "/"
+    val visuanlizationPath: String = ConfigureUtil.getVisualizationPath().stripSuffix(Constants.SINGLE_SLASH) + Constants.SINGLE_SLASH + appId + Constants.SINGLE_SLASH + stopName + Constants.SINGLE_SLASH
 
     val visualizationSchema = getLine(visuanlizationPath + "/schema")
     val schemaArray = visualizationSchema.split(",")
@@ -512,10 +512,10 @@ object API {
     val dataFormat: SimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss")
     val nowDate = dataFormat.format(now)
 
-    val stdoutPathString = PropertyUtil.getPropertyValue("log.path") + "/" + appName + "_" + uuid + "_stdout_" + nowDate
+    val stdoutPathString = PropertyUtil.getPropertyValue("log.path") + Constants.SINGLE_SLASH + appName + "_" + uuid + "_stdout_" + nowDate
     val stdout = new File(stdoutPathString)
 
-    val stderrPathString = PropertyUtil.getPropertyValue("log.path") + "/" + appName + "_" + uuid + "_stderr_" + nowDate
+    val stderrPathString = PropertyUtil.getPropertyValue("log.path") + Constants.SINGLE_SLASH + appName + "_" + uuid + "_stderr_" + nowDate
     val stderr = new File(stderrPathString)
 
     (stdout, stderr)

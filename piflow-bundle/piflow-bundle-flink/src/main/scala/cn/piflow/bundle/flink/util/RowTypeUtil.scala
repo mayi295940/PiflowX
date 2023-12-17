@@ -2,10 +2,12 @@ package cn.piflow.bundle.flink.util
 
 import cn.piflow.Constants
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
+import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation, Types}
 import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.table.api.{DataTypes, Schema, Table}
 
+// https://nightlies.apache.org/flink/flink-docs-release-1.17/zh/docs/dev/table/types/
+// TODO 类型完善
 object RowTypeUtil {
 
   /**
@@ -30,14 +32,14 @@ object RowTypeUtil {
       fieldNames(i) = columnName
 
       columnType.toLowerCase() match {
-        case "string" => columnTypes(i) = BasicTypeInfo.STRING_TYPE_INFO
-        case "int" => columnTypes(i) = BasicTypeInfo.INT_TYPE_INFO
-        case "double" => columnTypes(i) = BasicTypeInfo.DOUBLE_TYPE_INFO
-        case "float" => columnTypes(i) = BasicTypeInfo.FLOAT_TYPE_INFO
-        case "long" => columnTypes(i) = BasicTypeInfo.LONG_TYPE_INFO
-        case "boolean" => columnTypes(i) = BasicTypeInfo.BOOLEAN_TYPE_INFO
+        case "string" => columnTypes(i) = Types.STRING
+        case "int" => columnTypes(i) = Types.INT
+        case "double" => columnTypes(i) = Types.DOUBLE
+        case "float" => columnTypes(i) = Types.FLOAT
+        case "long" => columnTypes(i) = Types.LONG
+        case "boolean" => columnTypes(i) = Types.BOOLEAN
         case "date" => columnTypes(i) = BasicTypeInfo.DATE_TYPE_INFO
-        case "timestamp" => columnTypes(i) = BasicTypeInfo.DATE_TYPE_INFO
+        case "timestamp" => columnTypes(i) = Types.SQL_TIMESTAMP
         case _ =>
           throw new RuntimeException("Unsupported type: " + columnType)
       }

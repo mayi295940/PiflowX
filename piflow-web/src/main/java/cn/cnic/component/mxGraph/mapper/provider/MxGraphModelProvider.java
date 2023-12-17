@@ -1,6 +1,6 @@
 package cn.cnic.component.mxGraph.mapper.provider;
 
-import cn.cnic.base.util.DateUtils;
+import cn.piflow.util.DateUtils;
 import cn.cnic.base.util.SqlUtils;
 import cn.cnic.component.mxGraph.entity.MxGraphModel;
 import java.util.Date;

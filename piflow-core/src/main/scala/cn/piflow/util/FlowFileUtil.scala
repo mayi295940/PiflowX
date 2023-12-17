@@ -1,48 +1,50 @@
 package cn.piflow.util
 
-import java.io.{File, FileInputStream, InputStream}
+import cn.piflow.Constants
+
+import java.io.{File, InputStream}
 import java.util.Properties
 
 object FlowFileUtil {
   private val prop: Properties = new Properties()
   var fis: InputStream = null
   val userDir = System.getProperty("user.dir")
-  var path :String = ""
-  var schedulePath:String = ""
-  var file : File = null
+  var path: String = ""
+  var schedulePath: String = ""
+  var file: File = null
 
-  try{
+  try {
 
     path = userDir + "/flowFile"
     schedulePath = path + "/scheduleFile"
     file = new File(schedulePath)
-    if(!file.exists()){
+    if (!file.exists()) {
       file.mkdirs()
     }
 
-  } catch{
+  } catch {
     case ex: Exception => ex.printStackTrace()
   }
 
-  def getFlowFilePath(flowName : String) : String = {
-    path + "/" + flowName + ".json"
+  def getFlowFilePath(flowName: String): String = {
+    path + Constants.SINGLE_SLASH + flowName + ".json"
   }
 
-  def getFlowFileInUserDir(flowName : String) : String = {
-    userDir + "/" + flowName + ".json"
+  def getFlowFileInUserDir(flowName: String): String = {
+    userDir + Constants.SINGLE_SLASH + flowName + ".json"
   }
 
-  def writeFlowFile(flowJson : String, flowFilePath : String) = {
+  def writeFlowFile(flowJson: String, flowFilePath: String) = {
     FileUtil.writeFile(flowJson, flowFilePath)
   }
 
-  def readFlowFile(flowFilePath : String) : String = {
+  def readFlowFile(flowFilePath: String): String = {
 
     FileUtil.readFile(flowFilePath)
   }
 
-  def getScheduleFilePath(fileName : String) : String = {
-    schedulePath + "/" + fileName + ".json"
+  def getScheduleFilePath(fileName: String): String = {
+    schedulePath + Constants.SINGLE_SLASH + fileName + ".json"
   }
 
 

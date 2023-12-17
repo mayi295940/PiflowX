@@ -1,7 +1,7 @@
 package cn.cnic.component.flow.entity;
 
 import cn.cnic.base.BaseHibernateModelUUIDNoCorpAgentId;
-import cn.cnic.base.util.DateUtils;
+import cn.piflow.util.DateUtils;
 import cn.cnic.common.Eunm.PortType;
 import cn.cnic.component.dataSource.entity.DataSource;
 import java.text.SimpleDateFormat;

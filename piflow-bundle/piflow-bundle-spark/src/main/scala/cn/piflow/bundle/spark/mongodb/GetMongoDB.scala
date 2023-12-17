@@ -1,9 +1,9 @@
 package cn.piflow.bundle.spark.mongodb
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
+import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class GetMongoDB extends ConfigurableStop[DataFrame] {
@@ -92,7 +92,8 @@ class GetMongoDB extends ConfigurableStop[DataFrame] {
     val session: SparkSession = pec.get[SparkSession]()
 
     val df: DataFrame = session.read.format("com.mongodb.spark.sql").options(
-      Map("spark.mongodb.input.uri" -> ("mongodb://" + ip + ":" + port + "/" + dataBase + "." + collection))
+      Map("spark.mongodb.input.uri" -> ("mongodb://" + ip + ":" + port +
+        Constants.SINGLE_SLASH + dataBase + "." + collection))
     ).load()
 
     df.createTempView(collection)

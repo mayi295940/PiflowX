@@ -1,6 +1,6 @@
 package cn.cnic.component.flow.mapper.provider;
 
-import cn.cnic.base.util.DateUtils;
+import cn.piflow.util.DateUtils;
 import cn.cnic.base.util.SqlUtils;
 import cn.cnic.component.flow.entity.CustomizedProperty;
 import java.util.Date;

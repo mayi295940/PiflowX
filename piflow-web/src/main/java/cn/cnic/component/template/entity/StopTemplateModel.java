@@ -1,6 +1,6 @@
 package cn.cnic.component.template.entity;
 
-import cn.cnic.base.util.DateUtils;
+import cn.piflow.util.DateUtils;
 import cn.cnic.common.Eunm.PortType;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;

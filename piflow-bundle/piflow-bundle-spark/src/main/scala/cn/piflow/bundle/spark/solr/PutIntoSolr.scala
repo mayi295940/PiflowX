@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.solr
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -37,7 +37,7 @@ class PutIntoSolr extends ConfigurableStop[DataFrame] {
 
     val SchemaList: List[StructField] = df.schema.toList
     val length: Int = SchemaList.length
-    val url = solrURL + "/" + SolrCollection
+    val url = solrURL + Constants.SINGLE_SLASH + SolrCollection
 
     df.collect().foreach(row => {
       client = new HttpSolrClient.Builder(url).build()

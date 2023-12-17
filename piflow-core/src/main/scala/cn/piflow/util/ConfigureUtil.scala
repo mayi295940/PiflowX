@@ -1,5 +1,6 @@
 package cn.piflow.util
 
+import cn.piflow.Constants
 import cn.piflow.util.FileUtil.getJarFile
 import com.alibaba.fastjson2.JSON
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
@@ -161,7 +162,7 @@ object ConfigureUtil {
       yarnResourceManagerWebAppAddress = "http://" + yarnHostName + ":" + port + "/ws/v1/cluster/apps/"
     }*/
     val yarnAPI = getYarnResourceManagerAPI()
-    val webAppAddress = yarnAPI + "apps" + "/"
+    val webAppAddress = yarnAPI + "apps" + Constants.SINGLE_SLASH
     webAppAddress
   }
 

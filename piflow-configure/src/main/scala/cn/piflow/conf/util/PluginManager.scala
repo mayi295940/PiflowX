@@ -1,5 +1,6 @@
 package cn.piflow.conf.util
 
+import cn.piflow.Constants
 import cn.piflow.conf.ConfigurableStop
 import cn.piflow.util.PropertyUtil
 import com.sksamuel
@@ -131,7 +132,7 @@ class PluginManager {
     var stopList = List[ConfigurableStop[DataStream]]()
     var plugin = this.getPluginPath + pluginName
     //temp
-    plugin = plugin.replace("/", "\\")
+    plugin = plugin.replace(Constants.SINGLE_SLASH, "\\")
     if (pluginMap.contains(plugin)) {
 
       val finder = ClassFinder(Seq(new File(plugin)))

@@ -1,7 +1,7 @@
 package cn.piflow.launcher.flink
 
-import cn.piflow.Flow
 import cn.piflow.util._
+import cn.piflow.{Constants, Flow}
 import com.alibaba.fastjson2.{JSON, JSONObject}
 import org.apache.flink.client.deployment.StandaloneClusterId
 import org.apache.flink.client.program.rest.RestClusterClient
@@ -40,7 +40,7 @@ object FlowLauncher {
           .getOrDefault("ymlPath", "")
           .toString
 
-        val unzipDir = ymlPath.substring(ymlPath.lastIndexOf("/") + 1)
+        val unzipDir = ymlPath.substring(ymlPath.lastIndexOf(Constants.SINGLE_SLASH) + 1)
           .replace(".zip", "")
 
         dockerExecutor.append(ymlPath + "#" + unzipDir)
@@ -58,7 +58,7 @@ object FlowLauncher {
           .toString
 
         val unzipDir = zipPath.
-          substring(zipPath.lastIndexOf("/") + 1)
+          substring(zipPath.lastIndexOf(Constants.SINGLE_SLASH) + 1)
           .replace(".zip", "")
 
         dockerExecutor.append(zipPath + "#app/" + unzipDir)

@@ -1,5 +1,6 @@
 package cn.piflow.util
 
+import cn.piflow.Constants
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 
@@ -78,7 +79,7 @@ object HdfsUtil {
     val files = HdfsUtil.getFiles(hdfsFolder)
     var jsonList = List[Map[String, Any]]()
     files.filter(!_.equals("_SUCCESSS")).foreach(file => {
-      val filePath = hdfsFolder + "/" + file
+      val filePath = hdfsFolder + Constants.SINGLE_SLASH + file
       var line: String = ""
       var inputStream: FSDataInputStream = null
       var bufferedReader: BufferedReader = null
@@ -114,7 +115,7 @@ object HdfsUtil {
         output = fs.create(new Path(file))
         writer = new PrintWriter(output)
         writer.write(line)
-        writer.write("\n")
+        writer.write(Constants.LINE_SPLIT_N)
       } catch {
         case ex: Exception => println(ex)
       } finally {
