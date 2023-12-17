@@ -20,7 +20,7 @@ import java.util.Date
 /**
  * Created by xjzhu@cnic.cn on 4/30/19
  */
-object FlowLauncher {
+object FlinkFlowLauncher {
 
   def launch[DataStream](flow: Flow[DataStream]): String = {
 
@@ -46,6 +46,7 @@ object FlowLauncher {
         dockerExecutor.append(ymlPath + "#" + unzipDir)
         dockerExecutor.append(",")
       }
+
       if (stopsJsonArray
         .getJSONObject(i)
         .getJSONObject("properties")
@@ -73,37 +74,9 @@ object FlowLauncher {
       distArchives = dockerExecutor.toString().stripPrefix(",")
     }
 
-
     val flowFileName = flow.getFlowName + new Date().getTime
     val flowFile = FlowFileUtil.getFlowFilePath(flowFileName)
     FileUtil.writeFile(flowJson, flowFile)
-
-    //    val launcher = new SparkLauncher
-    //    val sparkLauncher = launcher
-    //      .setAppName(flow.getFlowName())
-    //      .setMaster(PropertyUtil.getPropertyValue("spark.master"))
-    //      //.setDeployMode(PropertyUtil.getPropertyValue("spark.deploy.mode"))
-    //      .setAppResource(ConfigureUtil.getPiFlowBundlePath())
-    //      .setVerbose(true)
-    //      .setConf("spark.driver.memory", flow.getDriverMemory())
-    //      .setConf("spark.executor.instances", flow.getExecutorNum())
-    //      .setConf("spark.executor.memory", flow.getExecutorMem())
-    //      .setConf("spark.executor.cores", flow.getExecutorCores())
-    //      //.setConf("spark.driver.allowMultipleContexts","true")
-    //      //.setConf("spark.pyspark.python","pyspark/venv/bin/python3")
-    //      .addFile(PropertyUtil.getConfigureFile())
-    //      .addFile(ServerIpUtil.getServerIpFile())
-    //      .addFile(flowFile)
-    //      .setConf("spark.yarn.dist.archives", distArchives)
-    //      .setMainClass("cn.piflow.api.StartFlowMain")
-    //      .addAppArgs(flowFileName)
-
-
-    //    val sparkMaster = PropertyUtil.getPropertyValue("spark.master")
-    //    if (sparkMaster.equals("yarn")) {
-    //      sparkLauncher.setDeployMode(PropertyUtil.getPropertyValue("spark.deploy.mode"))
-    //      sparkLauncher.setConf("spark.hadoop.yarn.resourcemanager.hostname", PropertyUtil.getPropertyValue("yarn.resourcemanager.hostname"))
-    //    }
 
     //add plugin jars for application
     val pluginOnList = H2Util.getPluginOn()
@@ -120,39 +93,14 @@ object FlowLauncher {
       })
     }
 
-
-    //add sparkJar to spark cluster
-    //    val sparkJarList = H2Util.getSparkJarOn()
-    //    val sparkJarPath = PropertyUtil.getSpartJarPath()
-    //    val sparkJarPathFile = new File(sparkJarPath)
-    //    if (sparkJarPathFile.exists()) {
-    //      FileUtil.getJarFile(new File(sparkJarPath)).foreach(f => {
-    //        sparkJarList.foreach(sparkJarName => {
-    //          if (sparkJarName == f.getName) {
-    //            println("Load " + f.getPath + "to spark cluster!!!")
-    //            //sparkLauncher.addJar(f.getPath)
-    //          }
-    //        })
+    //    val scalaPath = PropertyUtil.getScalaPath()
+    //    val scalaPathFile = new File(scalaPath)
+    //    if (scalaPathFile.exists()) {
+    //      FileUtil.getJarFile(new File(scalaPath)).foreach(f => {
+    //        println("Load scala Jar: " + f.getPath)
+    //        // sparkLauncher.addJar(f.getPath)
     //      })
     //    }
-
-    //add pythonJar to spark cluster
-    /*val pythonJarPath = PythonScriptUtil.getJarPath()
-    val pythonJarPathFile = new File(pythonJarPath)
-    if(pythonJarPathFile.exists()){
-      FileUtil.getTarFile(new File(pythonJarPath)).foreach(f => {
-        sparkLauncher.addJar(f.getPath)
-      })
-    }*/
-
-    val scalaPath = PropertyUtil.getScalaPath()
-    val scalaPathFile = new File(scalaPath)
-    if (scalaPathFile.exists()) {
-      FileUtil.getJarFile(new File(scalaPath)).foreach(f => {
-        println("Load scala Jar: " + f.getPath)
-        //        sparkLauncher.addJar(f.getPath)
-      })
-    }
 
     // 集群信息
     val configuration = new Configuration()
@@ -162,7 +110,7 @@ object FlowLauncher {
 
     val program = PackagedProgram.newBuilder()
       .setConfiguration(configuration)
-      .setEntryPointClassName("cn.piflow.api.StartFlinkFlowMain")
+      .setEntryPointClassName("cn.piflow.launcher.flink.StartFlinkFlowMain")
       .setArguments(flowFileName)
       .setJarFile(new File(ConfigureUtil.getPiFlowBundlePath()))
       .setSavepointRestoreSettings(SavepointRestoreSettings.none())

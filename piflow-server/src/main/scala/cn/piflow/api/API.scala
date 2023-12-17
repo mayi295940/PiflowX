@@ -3,33 +3,34 @@ package cn.piflow.api
 import cn.piflow.conf.VisualizationType
 import cn.piflow.conf.bean.{FlowBean, GroupBean}
 import cn.piflow.conf.util.{ClassUtil, MapUtil, OptionUtil, PluginManager}
-import cn.piflow.launcher.flink.{FlinkLauncher, FlowLauncher}
+import cn.piflow.launcher.flink.{FlinkFlowLauncher, FlinkLauncher}
+import cn.piflow.launcher.spark.SparkFlowLauncher
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
 import cn.piflow.util._
-import cn.piflow.{Constants, GroupExecution, Runner}
+import cn.piflow.{Constants, GroupExecution, Process, Runner}
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.types.Row
+import org.apache.flink.util.IOUtils
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{FSDataInputStream, FileStatus, FileSystem, Path}
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet, HttpPut}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
+import org.apache.spark.launcher.SparkAppHandle
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
-import java.io.File
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File}
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.CountDownLatch
+import java.util.zip.{ZipEntry, ZipOutputStream}
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks._
 
 object API {
-
-  def main(args: Array[String]): Unit = {
-    var stops: List[String] = List()
-    val stopList = ClassUtil.findAllConfigurableStop()
-    stopList.foreach(s => stops = s.getClass.getName +: stops)
-    stopList.foreach(s => println(s.getClass.getName))
-  }
 
   def addSparkJar(addSparkJarName: String): String = {
     var id = ""
@@ -174,7 +175,7 @@ object API {
     scheduleInfo
   }
 
-  def startGroup(groupJson: String) = {
+  def startGroup(groupJson: String): GroupExecution = {
 
     println("StartGroup API get json: \n" + groupJson)
 
@@ -210,46 +211,83 @@ object API {
 
   def startFlow(flowJson: String): (String, Any) = {
 
-    var appId: String = null
+    println("StartFlow API get json: \n" + flowJson)
 
     val flowMap = JsonUtil.jsonToMap(flowJson)
 
+    val env = flowMap.getOrElse("env", "flink")
+    if ("flink".equals(env)) {
+      val (appId, handle) = this.startFlinkFlow(flowMap)
+      (appId, handle)
+    } else {
+      val (appId, handle) = this.startSparkFlow(flowMap)
+      (appId, handle)
+    }
+  }
+
+  private def startSparkFlow(flowMap: Map[String, Any]): (String, SparkAppHandle) = {
+
+    var appId: String = null
+
     //create flow
-    val flowBean = FlowBean(flowMap)
+    val flowBean = FlowBean[DataFrame](flowMap)
     val flow = flowBean.constructFlow()
 
     val uuid = flow.getUUID
     val appName = flow.getFlowName
     val (stdout, stderr) = getLogFile(uuid, appName)
 
-    println("StartFlow API get json: \n" + flowJson)
-
     val countDownLatch = new CountDownLatch(1)
 
-    //    val handle = FlowLauncher.launch(flow).startApplication(new SparkAppHandle.Listener {
-    //      override def stateChanged(handle: SparkAppHandle): Unit = {
-    //        appId = handle.getAppId
-    //        val sparkAppState = handle.getState
-    //        if (appId != null) {
-    //          println("Spark job with app id: " + appId + ",\t State changed to: " + sparkAppState)
-    //        } else {
-    //          println("Spark job's state changed to: " + sparkAppState)
-    //        }
-    //        if (handle.getState().isFinal) {
-    //          countDownLatch.countDown()
-    //          println("Task is finished!")
-    //        }
-    //      }
-    //
-    //      override def infoChanged(handle: SparkAppHandle): Unit = {
-    //        //println("Info:" + handle.getState().toString)
-    //      }
-    //    })
+    val handle = SparkFlowLauncher.launch(flow).startApplication(new SparkAppHandle.Listener {
+      override def stateChanged(handle: SparkAppHandle): Unit = {
+        appId = handle.getAppId
+        val sparkAppState = handle.getState
+        if (appId != null) {
+          println("Spark job with app id: " + appId + ",\t State changed to: " + sparkAppState)
+        } else {
+          println("Spark job's state changed to: " + sparkAppState)
+        }
+        if (handle.getState.isFinal) {
+          countDownLatch.countDown()
+          println("Task is finished!")
+        }
+      }
 
+      override def infoChanged(handle: SparkAppHandle): Unit = {
+        //println("Info:" + handle.getState().toString)
+      }
 
-    appId = FlowLauncher.launch(flow)
+    })
 
-    //    (appId, handle)
+    while (handle.getAppId == null) {
+      Thread.sleep(100)
+    }
+
+    while (!H2Util.isFlowExist(handle.getAppId)) {
+      Thread.sleep(1000)
+    }
+
+    appId = handle.getAppId
+
+    (appId, handle)
+
+  }
+
+  private def startFlinkFlow(flowMap: Map[String, Any]): (String, Any) = {
+
+    var appId: String = null
+
+    //create flow
+    val flowBean = FlowBean[DataStream[Row]](flowMap)
+    val flow = flowBean.constructFlow()
+
+    val uuid = flow.getUUID
+    val appName = flow.getFlowName
+    val (stdout, stderr) = getLogFile(uuid, appName)
+
+    appId = FlinkFlowLauncher.launch(flow)
+
     (appId, null)
 
   }
@@ -259,8 +297,11 @@ object API {
     //yarn application kill appId
     stopFlowOnYarn(appID)
 
-    // process kill
-    // process.kill()
+    process match {
+      case _v: SparkAppHandle =>
+        process.asInstanceOf[SparkAppHandle].kill()
+      case _ =>
+    }
 
     //update db
     H2Util.updateFlowState(appID, FlowState.KILLED)
@@ -293,7 +334,7 @@ object API {
     progress
   }
 
-  def getFlowLog(appID: String): String = {
+  def getFlowYarnInfo(appID: String): String = {
 
     val url = ConfigureUtil.getYarnResourceManagerWebAppAddress() + appID
     val client = HttpClients.createDefault()
@@ -310,7 +351,6 @@ object API {
     val checkpointList = HdfsUtil.getFiles(checkpointPath)
     """{"checkpoints":"""" + checkpointList.mkString(",") + """"}"""
   }
-
 
   def getFlowDebugData(appId: String, stopName: String, port: String): String = {
 
@@ -463,10 +503,9 @@ object API {
     } catch {
       case ex: Exception => println(ex); throw ex
     }
-
   }
 
-  def getAllGroups() = {
+  def getAllGroups(): String = {
     val groups = ClassUtil.findAllGroups().mkString(",")
     """{"groups":"""" + groups + """"}"""
   }
@@ -553,12 +592,40 @@ object API {
 
     appId
   }
+
+  def getHdfsDataByPath(hdfsPath: String): ByteArrayInputStream = {
+    val conf = new Configuration()
+    conf.set("fs.defaultFS", PropertyUtil.getPropertyValue("fs.defaultFS"))
+    val fs: FileSystem = FileSystem.get(conf)
+    val fileStatusArr: Array[FileStatus] = fs.listStatus(new Path(hdfsPath))
+    val map = mutable.HashMap[String, FSDataInputStream]()
+    for (elem <- fileStatusArr) {
+      val name = elem.getPath.getName
+      val inputStream = fs.open(elem.getPath)
+      map.put(name, inputStream)
+    }
+
+    val byteArrayOutputStream = new ByteArrayOutputStream()
+    val zos = new ZipOutputStream(byteArrayOutputStream)
+    var zipEntry: ZipEntry = null
+    for (elem <- map) {
+      zipEntry = new ZipEntry(elem._1)
+      zos.putNextEntry(zipEntry)
+      IOUtils.copyBytes(elem._2, zos, 1024 * 1024 * 50, false)
+      zos.closeEntry()
+    }
+    zos.close()
+    //    println("copy hdfsDir end time:"+new Date(System.currentTimeMillis()))
+    val byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray)
+    byteArrayInputStream
+  }
+
 }
 
-//class WaitProcessTerminateRunnable(spark: SparkSession, process: Process) extends Runnable {
-//  override def run(): Unit = {
-//    process.awaitTermination()
-//    //spark.close()
-//  }
-//}
+class WaitProcessTerminateRunnable(spark: SparkSession, process: Process[DataFrame]) extends Runnable {
+  override def run(): Unit = {
+    process.awaitTermination()
+    //spark.close()
+  }
+}
 
