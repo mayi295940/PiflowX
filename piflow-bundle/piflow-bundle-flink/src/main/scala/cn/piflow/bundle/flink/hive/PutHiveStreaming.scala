@@ -4,15 +4,13 @@ import cn.piflow._
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
-import org.apache.flink.table.api.{EnvironmentSettings, Table}
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.apache.flink.types.Row
 
-class PutHiveStreaming extends ConfigurableStop[DataStream[Row]] {
-  override val authorEmail: String = "qinghua.liao@outlook.com"
+class PutHiveStreaming extends ConfigurableStop[Table] {
+
+  override val authorEmail: String = ""
   override val description: String = "Save data to hive"
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
@@ -20,22 +18,14 @@ class PutHiveStreaming extends ConfigurableStop[DataStream[Row]] {
   var database: String = _
   var table: String = _
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
-    //0.Create the execution environment for the flow
-    val env = pec.get[StreamExecutionEnvironment]()
-    val settings = EnvironmentSettings.newInstance().inStreamingMode().build()
-    //create a TableEnvironment for specific planner streaming
-    val tableEnv = StreamTableEnvironment.create(env, settings)
+    val tableEnv = pec.get[StreamTableEnvironment]()
 
-    //Read data from upstream
-    val inDF = in.read()
-    //transform DataStream to Table
-    val resultTable: Table = tableEnv.fromDataStream(inDF)
-    //create view resultTable
-    tableEnv.createTemporaryView("resultTable", resultTable)
+    val inputTable = in.read()
+    tableEnv.createTemporaryView("inputTable", inputTable)
 
     //connect hive by flink
     val name = "myhive"
@@ -50,7 +40,7 @@ class PutHiveStreaming extends ConfigurableStop[DataStream[Row]] {
     tableEnv.useDatabase(database)
 
     //save data to hive
-    tableEnv.executeSql("insert into " + database + "." + table + " select * from " + resultTable)
+    tableEnv.executeSql(s"INSERT INTO $database.$table SELECT * FROM $inputTable")
   }
 
   override def setProperties(map: Map[String, Any]): Unit = {
@@ -85,12 +75,10 @@ class PutHiveStreaming extends ConfigurableStop[DataStream[Row]] {
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.HiveGroup.toString)
+    List(StopGroup.HiveGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 }
 

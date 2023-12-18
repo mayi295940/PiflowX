@@ -1,0 +1,36 @@
+{
+  "flow": {
+    "name": "MockDataTest",
+    "uuid": "1234",
+    "stops": [
+      {
+        "uuid": "0000",
+        "name": "JDBCRead1",
+        "bundle": "cn.piflow.bundle.flink.jdbc.JDBCRead",
+        "properties": {
+          "schema": "id:String,name:String",
+          "url": "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false&allowMultiQueries=true",
+          "username": "root",
+          "password": "123456",
+          "tableName": "test"
+        }
+      },
+      {
+        "uuid": "2222",
+        "name": "ShowData1",
+        "bundle": "cn.piflow.bundle.flink.common.ShowData",
+        "properties": {
+          "showNumber": "10"
+        }
+      }
+    ],
+    "paths": [
+      {
+        "from": "JDBCRead1",
+        "outport": "",
+        "inport": "",
+        "to": "ShowData1"
+      }
+    ]
+  }
+}

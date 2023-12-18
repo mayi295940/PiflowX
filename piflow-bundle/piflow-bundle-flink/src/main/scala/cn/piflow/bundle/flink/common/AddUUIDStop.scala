@@ -5,11 +5,10 @@ import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.IdGenerator
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
-class AddUUIDStop extends ConfigurableStop[DataStream[Row]] {
+class AddUUIDStop extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   override val description: String = "Add UUID column"
@@ -18,15 +17,13 @@ class AddUUIDStop extends ConfigurableStop[DataStream[Row]] {
 
   var column: String = _
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val df = in.read()
-
-    val inputTable = tableEnv.fromDataStream(df)
+    val inputTable = in.read()
 
     val tmpTable = "AddUUIDTmp_" + IdGenerator.uuidWithoutSplit
 
@@ -34,12 +31,9 @@ class AddUUIDStop extends ConfigurableStop[DataStream[Row]] {
 
     val resultTable = tableEnv.sqlQuery(s"SELECT UUID() AS ${column}, * FROM $tmpTable")
 
-    val resultStream = tableEnv.toDataStream(resultTable)
-
-    out.write(resultStream)
+    out.write(resultTable)
 
   }
-
 
   override def setProperties(map: Map[String, Any]): Unit = {
     column = MapUtil.get(map, "column").asInstanceOf[String]
@@ -47,7 +41,6 @@ class AddUUIDStop extends ConfigurableStop[DataStream[Row]] {
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
-
 
     val column = new PropertyDescriptor()
       .name("column")
@@ -69,8 +62,6 @@ class AddUUIDStop extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 }

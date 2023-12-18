@@ -4,14 +4,11 @@ import cn.piflow._
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.table.api.ApiExpression
 import org.apache.flink.table.api.Expressions.$
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.{ApiExpression, Table}
 
 
-class ConvertSchema extends ConfigurableStop[DataStream[Row]] {
+class ConvertSchema extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
   val description: String = "Change field name"
@@ -20,15 +17,11 @@ class ConvertSchema extends ConfigurableStop[DataStream[Row]] {
 
   var schema: String = _
 
-  def perform(in: JobInputStream[DataStream[Row]],
-              out: JobOutputStream[DataStream[Row]],
-              pec: JobContext[DataStream[Row]]): Unit = {
+  def perform(in: JobInputStream[Table],
+              out: JobOutputStream[Table],
+              pec: JobContext[Table]): Unit = {
 
-    val tableEnv = pec.get[StreamTableEnvironment]()
-
-    val inDf: DataStream[Row] = in.read()
-
-    val inputTable = tableEnv.fromDataStream(inDf)
+    val inputTable = in.read()
 
     val fields = schema.split(Constants.COMMA).map(x => x.trim)
 
@@ -41,11 +34,10 @@ class ConvertSchema extends ConfigurableStop[DataStream[Row]] {
 
     val resultTable = inputTable.renameColumns(array: _*)
 
-    val resultStream = tableEnv.toDataStream(resultTable)
-    out.write(resultStream)
+    out.write(resultTable)
   }
 
-  def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
+  def initialize(ctx: ProcessContext[Table]): Unit = {
 
   }
 

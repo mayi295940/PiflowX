@@ -22,7 +22,7 @@ import java.util.Date
  */
 object FlinkFlowLauncher {
 
-  def launch[DataStream](flow: Flow[DataStream]): String = {
+  def launch[Table](flow: Flow[Table]): String = {
 
     val flowJson = flow.getFlowJson
     println("FlowLauncher json:" + flowJson)

@@ -12,13 +12,13 @@ import scala.util.{Failure, Success, Try}
  * Created by xjzhu@cnic.cn on 4/25/19
  */
 
-trait Group[DataStream] extends GroupEntry[DataStream] {
+trait Group[DataType] extends GroupEntry[DataType] {
 
   def addGroupEntry(name: String,
-                    flowOrGroup: GroupEntry[DataStream],
+                    flowOrGroup: GroupEntry[DataType],
                     con: Condition[GroupExecution] = Condition.AlwaysTrue[GroupExecution]()): Unit
 
-  def mapFlowWithConditions(): Map[String, (GroupEntry[DataStream], Condition[GroupExecution])]
+  def mapFlowWithConditions(): Map[String, (GroupEntry[DataType], Condition[GroupExecution])]
 
   def getGroupName: String
 
@@ -30,21 +30,21 @@ trait Group[DataStream] extends GroupEntry[DataStream] {
 
 }
 
-class GroupImpl[DataStream] extends Group[DataStream] {
+class GroupImpl[DataType] extends Group[DataType] {
   var name = ""
   var uuid = ""
   var parentId = ""
 
-  private val _mapFlowWithConditions = MMap[String, (GroupEntry[DataStream], Condition[GroupExecution])]()
+  private val _mapFlowWithConditions = MMap[String, (GroupEntry[DataType], Condition[GroupExecution])]()
 
   def addGroupEntry(name: String,
-                    flowOrGroup: GroupEntry[DataStream],
+                    flowOrGroup: GroupEntry[DataType],
                     con: Condition[GroupExecution] = Condition.AlwaysTrue[GroupExecution]()): Unit = {
 
     _mapFlowWithConditions(name) = flowOrGroup -> con
   }
 
-  def mapFlowWithConditions(): Map[String, (GroupEntry[DataStream], Condition[GroupExecution])]
+  def mapFlowWithConditions(): Map[String, (GroupEntry[DataType], Condition[GroupExecution])]
   = _mapFlowWithConditions.toMap
 
   override def getGroupName: String = {
@@ -78,16 +78,16 @@ trait GroupExecution extends Execution {
   def getChildCount: Int
 }
 
-class GroupExecutionImpl[DataStream](group: Group[DataStream],
-                                     runnerContext: Context[DataStream],
-                                     runner: Runner[DataStream]) extends GroupExecution {
+class GroupExecutionImpl[DataType](group: Group[DataType],
+                                     runnerContext: Context[DataType],
+                                     runner: Runner[DataType]) extends GroupExecution {
 
   private val groupContext = createContext(runnerContext)
-  val groupExecution: GroupExecutionImpl[DataStream] = this
+  val groupExecution: GroupExecutionImpl[DataType] = this
 
   val id: String = "group_" + IdGenerator.uuid
 
-  private val mapGroupEntryWithConditions: Map[String, (GroupEntry[DataStream], Condition[GroupExecution])] =
+  private val mapGroupEntryWithConditions: Map[String, (GroupEntry[DataType], Condition[GroupExecution])] =
     group.mapFlowWithConditions()
 
   private val completedGroupEntry = MMap[String, Boolean]()
@@ -105,54 +105,54 @@ class GroupExecutionImpl[DataStream](group: Group[DataStream],
   val latch = new CountDownLatch(1)
   var running = true
 
-  val listener: RunnerListener[DataStream] = new RunnerListener[DataStream] {
+  val listener: RunnerListener[DataType] = new RunnerListener[DataType] {
 
-    override def onProcessStarted(ctx: ProcessContext[DataStream]): Unit = {}
+    override def onProcessStarted(ctx: ProcessContext[DataType]): Unit = {}
 
-    override def onProcessFailed(ctx: ProcessContext[DataStream]): Unit = {
+    override def onProcessFailed(ctx: ProcessContext[DataType]): Unit = {
       //TODO: retry?
     }
 
-    override def onProcessCompleted(ctx: ProcessContext[DataStream]): Unit = {
+    override def onProcessCompleted(ctx: ProcessContext[DataType]): Unit = {
 
     }
 
-    override def onJobStarted(ctx: JobContext[DataStream]): Unit = {}
+    override def onJobStarted(ctx: JobContext[DataType]): Unit = {}
 
-    override def onJobCompleted(ctx: JobContext[DataStream]): Unit = {}
+    override def onJobCompleted(ctx: JobContext[DataType]): Unit = {}
 
-    override def onJobInitialized(ctx: JobContext[DataStream]): Unit = {}
+    override def onJobInitialized(ctx: JobContext[DataType]): Unit = {}
 
-    override def onProcessForked(ctx: ProcessContext[DataStream], child: ProcessContext[DataStream]): Unit = {}
+    override def onProcessForked(ctx: ProcessContext[DataType], child: ProcessContext[DataType]): Unit = {}
 
-    override def onJobFailed(ctx: JobContext[DataStream]): Unit = {}
+    override def onJobFailed(ctx: JobContext[DataType]): Unit = {}
 
-    override def onProcessAborted(ctx: ProcessContext[DataStream]): Unit = {}
+    override def onProcessAborted(ctx: ProcessContext[DataType]): Unit = {}
 
-    override def monitorJobCompleted(ctx: JobContext[DataStream], outputs: JobOutputStream[DataStream]): Unit = {}
+    override def monitorJobCompleted(ctx: JobContext[DataType], outputs: JobOutputStream[DataType]): Unit = {}
 
-    override def onGroupStarted(ctx: GroupContext[DataStream]): Unit = {}
+    override def onGroupStarted(ctx: GroupContext[DataType]): Unit = {}
 
-    override def onGroupCompleted(ctx: GroupContext[DataStream]): Unit = {
+    override def onGroupCompleted(ctx: GroupContext[DataType]): Unit = {
       startedGroup.filter(_._2 == ctx.getGroupExecution).foreach { x =>
         completedGroupEntry(x._1) = true
         numWaitingGroupEntry.decrementAndGet()
       }
     }
 
-    override def onGroupStoped(ctx: GroupContext[DataStream]): Unit = {}
+    override def onGroupStoped(ctx: GroupContext[DataType]): Unit = {}
 
-    override def onGroupFailed(ctx: GroupContext[DataStream]): Unit = {}
+    override def onGroupFailed(ctx: GroupContext[DataType]): Unit = {}
   }
 
   runner.addListener(listener)
-  val runnerListener: RunnerListener[DataStream] = runner.getListener
+  val runnerListener: RunnerListener[DataType] = runner.getListener
 
   def isEntryCompleted(name: String): Boolean = {
     completedGroupEntry(name)
   }
 
-  private def startProcess(name: String, flow: Flow[DataStream], groupId: String = ""): Unit = {
+  private def startProcess(name: String, flow: Flow[DataType], groupId: String = ""): Unit = {
 
     println(flow.getFlowJson)
 
@@ -211,7 +211,7 @@ class GroupExecutionImpl[DataStream](group: Group[DataStream],
     //    startedProcessesAppID(name) = appId
   }
 
-  private def startGroup(name: String, group: Group[DataStream], parentId: String): Unit = {
+  private def startGroup(name: String, group: Group[DataType], parentId: String): Unit = {
     val groupExecution = runner.start(group)
     startedGroup(name) = groupExecution
     val groupId = groupExecution.getGroupId
@@ -341,26 +341,26 @@ class GroupExecutionImpl[DataStream](group: Group[DataStream],
     }
   }
 
-  private def createContext(runnerContext: Context[DataStream]): GroupContext[DataStream] = {
-    new CascadeContext[DataStream](runnerContext) with GroupContext[DataStream] {
-      override def getGroup: Group[DataStream] = group
+  private def createContext(runnerContext: Context[DataType]): GroupContext[DataType] = {
+    new CascadeContext[DataType](runnerContext) with GroupContext[DataType] {
+      override def getGroup: Group[DataType] = group
 
       override def getGroupExecution: GroupExecution = groupExecution
     }
   }
 
-  private def getTodos: (ArrayBuffer[(String, Flow[DataStream])], ArrayBuffer[(String, Group[DataStream])]) = {
+  private def getTodos: (ArrayBuffer[(String, Flow[DataType])], ArrayBuffer[(String, Group[DataType])]) = {
 
-    val todosFlow = ArrayBuffer[(String, Flow[DataStream])]()
-    val todosGroup = ArrayBuffer[(String, Group[DataStream])]()
+    val todosFlow = ArrayBuffer[(String, Flow[DataType])]()
+    val todosGroup = ArrayBuffer[(String, Group[DataType])]()
 
     mapGroupEntryWithConditions.foreach { en =>
       en._2._1 match {
-        case flow: Flow[DataStream] =>
+        case flow: Flow[DataType] =>
           if (!startedProcesses.contains(en._1) && en._2._2.matches(execution)) {
             todosFlow += (en._1 -> flow)
           }
-        case group1: Group[DataStream] =>
+        case group1: Group[DataType] =>
           if (!startedGroup.contains(en._1) && en._2._2.matches(execution)) {
             todosGroup += (en._1 -> group1)
           }

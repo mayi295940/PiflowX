@@ -5,13 +5,12 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.util.IdGenerator
-import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow._
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
-class CsvSave extends ConfigurableStop[DataStream[Row]] {
+class CsvSave extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
   val description: String = "Save the data as a csv file."
@@ -34,18 +33,17 @@ class CsvSave extends ConfigurableStop[DataStream[Row]] {
 
   // todo partition > 0 文件合并
   // todo  文件名如何定义？
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val df: DataStream[Row] = in.read()
-    val inputTable = tableEnv.fromDataStream(df)
+    val inputTable: Table = in.read()
+
     val inputTmpTable = "InputTmpTable" + IdGenerator.uuidWithoutSplit
     tableEnv.createTemporaryView(inputTmpTable, inputTable)
-
 
     val columns = RowTypeUtil.getTableSchema(inputTable)
     val tmpTable = "CsvSave_" + IdGenerator.uuidWithoutSplit
@@ -199,7 +197,7 @@ class CsvSave extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CsvGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 }
 

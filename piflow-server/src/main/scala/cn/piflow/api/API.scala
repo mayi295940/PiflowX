@@ -8,9 +8,8 @@ import cn.piflow.launcher.spark.SparkFlowLauncher
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
 import cn.piflow.util._
 import cn.piflow.{Constants, GroupExecution, Process, Runner}
-import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.Table
 import org.apache.flink.util.IOUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataInputStream, FileStatus, FileSystem, Path}
@@ -130,9 +129,9 @@ object API {
   def getResourceInfo: String = {
 
     try {
-      val matricsURL = ConfigureUtil.getYarnResourceMatrics()
+      val metricsURL = ConfigureUtil.getYarnResourceMatrics()
       val client = HttpClients.createDefault()
-      val get: HttpGet = new HttpGet(matricsURL)
+      val get: HttpGet = new HttpGet(metricsURL)
 
       val response: CloseableHttpResponse = client.execute(get)
       val entity = response.getEntity
@@ -279,7 +278,7 @@ object API {
     var appId: String = null
 
     //create flow
-    val flowBean = FlowBean[DataStream[Row]](flowMap)
+    val flowBean = FlowBean[Table](flowMap)
     val flow = flowBean.constructFlow()
 
     val uuid = flow.getUUID
@@ -568,11 +567,11 @@ object API {
     println(map)
 
     //create flow
-    val flowBean = FlowBean.apply[DataStream[Row]](map)
+    val flowBean = FlowBean.apply[Table](map)
     val flow = flowBean.constructFlow(false)
     val env = FlinkLauncher.launchYarnSession(flow)
 
-    val process = Runner.create[DataStream[Row]]()
+    val process = Runner.create[Table]()
       .bind(classOf[StreamExecutionEnvironment].getName, env)
       .start(flow)
     env.execute(flow.getFlowName)

@@ -5,148 +5,150 @@ import cn.piflow.util._
 import java.util.Date
 import scala.collection.mutable.ArrayBuffer
 
-trait Runner[DataStream] {
-  def bind(key: String, value: Any): Runner[DataStream]
+trait Runner[DataType] {
 
-  def start(flow: Flow[DataStream]): Process[DataStream]
+  def bind(key: String, value: Any): Runner[DataType]
 
-  def start(group: Group[DataStream]): GroupExecution
+  def start(flow: Flow[DataType]): Process[DataType]
 
-  def addListener(listener: RunnerListener[DataStream]): Unit
+  def start(group: Group[DataType]): GroupExecution
 
-  def removeListener(listener: RunnerListener[DataStream]): Unit
+  def addListener(listener: RunnerListener[DataType]): Unit
 
-  def getListener: RunnerListener[DataStream]
+  def removeListener(listener: RunnerListener[DataType]): Unit
+
+  def getListener: RunnerListener[DataType]
 }
 
 object Runner {
 
-  def create[DataStream](): Runner[DataStream] = new Runner[DataStream]() {
+  def create[DataType](): Runner[DataType] = new Runner[DataType]() {
 
-    val listeners: ArrayBuffer[RunnerListener[DataStream]] = ArrayBuffer[RunnerListener[DataStream]](new RunnerLogger())
+    val listeners: ArrayBuffer[RunnerListener[DataType]] =
+      ArrayBuffer[RunnerListener[DataType]](new RunnerLogger())
 
-    val compositeListener: RunnerListener[DataStream] = new RunnerListener[DataStream]() {
-      override def onProcessStarted(ctx: ProcessContext[DataStream]): Unit = {
+    val compositeListener: RunnerListener[DataType] = new RunnerListener[DataType]() {
+      override def onProcessStarted(ctx: ProcessContext[DataType]): Unit = {
         listeners.foreach(_.onProcessStarted(ctx))
       }
 
-      override def onProcessFailed(ctx: ProcessContext[DataStream]): Unit = {
+      override def onProcessFailed(ctx: ProcessContext[DataType]): Unit = {
         listeners.foreach(_.onProcessFailed(ctx))
       }
 
-      override def onProcessCompleted(ctx: ProcessContext[DataStream]): Unit = {
+      override def onProcessCompleted(ctx: ProcessContext[DataType]): Unit = {
         listeners.foreach(_.onProcessCompleted(ctx))
       }
 
-      override def onJobStarted(ctx: JobContext[DataStream]): Unit = {
+      override def onJobStarted(ctx: JobContext[DataType]): Unit = {
         listeners.foreach(_.onJobStarted(ctx))
       }
 
-      override def onJobCompleted(ctx: JobContext[DataStream]): Unit = {
+      override def onJobCompleted(ctx: JobContext[DataType]): Unit = {
         listeners.foreach(_.onJobCompleted(ctx))
       }
 
-      override def onJobInitialized(ctx: JobContext[DataStream]): Unit = {
+      override def onJobInitialized(ctx: JobContext[DataType]): Unit = {
         listeners.foreach(_.onJobInitialized(ctx))
       }
 
-      override def onProcessForked(ctx: ProcessContext[DataStream],
-                                   child: ProcessContext[DataStream]): Unit = {
+      override def onProcessForked(ctx: ProcessContext[DataType],
+                                   child: ProcessContext[DataType]): Unit = {
         listeners.foreach(_.onProcessForked(ctx, child))
       }
 
-      override def onJobFailed(ctx: JobContext[DataStream]): Unit = {
+      override def onJobFailed(ctx: JobContext[DataType]): Unit = {
         listeners.foreach(_.onJobFailed(ctx))
       }
 
-      override def onProcessAborted(ctx: ProcessContext[DataStream]): Unit = {
+      override def onProcessAborted(ctx: ProcessContext[DataType]): Unit = {
         listeners.foreach(_.onProcessAborted(ctx))
       }
 
-      override def monitorJobCompleted(ctx: JobContext[DataStream],
-                                       outputs: JobOutputStream[DataStream]): Unit = {
+      override def monitorJobCompleted(ctx: JobContext[DataType],
+                                       outputs: JobOutputStream[DataType]): Unit = {
         //TODO:
         listeners.foreach(_.monitorJobCompleted(ctx, outputs))
       }
 
-      override def onGroupStarted(ctx: GroupContext[DataStream]): Unit = {
+      override def onGroupStarted(ctx: GroupContext[DataType]): Unit = {
         listeners.foreach(_.onGroupStarted(ctx))
       }
 
-      override def onGroupCompleted(ctx: GroupContext[DataStream]): Unit = {
+      override def onGroupCompleted(ctx: GroupContext[DataType]): Unit = {
         listeners.foreach(_.onGroupCompleted(ctx))
       }
 
-      override def onGroupFailed(ctx: GroupContext[DataStream]): Unit = {
+      override def onGroupFailed(ctx: GroupContext[DataType]): Unit = {
         listeners.foreach(_.onGroupFailed(ctx))
       }
 
-      override def onGroupStoped(ctx: GroupContext[DataStream]): Unit = {
+      override def onGroupStoped(ctx: GroupContext[DataType]): Unit = {
         //TODO
       }
     }
 
-    override def addListener(listener: RunnerListener[DataStream]): Unit = {
+    override def addListener(listener: RunnerListener[DataType]): Unit = {
       listeners += listener
     }
 
-    override def getListener: RunnerListener[DataStream] = compositeListener
+    override def getListener: RunnerListener[DataType] = compositeListener
 
-    val ctx = new CascadeContext[DataStream]()
+    val ctx = new CascadeContext[DataType]()
 
     override def bind(key: String, value: Any): this.type = {
       ctx.put(key, value)
       this
     }
 
-    override def start(flow: Flow[DataStream]): Process[DataStream] = {
-      new ProcessImpl[DataStream](flow, ctx, this)
+    override def start(flow: Flow[DataType]): Process[DataType] = {
+      new ProcessImpl[DataType](flow, ctx, this)
     }
 
-    override def start(group: Group[DataStream]): GroupExecution = {
+    override def start(group: Group[DataType]): GroupExecution = {
       new GroupExecutionImpl(group, ctx, this)
     }
 
-    override def removeListener(listener: RunnerListener[DataStream]): Unit = {
+    override def removeListener(listener: RunnerListener[DataType]): Unit = {
       listeners -= listener
     }
   }
 }
 
-trait RunnerListener[DataStream] {
-  def onProcessStarted(ctx: ProcessContext[DataStream]): Unit
+trait RunnerListener[DataType] {
+  def onProcessStarted(ctx: ProcessContext[DataType]): Unit
 
-  def onProcessForked(ctx: ProcessContext[DataStream], child: ProcessContext[DataStream]): Unit
+  def onProcessForked(ctx: ProcessContext[DataType], child: ProcessContext[DataType]): Unit
 
-  def onProcessCompleted(ctx: ProcessContext[DataStream]): Unit
+  def onProcessCompleted(ctx: ProcessContext[DataType]): Unit
 
-  def onProcessFailed(ctx: ProcessContext[DataStream]): Unit
+  def onProcessFailed(ctx: ProcessContext[DataType]): Unit
 
-  def onProcessAborted(ctx: ProcessContext[DataStream]): Unit
+  def onProcessAborted(ctx: ProcessContext[DataType]): Unit
 
-  def onJobInitialized(ctx: JobContext[DataStream]): Unit
+  def onJobInitialized(ctx: JobContext[DataType]): Unit
 
-  def onJobStarted(ctx: JobContext[DataStream]): Unit
+  def onJobStarted(ctx: JobContext[DataType]): Unit
 
-  def onJobCompleted(ctx: JobContext[DataStream]): Unit
+  def onJobCompleted(ctx: JobContext[DataType]): Unit
 
-  def onJobFailed(ctx: JobContext[DataStream]): Unit
+  def onJobFailed(ctx: JobContext[DataType]): Unit
 
-  def monitorJobCompleted(ctx: JobContext[DataStream], outputs: JobOutputStream[DataStream]): Unit
+  def monitorJobCompleted(ctx: JobContext[DataType], outputs: JobOutputStream[DataType]): Unit
 
-  def onGroupStarted(ctx: GroupContext[DataStream]): Unit
+  def onGroupStarted(ctx: GroupContext[DataType]): Unit
 
-  def onGroupCompleted(ctx: GroupContext[DataStream]): Unit
+  def onGroupCompleted(ctx: GroupContext[DataType]): Unit
 
-  def onGroupFailed(ctx: GroupContext[DataStream]): Unit
+  def onGroupFailed(ctx: GroupContext[DataType]): Unit
 
-  def onGroupStoped(ctx: GroupContext[DataStream]): Unit
+  def onGroupStoped(ctx: GroupContext[DataType]): Unit
 
 }
 
-class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
+class RunnerLogger[DataType] extends RunnerListener[DataType] with Logging {
   //TODO: add GroupID or ProjectID
-  override def onProcessStarted(ctx: ProcessContext[DataStream]): Unit = {
+  override def onProcessStarted(ctx: ProcessContext[DataType]): Unit = {
     val pid = ctx.getProcess.pid()
     val flowName = ctx.getFlow.toString
     val time = new Date().toString
@@ -159,7 +161,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
     H2Util.updateFlowStartTime(appId, time)
   }
 
-  override def onJobStarted(ctx: JobContext[DataStream]): Unit = {
+  override def onJobStarted(ctx: JobContext[DataType]): Unit = {
     val jid = ctx.getStopJob.jid()
     val stopName = ctx.getStopJob.getStopName
     val time = new Date().toString
@@ -170,7 +172,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
     H2Util.updateStopStartTime(getAppId(ctx), stopName, time)
   }
 
-  override def onJobFailed(ctx: JobContext[DataStream]): Unit = {
+  override def onJobFailed(ctx: JobContext[DataType]): Unit = {
     ctx.getProcessContext
     val stopName = ctx.getStopJob.getStopName
     val time = new Date().toString
@@ -182,7 +184,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
 
   }
 
-  override def onJobInitialized(ctx: JobContext[DataStream]): Unit = {
+  override def onJobInitialized(ctx: JobContext[DataType]): Unit = {
     val stopName = ctx.getStopJob.getStopName
     val time = new Date().toString
     logger.debug(s"job initialized: $stopName, time: $time")
@@ -193,7 +195,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
     H2Util.updateStopState(appId, stopName, StopState.INIT)
   }
 
-  override def onProcessCompleted(ctx: ProcessContext[DataStream]): Unit = {
+  override def onProcessCompleted(ctx: ProcessContext[DataType]): Unit = {
     val pid = ctx.getProcess.pid()
     val time = new Date().toString
     logger.debug(s"process completed: $pid, time: $time")
@@ -205,7 +207,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
 
   }
 
-  override def onJobCompleted(ctx: JobContext[DataStream]): Unit = {
+  override def onJobCompleted(ctx: JobContext[DataType]): Unit = {
     val stopName = ctx.getStopJob.getStopName
     val time = new Date().toString
     logger.debug(s"job completed: $stopName, time: $time")
@@ -217,7 +219,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
 
   }
 
-  override def onProcessFailed(ctx: ProcessContext[DataStream]): Unit = {
+  override def onProcessFailed(ctx: ProcessContext[DataType]): Unit = {
     val pid = ctx.getProcess.pid()
     val time = new Date().toString
     logger.debug(s"process failed: $pid, time: $time")
@@ -229,7 +231,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
 
   }
 
-  override def onProcessAborted(ctx: ProcessContext[DataStream]): Unit = {
+  override def onProcessAborted(ctx: ProcessContext[DataType]): Unit = {
     val pid = ctx.getProcess.pid()
     val time = new Date().toString
     logger.debug(s"process aborted: $pid, time: $time")
@@ -241,8 +243,8 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
 
   }
 
-  override def onProcessForked(ctx: ProcessContext[DataStream],
-                               child: ProcessContext[DataStream]): Unit = {
+  override def onProcessForked(ctx: ProcessContext[DataType],
+                               child: ProcessContext[DataType]): Unit = {
     val pid = ctx.getProcess.pid()
     val cid = child.getProcess.pid()
     val time = new Date().toString
@@ -252,15 +254,15 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
     H2Util.updateFlowState(getAppId(ctx), FlowState.FORK)
   }
 
-  private def getAppId(ctx: Context[DataStream]): String = {
+  private def getAppId(ctx: Context[DataType]): String = {
     // todo
     //    val sparkSession = ctx.get(classOf[SparkSession].getName).asInstanceOf[SparkSession]
     //    sparkSession.sparkContext.applicationId
     ""
   }
 
-  override def monitorJobCompleted(ctx: JobContext[DataStream],
-                                   outputs: JobOutputStream[DataStream]): Unit = {
+  override def monitorJobCompleted(ctx: JobContext[DataType],
+                                   outputs: JobOutputStream[DataType]): Unit = {
     val appId = getAppId(ctx)
     val stopName = ctx.getStopJob.getStopName
     logger.debug(s"job completed: monitor $stopName")
@@ -268,7 +270,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
 
   }
 
-  override def onGroupStarted(ctx: GroupContext[DataStream]): Unit = {
+  override def onGroupStarted(ctx: GroupContext[DataType]): Unit = {
     //TODO: write monitor data into db
     val groupId = ctx.getGroupExecution.getGroupId
     val flowGroupName = ctx.getGroup.getGroupName
@@ -283,7 +285,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
     H2Util.updateGroupStartTime(groupId, time)
   }
 
-  override def onGroupCompleted(ctx: GroupContext[DataStream]): Unit = {
+  override def onGroupCompleted(ctx: GroupContext[DataType]): Unit = {
     //TODO: write monitor data into db
     val groupId = ctx.getGroupExecution.getGroupId
     val flowGroupName = ctx.getGroup.getGroupName
@@ -296,7 +298,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
 
   }
 
-  override def onGroupStoped(ctx: GroupContext[DataStream]): Unit = {
+  override def onGroupStoped(ctx: GroupContext[DataType]): Unit = {
     //TODO: write monitor data into db
     val groupId = ctx.getGroupExecution.getGroupId
     val flowGroupName = ctx.getGroup.getGroupName
@@ -309,7 +311,7 @@ class RunnerLogger[DataStream] extends RunnerListener[DataStream] with Logging {
 
   }
 
-  override def onGroupFailed(ctx: GroupContext[DataStream]): Unit = {
+  override def onGroupFailed(ctx: GroupContext[DataType]): Unit = {
     //TODO: write monitor data into db
     val groupId = ctx.getGroupExecution.getGroupId
     val time = new Date().toString

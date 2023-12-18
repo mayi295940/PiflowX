@@ -19,7 +19,7 @@ import java.util.Collections
 
 object FlinkYarnClusterLauncher {
 
-  def launch[DataStream](flow: Flow[DataStream]): String = {
+  def launch[DataType](flow: Flow[DataType]): String = {
 
     val flowFileName = flow.getFlowName
     val flowFile = FlowFileUtil.getFlowFilePath(flowFileName)

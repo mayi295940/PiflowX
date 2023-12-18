@@ -4,13 +4,11 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.apache.flink.types.Row
 
-class SelectHiveQLAppend extends ConfigurableStop[DataStream[Row]] {
+class SelectHiveQLAppend extends ConfigurableStop[Table] {
 
   override val authorEmail: String = "qinghua.liao@outlook.com"
   override val description: String = "Execute select clause of hiveQL with AppendStream"
@@ -24,11 +22,10 @@ class SelectHiveQLAppend extends ConfigurableStop[DataStream[Row]] {
   val defaultDatabase = "mydatabase"
   val hiveConfDir = "/piflow-configure/hive-conf"
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
-    val env = pec.get[StreamExecutionEnvironment]()
     val tableEnv = pec.get[StreamTableEnvironment]()
 
     val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir)
@@ -38,15 +35,13 @@ class SelectHiveQLAppend extends ConfigurableStop[DataStream[Row]] {
 
     import org.apache.flink.table.api.SqlDialect
 
-    tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE)
+    tableEnv.getConfig.setSqlDialect(SqlDialect.HIVE)
 
     tableEnv.useDatabase(database)
 
     val resultTable = tableEnv.sqlQuery(hiveQL)
 
-    val resultStream: DataStream[Row] = tableEnv.toDataStream(resultTable)
-
-    out.write(resultStream)
+    out.write(resultTable)
 
   }
 
@@ -86,9 +81,7 @@ class SelectHiveQLAppend extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.HiveGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 }
 

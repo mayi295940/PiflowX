@@ -4,14 +4,12 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.table.api.SqlDialect
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
+import org.apache.flink.table.api.{SqlDialect, Table}
 import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.apache.flink.types.Row
 
 
-class SelectHiveQLRetract extends ConfigurableStop[DataStream[Row]] {
+class SelectHiveQLRetract extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   override val description: String = "Execute select clause of hiveQL with RetractStream"
@@ -25,9 +23,9 @@ class SelectHiveQLRetract extends ConfigurableStop[DataStream[Row]] {
   val defaultDatabase = "mydatabase"
   val hiveConfDir = "/piflow-configure/hive-conf"
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
@@ -43,9 +41,9 @@ class SelectHiveQLRetract extends ConfigurableStop[DataStream[Row]] {
 
     val resultTable = tableEnv.sqlQuery(hiveQL)
 
-    val result = tableEnv.toChangelogStream(resultTable)
+    // val result = tableEnv.toChangelogStream(resultTable)
 
-    out.write(result)
+    out.write(resultTable)
   }
 
   override def setProperties(map: Map[String, Any]): Unit = {
@@ -85,9 +83,7 @@ class SelectHiveQLRetract extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.HiveGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 }
 

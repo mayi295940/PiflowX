@@ -4,11 +4,10 @@ import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
 import cn.piflow.conf.util.FileUtil
 import cn.piflow.util.JsonUtil
-import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.apache.flink.types.Row
 import org.h2.tools.Server
 import org.junit.Test
 
@@ -24,7 +23,7 @@ class PutHiveQLTest {
     println(map)
 
     //create flow
-    val flowBean = FlowBean.apply[DataStream[Row]](map)
+    val flowBean = FlowBean.apply[Table](map)
     val flow = flowBean.constructFlow()
 
     val h2Server = Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "50001").start()
@@ -43,7 +42,7 @@ class PutHiveQLTest {
     // set the HiveCatalog as the current catalog of the session
     tableEnv.useCatalog("myhive")
 
-    val process = Runner.create[DataStream[Row]]()
+    val process = Runner.create[Table]()
       .bind(classOf[StreamExecutionEnvironment].getName, env)
       .bind("checkpoint.path", "")
       .bind("debug.path", "")

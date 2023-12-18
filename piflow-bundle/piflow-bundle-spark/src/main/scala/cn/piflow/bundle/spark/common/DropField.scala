@@ -4,7 +4,7 @@ import cn.piflow._
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.DataFrame
 
 
 class DropField extends ConfigurableStop[DataFrame] {
@@ -20,7 +20,7 @@ class DropField extends ConfigurableStop[DataFrame] {
               out: JobOutputStream[DataFrame],
               pec: JobContext[DataFrame]): Unit = {
 
-    var df = in.read[Row]()
+    var df = in.read()
 
     val field = columnNames.split(",").map(x => x.trim)
     for (x <- field.indices) {

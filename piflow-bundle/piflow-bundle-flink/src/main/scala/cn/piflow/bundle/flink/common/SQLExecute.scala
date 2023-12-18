@@ -4,12 +4,11 @@ import cn.piflow._
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.table.api.TableResult
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.{Table, TableResult}
 
-class SQLExecute extends ConfigurableStop[DataStream[Row]] {
+class SQLExecute extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
   val description: String = "execute sql"
@@ -18,33 +17,35 @@ class SQLExecute extends ConfigurableStop[DataStream[Row]] {
 
   private var sql: String = _
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
-    val result: TableResult = tableEnv.executeSql(sql)
-    result.print()
+
+    if (StringUtils.isNotEmpty(sql)) {
+      sql.split(Constants.SEMICOLON).map(t => {
+        val result: TableResult = tableEnv.executeSql(t)
+        result.print()
+      })
+    }
 
   }
-
 
   override def setProperties(map: Map[String, Any]): Unit = {
     sql = MapUtil.get(map, "sql").asInstanceOf[String]
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
     val sql = new PropertyDescriptor().name("sql")
       .displayName("Sql")
-      .description("Sql string")
+      .description("sql语句，多行sql以';'分隔")
       .defaultValue("")
       .required(true)
-      .example("select * from temp")
+      .example("select * from temp;show tables;")
     descriptor = sql :: descriptor
 
     descriptor

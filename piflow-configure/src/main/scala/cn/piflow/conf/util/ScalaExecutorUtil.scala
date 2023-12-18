@@ -51,7 +51,7 @@ object ScalaExecutorUtil {
     jarFile
   }
 
-  def buildScalaExcutorJar[DataStream]( flowBean : FlowBean[DataStream]) : List[String] = {
+  def buildScalaExcutorJar[DataType]( flowBean : FlowBean[DataType]) : List[String] = {
     var scalaPluginList = List[String]()
     flowBean.stops.foreach{s => {
       if(s.bundle.equals("cn.piflow.bundle.script.ExecuteScala")){

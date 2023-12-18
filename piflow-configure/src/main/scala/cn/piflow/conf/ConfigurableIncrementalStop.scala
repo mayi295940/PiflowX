@@ -6,9 +6,9 @@ import cn.piflow.{Constants, IncrementalStop, JobContext}
 /**
  * Created by xjzhu@cnic.cn on 7/15/19
  */
-abstract class ConfigurableIncrementalStop[DataStream]
-  extends ConfigurableStop[DataStream]
-    with IncrementalStop[DataStream] {
+abstract class ConfigurableIncrementalStop[DataType]
+  extends ConfigurableStop[DataType]
+    with IncrementalStop[DataType] {
 
   override var incrementalPath: String = _
 

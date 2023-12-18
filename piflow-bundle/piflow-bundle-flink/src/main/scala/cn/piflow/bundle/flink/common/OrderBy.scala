@@ -5,13 +5,11 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.table.api.ApiExpression
 import org.apache.flink.table.api.Expressions.$
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.{ApiExpression, Table}
 
-class OrderBy extends ConfigurableStop[DataStream[Row]] {
+class OrderBy extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   override val description: String = "返回跨所有并行分区的全局有序记录"
@@ -28,14 +26,13 @@ class OrderBy extends ConfigurableStop[DataStream[Row]] {
     fetch = MapUtil.get(map, "fetch").asInstanceOf[String]
   }
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val df = in.read()
-    val inputTable = tableEnv.fromDataStream(df)
+    val inputTable = in.read()
     var resultTable = inputTable
 
     if (StringUtils.isNotEmpty(expression)) {
@@ -59,8 +56,7 @@ class OrderBy extends ConfigurableStop[DataStream[Row]] {
       resultTable = resultTable.fetch(fetch.toInt)
     }
 
-    val resultStream = tableEnv.toDataStream(resultTable)
-    out.write(resultStream)
+    out.write(resultTable)
 
   }
 
@@ -105,7 +101,7 @@ class OrderBy extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 
 }

@@ -15,13 +15,13 @@ object ClassUtil {
   val configurableStopClass: String = "cn.piflow.conf.ConfigurableStop"
   val configurableIncrementalStop: String = "cn.piflow.conf.ConfigurableIncrementalStop"
 
-  def findAllConfigurableStop[DataStream](): List[ConfigurableStop[DataStream]] = {
+  def findAllConfigurableStop[DataType](): List[ConfigurableStop[DataType]] = {
 
-    var stopList: List[ConfigurableStop[DataStream]] = List()
+    var stopList: List[ConfigurableStop[DataType]] = List()
 
     //find internal stop
     val reflections = new Reflections("")
-    val allClasses = reflections.getSubTypesOf(classOf[ConfigurableStop[DataStream]])
+    val allClasses = reflections.getSubTypesOf(classOf[ConfigurableStop[DataType]])
     val it = allClasses.iterator()
     while (it.hasNext) {
       breakable {
@@ -35,7 +35,7 @@ object ClassUtil {
         }
         else {
           val plugin = stopClass.newInstance()
-          val stop = plugin.asInstanceOf[ConfigurableStop[DataStream]]
+          val stop = plugin.asInstanceOf[ConfigurableStop[DataType]]
           println("Find ConfigurableStop: " + stopName)
           stopList = stop +: stopList
         }
@@ -44,16 +44,16 @@ object ClassUtil {
 
     //find external stop
     val pluginManager = PluginManager.getInstance
-    val externalStopList = findAllConfigurableStopInClasspath[DataStream]()
+    val externalStopList = findAllConfigurableStopInClasspath[DataType]()
 
     stopList ::: externalStopList
   }
 
 
-  private def findAllConfigurableStopInClasspath[DataStream](): List[ConfigurableStop[DataStream]] = {
+  private def findAllConfigurableStopInClasspath[DataType](): List[ConfigurableStop[DataType]] = {
 
     val pluginManager = PluginManager.getInstance
-    val stopList = pluginManager.getPluginConfigurableStops[DataStream]
+    val stopList = pluginManager.getPluginConfigurableStops[DataType]
     stopList
 
     /*val pluginManager = PluginManager.getInstance()
@@ -114,11 +114,11 @@ object ClassUtil {
     groupList
   }
 
-  private def findConfigurableStopInClasspath[DataStream](bundle: String): Option[ConfigurableStop[DataStream]] = {
+  private def findConfigurableStopInClasspath[DataType](bundle: String): Option[ConfigurableStop[DataType]] = {
 
     val pluginManager = PluginManager.getInstance
     val stopInstance = pluginManager.getConfigurableStop(bundle)
-    val stop = Some(stopInstance.asInstanceOf[ConfigurableStop[DataStream]])
+    val stop = Some(stopInstance.asInstanceOf[ConfigurableStop[DataType]])
     stop
 
     /*val pluginManager = PluginManager.getInstance
@@ -147,17 +147,17 @@ object ClassUtil {
   }
 
 
-  def findConfigurableStop[DataStream](bundle: String): ConfigurableStop[DataStream] = {
+  def findConfigurableStop[DataType](bundle: String): ConfigurableStop[DataType] = {
     try {
       println("find ConfigurableStop by Class.forName: " + bundle)
       val stop = Class.forName(bundle).newInstance()
-      stop.asInstanceOf[ConfigurableStop[DataStream]]
+      stop.asInstanceOf[ConfigurableStop[DataType]]
     } catch {
       case classNotFoundException: ClassNotFoundException =>
         val pluginManager = PluginManager.getInstance
         if (pluginManager != null) {
           println("find ConfigurableStop in Classpath: " + bundle)
-          val stop: Option[ConfigurableStop[DataStream]] = ClassUtil.findConfigurableStopInClasspath(bundle)
+          val stop: Option[ConfigurableStop[DataType]] = ClassUtil.findConfigurableStopInClasspath(bundle)
           stop match {
             case Some(s) => s
             case _ => throw new ClassNotFoundException(bundle + " is not found!!!")
@@ -177,7 +177,7 @@ object ClassUtil {
     stopPropertyDesc.getPropertyDescriptor()
   }
 
-  private def constructStopInfoJValue[DataStream](bundle: String, stop: ConfigurableStop[DataStream]): JValue = {
+  private def constructStopInfoJValue[DataType](bundle: String, stop: ConfigurableStop[DataType]): JValue = {
     val stopName = bundle.split("\\.").last
     val propertyDescriptorList: List[PropertyDescriptor] = stop.getPropertyDescriptor()
     propertyDescriptorList.foreach(p => if (p.allowableValues == null || p.allowableValues == None) p.allowableValues = List(""))

@@ -4,15 +4,14 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.HdfsUtil
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.catalog.hive.HiveCatalog
-import org.apache.flink.types.Row
 
-class PutHiveQL extends ConfigurableStop[DataStream[Row]] {
-  override val authorEmail: String = "qinghua.liao@outlook.com"
+class PutHiveQL extends ConfigurableStop[Table] {
+
+  override val authorEmail: String = ""
   override val description: String = "Execute hiveQL script"
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
@@ -24,11 +23,10 @@ class PutHiveQL extends ConfigurableStop[DataStream[Row]] {
   val defaultDatabase = "mydatabase"
   val hiveConfDir = "/piflow-configure/hive-conf"
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
-    val env = pec.get[StreamExecutionEnvironment]()
     val tableEnv = pec.get[StreamTableEnvironment]()
 
     val hive = new HiveCatalog(name, defaultDatabase, hiveConfDir)
@@ -38,12 +36,12 @@ class PutHiveQL extends ConfigurableStop[DataStream[Row]] {
     tableEnv.useCatalog("myhive")
 
     import org.apache.flink.table.api.SqlDialect
-    tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE)
+    tableEnv.getConfig.setSqlDialect(SqlDialect.HIVE)
 
     tableEnv.useDatabase(database)
 
     val sqlString: String = HdfsUtil.getLines(hiveQL_Path)
-    sqlString.split(";").foreach(s => {
+    sqlString.split(Constants.SEMICOLON).foreach(s => {
       println("Sql is " + s)
       tableEnv.executeSql(s)
     })
@@ -88,7 +86,5 @@ class PutHiveQL extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.HiveGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 }

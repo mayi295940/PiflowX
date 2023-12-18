@@ -5,10 +5,9 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.Table
 
-class DownloadFromFtpToHDFS extends ConfigurableStop[DataStream[Row]] {
+class DownloadFromFtpToHDFS extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   override val description: String = "Download data from FTP and save to HDFS"
@@ -25,9 +24,9 @@ class DownloadFromFtpToHDFS extends ConfigurableStop[DataStream[Row]] {
   var hdfsPath: String = _
 
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val ftpUtil = new FtpDownAndUploadUtil
 
@@ -118,5 +117,5 @@ class DownloadFromFtpToHDFS extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.FtpGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 }

@@ -5,11 +5,10 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.util.IdGenerator
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
-class Route extends ConfigurableStop[DataStream[Row]] {
+class Route extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
   val description: String = "Route data by custom properties,key is port,value is filter"
@@ -20,17 +19,15 @@ class Route extends ConfigurableStop[DataStream[Row]] {
 
   override def setProperties(map: Map[String, Any]): Unit = {}
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val df = in.read()
-
-    val inputTable = tableEnv.fromDataStream(df)
+    val inputTable = in.read()
 
     val tmpTable = "RouteTmp_" + IdGenerator.uuidWithoutSplit
     tableEnv.createTemporaryView(tmpTable, inputTable)
@@ -41,12 +38,11 @@ class Route extends ConfigurableStop[DataStream[Row]] {
         val port = keyIterator.next()
         val filterCondition = MapUtil.get(this.customizedProperties, port).asInstanceOf[String]
         val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable WHERE $filterCondition")
-        val resultStream = tableEnv.toDataStream(resultTable)
-        out.write(port, resultStream)
+        out.write(port, resultTable)
       }
     }
 
-    out.write(df)
+    out.write(inputTable)
 
   }
 

@@ -6,6 +6,7 @@ import org.apache.flink.table.catalog.hive.HiveCatalog
 import org.junit.Test
 
 class TestMainFunction {
+
   @Test
   def testFlow(): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment

@@ -6,12 +6,11 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.util.IdGenerator
-import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
 // todo 暂不支持跳过首行
-class CsvParser extends ConfigurableStop[DataStream[Row]] {
+class CsvParser extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
   val description: String = "Parse csv file or folder"
@@ -23,9 +22,9 @@ class CsvParser extends ConfigurableStop[DataStream[Row]] {
   var delimiter: String = _
   var schema: String = _
 
-  def perform(in: JobInputStream[DataStream[Row]],
-              out: JobOutputStream[DataStream[Row]],
-              pec: JobContext[DataStream[Row]]): Unit = {
+  def perform(in: JobInputStream[Table],
+              out: JobOutputStream[Table],
+              pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
@@ -51,8 +50,7 @@ class CsvParser extends ConfigurableStop[DataStream[Row]] {
     tableEnv.executeSql(sourceDDL)
 
     val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
-    val resultStream = tableEnv.toDataStream(resultTable)
-    out.write(resultStream)
+    out.write(resultTable)
 
 
     //    val env = pec.get[StreamExecutionEnvironment]()
@@ -79,7 +77,7 @@ class CsvParser extends ConfigurableStop[DataStream[Row]] {
 
   }
 
-  def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  def initialize(ctx: ProcessContext[Table]): Unit = {}
 
   def setProperties(map: Map[String, Any]): Unit = {
     csvPath = MapUtil.get(map, "csvPath").asInstanceOf[String]

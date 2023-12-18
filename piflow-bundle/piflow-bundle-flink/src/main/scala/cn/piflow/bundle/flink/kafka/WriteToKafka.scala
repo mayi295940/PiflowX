@@ -4,31 +4,31 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
-class WriteToKafka extends ConfigurableStop[DataStream[Row]] {
+class WriteToKafka extends ConfigurableStop[Table] {
 
-  val description: String = "Write data to kafka"
-  val inportList: List[String] = List(Port.DefaultPort)
-  val outportList: List[String] = List(Port.DefaultPort)
+  override val authorEmail: String = ""
+  override val description: String = "Write data to kafka"
+  override val inportList: List[String] = List(Port.DefaultPort)
+  override val outportList: List[String] = List(Port.DefaultPort)
+
   var kafka_host: String = _
   var topic: String = _
 
-  def perform(in: JobInputStream[DataStream[Row]],
-              out: JobOutputStream[DataStream[Row]],
-              pec: JobContext[DataStream[Row]]): Unit = {
+  def perform(in: JobInputStream[Table],
+              out: JobOutputStream[Table],
+              pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
-    val inputStream = in.read[Row]()
-    val kafkaTable: Table = tableEnv.fromDataStream(inputStream)
-    val fieldNames = kafkaTable.getSchema.getFieldNames
+
+    val kafkaTable = in.read()
+    val fieldNames = kafkaTable.getResolvedSchema.getColumnNames
     var fields = ""
     for (i <- 0 until fieldNames.size) {
-      if (i == fieldNames.size - 1) fields += "`" + fieldNames(i) + "`" + " STRING"
-      else fields += "`" + fieldNames(i) + "`" + " STRING,"
+      if (i == fieldNames.size - 1) fields += "`" + fieldNames.get(i) + "`" + " STRING"
+      else fields += "`" + fieldNames.get(i) + "`" + " STRING,"
     }
 
     tableEnv.executeSql(
@@ -45,13 +45,11 @@ class WriteToKafka extends ConfigurableStop[DataStream[Row]] {
         "'csv.field-delimiter' = ','" +
         ")")
 
-    kafkaTable.executeInsert("kafkaOutputTable");
+    kafkaTable.executeInsert("kafkaOutputTable")
   }
 
 
-  def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 
   def setProperties(map: Map[String, Any]): Unit = {
@@ -86,5 +84,4 @@ class WriteToKafka extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.KafkaGroup)
   }
 
-  override val authorEmail: String = "liangdchg@163.com"
 }

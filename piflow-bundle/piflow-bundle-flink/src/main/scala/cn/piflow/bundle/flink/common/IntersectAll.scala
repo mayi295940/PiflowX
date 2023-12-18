@@ -4,11 +4,9 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.ImageUtil
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.Table
 
-class IntersectAll extends ConfigurableStop[DataStream[Row]] {
+class IntersectAll extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
 
@@ -20,21 +18,15 @@ class IntersectAll extends ConfigurableStop[DataStream[Row]] {
   override val inportList: List[String] = List(Port.LeftPort, Port.RightPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
-    val tableEnv = pec.get[StreamTableEnvironment]()
-
-    val leftDF = in.read(Port.LeftPort)
-    val rightDF = in.read(Port.RightPort)
-
-    val leftTable = tableEnv.fromDataStream(leftDF)
-    val rightTable = tableEnv.fromDataStream(rightDF)
+    val leftTable = in.read(Port.LeftPort)
+    val rightTable = in.read(Port.RightPort)
 
     val resultTable = leftTable.intersectAll(rightTable)
-    val resultStream = tableEnv.toDataStream(resultTable)
-    out.write(resultStream)
+    out.write(resultTable)
   }
 
   override def setProperties(map: Map[String, Any]): Unit = {
@@ -54,6 +46,6 @@ class IntersectAll extends ConfigurableStop[DataStream[Row]] {
   }
 
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 }

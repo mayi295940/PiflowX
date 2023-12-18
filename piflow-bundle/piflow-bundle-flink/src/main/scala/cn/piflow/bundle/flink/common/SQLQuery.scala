@@ -4,11 +4,10 @@ import cn.piflow._
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
-class SQLQuery extends ConfigurableStop[DataStream[Row]] {
+class SQLQuery extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
   val description: String = "Create temporary view table to execute sql"
@@ -18,23 +17,19 @@ class SQLQuery extends ConfigurableStop[DataStream[Row]] {
   private var sql: String = _
   private var viewName: String = _
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val inDf: DataStream[Row] = in.read()
-
-    val inputTable = tableEnv.fromDataStream(inDf)
+    val inputTable: Table = in.read()
 
     tableEnv.createTemporaryView(viewName, inputTable)
 
     val resultTable = tableEnv.sqlQuery(sql)
 
-    val resultStream = tableEnv.toDataStream(resultTable)
-
-    out.write(resultStream)
+    out.write(resultTable)
   }
 
 
@@ -43,7 +38,7 @@ class SQLQuery extends ConfigurableStop[DataStream[Row]] {
     viewName = MapUtil.get(map, "viewName").asInstanceOf[String]
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
+  override def initialize(ctx: ProcessContext[Table]): Unit = {
 
   }
 

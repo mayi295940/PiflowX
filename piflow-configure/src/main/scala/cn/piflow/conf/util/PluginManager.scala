@@ -22,12 +22,12 @@ class PluginManager {
     this.pluginPath
   }
 
-  def getConfigurableStop[DataStream](plugName: String,
-                                      bundleName: String): ConfigurableStop[DataStream] = {
+  def getConfigurableStop[DataType](plugName: String,
+                                    bundleName: String): ConfigurableStop[DataType] = {
     try {
       val plugin = pluginPath + plugName
       val forName = Class.forName(bundleName, true, getLoader(plugin))
-      val ins = forName.newInstance.asInstanceOf[ConfigurableStop[DataStream]]
+      val ins = forName.newInstance.asInstanceOf[ConfigurableStop[DataType]]
       return ins
     } catch {
       case e: IllegalAccessException =>
@@ -40,13 +40,13 @@ class PluginManager {
     null
   }
 
-  def getConfigurableStop[DataStream](bundleName: String): ConfigurableStop[DataStream] = {
+  def getConfigurableStop[DataType](bundleName: String): ConfigurableStop[DataType] = {
     val it = pluginMap.keys.iterator
     while (it.hasNext) {
       val plugin = it.next
       try {
         val forName = Class.forName(bundleName, true, getLoader(plugin))
-        val ins = forName.newInstance.asInstanceOf[ConfigurableStop[DataStream]]
+        val ins = forName.newInstance.asInstanceOf[ConfigurableStop[DataType]]
         System.out.println(bundleName + " is found in " + plugin)
         return ins
       } catch {
@@ -62,14 +62,14 @@ class PluginManager {
     null
   }
 
-  def getConfigurableStopIcon[DataStream](imagePath: String,
-                                          bundleName: String): Array[Byte] = {
+  def getConfigurableStopIcon[DataType](imagePath: String,
+                                        bundleName: String): Array[Byte] = {
     val it = pluginMap.keys.iterator
     while (it.hasNext) {
       val plugin = it.next
       try {
         val forName = Class.forName(bundleName, true, getLoader(plugin))
-        forName.newInstance.asInstanceOf[ConfigurableStop[DataStream]]
+        forName.newInstance.asInstanceOf[ConfigurableStop[DataType]]
         val imageInputStream = getLoader(plugin).getResourceAsStream(imagePath)
         val input = new BufferedInputStream(imageInputStream)
         Image.fromStream(input).bytes(sksamuel.scrimage.writer)
@@ -86,9 +86,9 @@ class PluginManager {
     null
   }
 
-  def getPluginConfigurableStops[DataStream]: List[ConfigurableStop[DataStream]] = {
+  def getPluginConfigurableStops[DataType]: List[ConfigurableStop[DataType]] = {
 
-    var stopList = List[ConfigurableStop[DataStream]]()
+    var stopList = List[ConfigurableStop[DataType]]()
     val pluginIterator = pluginMap.keys.iterator
     while (pluginIterator.hasNext) {
       val plugin: String = pluginIterator.next
@@ -100,7 +100,7 @@ class PluginManager {
           try {
             if (externalClass.superClassName.equals(ClassUtil.configurableStopClass)) {
               val forName = Class.forName(externalClass.name, true, getLoader(plugin))
-              val ins = forName.newInstance.asInstanceOf[ConfigurableStop[DataStream]]
+              val ins = forName.newInstance.asInstanceOf[ConfigurableStop[DataType]]
               System.out.println("Find ConfigurableStop: " + externalClass.name + " in " + plugin)
               stopList = ins +: stopList
             }
@@ -127,9 +127,9 @@ class PluginManager {
     stopList
   }
 
-  def getPluginConfigurableStops[DataStream](pluginName: String): List[ConfigurableStop[DataStream]] = {
+  def getPluginConfigurableStops[DataType](pluginName: String): List[ConfigurableStop[DataType]] = {
 
-    var stopList = List[ConfigurableStop[DataStream]]()
+    var stopList = List[ConfigurableStop[DataType]]()
     var plugin = this.getPluginPath + pluginName
     //temp
     plugin = plugin.replace(Constants.SINGLE_SLASH, "\\")
@@ -143,7 +143,7 @@ class PluginManager {
           try {
             if (externalClass.superClassName.equals(ClassUtil.configurableStopClass)) {
               val forName = Class.forName(externalClass.name, true, getLoader(plugin))
-              val ins = forName.newInstance.asInstanceOf[ConfigurableStop[DataStream]]
+              val ins = forName.newInstance.asInstanceOf[ConfigurableStop[DataType]]
               System.out.println("Find ConfigurableStop: " + externalClass.name + " in " + plugin)
               stopList = ins +: stopList
             }

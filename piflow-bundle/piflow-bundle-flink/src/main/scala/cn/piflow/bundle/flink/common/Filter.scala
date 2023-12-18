@@ -5,11 +5,10 @@ import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.IdGenerator
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
-class Filter extends ConfigurableStop[DataStream[Row]] {
+class Filter extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   override val description: String = "Filter by condition"
@@ -43,24 +42,24 @@ class Filter extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val df = in.read()
-
-    val inputTable = tableEnv.fromDataStream(df)
+    val inputTable = in.read()
 
     val tmpTable = "FilterTmp_" + IdGenerator.uuidWithoutSplit
     tableEnv.createTemporaryView(tmpTable, inputTable)
 
     val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable WHERE $condition")
-    val resultStream = tableEnv.toDataStream(resultTable)
-    out.write(resultStream)
+
+    // todo inputTable.where()
+
+    out.write(resultTable)
 
   }
 }

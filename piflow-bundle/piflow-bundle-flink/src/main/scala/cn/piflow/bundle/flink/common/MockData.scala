@@ -6,13 +6,13 @@ import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.Table
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
-class MockData extends ConfigurableStop[DataStream[Row]] {
+class MockData extends ConfigurableStop[Table] {
 
-  override val authorEmail: String = "xjzhu@cnic.cn"
+  override val authorEmail: String = ""
   override val description: String = "Mock dataframe."
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
@@ -59,19 +59,20 @@ class MockData extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val env = pec.get[StreamExecutionEnvironment]()
+    val tableEnv = pec.get[StreamTableEnvironment]()
 
     val rowTypeInfo = RowTypeUtil.getRowTypeInfo(schema)
 
     val df = env.addSource(new MockSourceFunction(rowTypeInfo, count))
 
-    out.write(df)
+    out.write(tableEnv.fromDataStream(df))
   }
 
 }

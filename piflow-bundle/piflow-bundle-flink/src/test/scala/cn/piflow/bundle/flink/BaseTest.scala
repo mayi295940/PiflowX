@@ -6,10 +6,9 @@ import cn.piflow.conf.util.FileUtil
 import cn.piflow.util.JsonUtil
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.streaming.api.CheckpointingMode
-import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.streaming.api.environment.{CheckpointConfig, StreamExecutionEnvironment}
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 import org.h2.tools.Server
 
 object BaseTest {
@@ -23,7 +22,7 @@ object BaseTest {
     println(map)
 
     //create flow
-    val flowBean = FlowBean.apply[DataStream[Row]](map)
+    val flowBean = FlowBean.apply[Table](map)
     val flow = flowBean.constructFlow()
     println(flow)
 
@@ -51,7 +50,7 @@ object BaseTest {
 
     val tableEnv = StreamTableEnvironment.create(env)
 
-    val process = Runner.create[DataStream[Row]]()
+    val process = Runner.create[Table]()
       .bind(classOf[StreamExecutionEnvironment].getName, env)
       .bind(classOf[StreamTableEnvironment].getName, tableEnv)
       .bind("checkpoint.path", "")

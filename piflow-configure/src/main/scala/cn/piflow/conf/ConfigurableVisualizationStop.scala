@@ -3,12 +3,9 @@ package cn.piflow.conf
 import cn.piflow.util.ConfigureUtil
 import cn.piflow.{Constants, VisualizationStop}
 
-/**
- * Created by xjzhu@cnic.cn on 8/11/202
- */
-abstract class ConfigurableVisualizationStop[DataStream]
-  extends ConfigurableStop[DataStream]
-    with VisualizationStop[DataStream] {
+abstract class ConfigurableVisualizationStop[DataType]
+  extends ConfigurableStop[DataType]
+    with VisualizationStop[DataType] {
 
   override var visualizationPath: String = _
   override var processId: String = _

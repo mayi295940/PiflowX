@@ -4,11 +4,10 @@ import cn.piflow._
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.Table
 
 
-class Fork extends ConfigurableStop[DataStream[Row]] {
+class Fork extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
   val description: String = "Forking data to different stops"
@@ -22,13 +21,13 @@ class Fork extends ConfigurableStop[DataStream[Row]] {
     outports = outPortStr.split(Constants.COMMA).map(x => x.trim).toList
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
+  override def initialize(ctx: ProcessContext[Table]): Unit = {
 
   }
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
     // todo val df = in.read().cache()
     val df = in.read()
     outports.foreach(out.write(_, df));

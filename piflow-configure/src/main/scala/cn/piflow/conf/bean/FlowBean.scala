@@ -9,7 +9,7 @@ import net.liftweb.json._
 import scala.collection.mutable.{Map => MMap}
 import scala.util.matching.Regex
 
-class FlowBean[DataStream] extends GroupEntryBean {
+class FlowBean[DataType] extends GroupEntryBean {
 
   /*@BeanProperty*/
   var uuid: String = _
@@ -19,7 +19,7 @@ class FlowBean[DataStream] extends GroupEntryBean {
   private var runMode: String = _
   private var showData: String = _
 
-  var stops: List[StopBean[DataStream]] = List()
+  var stops: List[StopBean[DataType]] = List()
   var paths: List[PathBean] = List()
 
   //flow resource info
@@ -78,12 +78,12 @@ class FlowBean[DataStream] extends GroupEntryBean {
         }
         }
         stopMutableMap("properties") = stopPropertiesMap.toMap
-        val stop = StopBean[DataStream](this.name, stopMutableMap.toMap)
+        val stop = StopBean[DataType](this.name, stopMutableMap.toMap)
         this.stops = stop +: this.stops
       })
     } else { //no environment variables
       stopsList.foreach(stopMap => {
-        val stop = StopBean[DataStream](this.name, stopMap)
+        val stop = StopBean[DataType](this.name, stopMap)
         this.stops = stop +: this.stops
       })
     }
@@ -98,12 +98,12 @@ class FlowBean[DataStream] extends GroupEntryBean {
   }
 
   //create Flow by FlowBean
-  def constructFlow(buildScalaJar: Boolean = true): FlowImpl[DataStream] = {
+  def constructFlow(buildScalaJar: Boolean = true): FlowImpl[DataType] = {
 
     if (buildScalaJar)
       ScalaExecutorUtil.buildScalaExcutorJar(this)
 
-    val flow = new FlowImpl[DataStream]()
+    val flow = new FlowImpl[DataType]()
 
     flow.setFlowJson(this.flowJson)
     flow.setFlowName(this.name)
@@ -158,8 +158,8 @@ class FlowBean[DataStream] extends GroupEntryBean {
 }
 
 object FlowBean {
-  def apply[DataStream](map: Map[String, Any]): FlowBean[DataStream] = {
-    val flowBean = new FlowBean[DataStream]()
+  def apply[DataType](map: Map[String, Any]): FlowBean[DataType] = {
+    val flowBean = new FlowBean[DataType]()
     flowBean.init(map)
     flowBean
   }

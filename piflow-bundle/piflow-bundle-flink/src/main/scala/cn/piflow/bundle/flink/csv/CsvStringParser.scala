@@ -1,16 +1,16 @@
 package cn.piflow.bundle.flink.csv
 
+import cn.piflow._
 import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.DateUtils
-import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.Table
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.types.Row
 
-class CsvStringParser extends ConfigurableStop[DataStream[Row]] {
+class CsvStringParser extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   val inportList: List[String] = List(Port.DefaultPort)
@@ -21,11 +21,11 @@ class CsvStringParser extends ConfigurableStop[DataStream[Row]] {
   var delimiter: String = _
   var schema: String = _
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
-    val env = pec.get[StreamExecutionEnvironment]()
+    val tableEnv = pec.get[StreamTableEnvironment]()
 
     val rowType = RowTypeUtil.getRowTypeInfo(schema)
     val colNum: Int = rowType.getArity
@@ -58,11 +58,7 @@ class CsvStringParser extends ConfigurableStop[DataStream[Row]] {
       row
     }).toList
 
-    val rowRDD: DataStream[Row] = env
-      .fromElements(listROW: _*)
-      .returns(rowType)
-
-    out.write(rowRDD)
+    out.write(tableEnv.fromValues(rowType, listROW))
   }
 
   override def setProperties(map: Map[String, Any]): Unit = {
@@ -111,6 +107,6 @@ class CsvStringParser extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CsvGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 }

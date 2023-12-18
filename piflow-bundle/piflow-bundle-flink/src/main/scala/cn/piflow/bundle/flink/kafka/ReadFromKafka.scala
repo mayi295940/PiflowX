@@ -4,64 +4,31 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.table.api.DataTypes
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
+import org.apache.flink.table.api.{DataTypes, Table}
 import org.apache.flink.table.types.DataType
-import org.apache.flink.types.Row
 
-class ReadFromKafka extends ConfigurableStop[DataStream[Row]] {
+class ReadFromKafka extends ConfigurableStop[Table] {
 
-  val description: String = "Read data from kafka"
-  val inportList: List[String] = List(Port.DefaultPort)
-  val outportList: List[String] = List(Port.DefaultPort)
+  override val authorEmail: String = ""
+  override val description: String = "Read data from kafka"
+  override val inportList: List[String] = List(Port.DefaultPort)
+  override val outportList: List[String] = List(Port.DefaultPort)
+
   var kafka_host: String = _
   var topic: String = _
   var schema: String = _
 
-  def perform(in: JobInputStream[DataStream[Row]],
-              out: JobOutputStream[DataStream[Row]],
-              pec: JobContext[DataStream[Row]]): Unit = {
+  def perform(in: JobInputStream[Table],
+              out: JobOutputStream[Table],
+              pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
-
-    //    import org.apache.flink.api.scala._
-    //    //checkpoint配置
-    //    // 每隔100 ms进行启动一个检查点【设置checkpoint的周期】
-    //    env.enableCheckpointing(100)
-    //    // 设置模式为exactly-once （这是默认值）
-    //    env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
-    //    // 确保检查点之间有至少500 ms的间隔【checkpoint最小间隔】
-    //    env.getCheckpointConfig.setMinPauseBetweenCheckpoints(500)
-    //    // 检查点必须在一分钟内完成，或者被丢弃【checkpoint的超时时间】
-    //    env.getCheckpointConfig.setCheckpointTimeout(60000)
-    //    env.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
-    //
-    //    /*表示一旦Flink处理程序被cancel后，会保留Checkpoint数据，
-    //    *以便根据实际需要恢复到指定的Checkpoint
-    //    */
-    //    env.getCheckpointConfig.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION)
-    //    env.getCheckpointConfig.setCheckpointStorage("hdfs://checkpoints")
-    //
-    //    //设置state backend
-    //    env.setStateBackend(new EmbeddedRocksDBStateBackend())
-    //
-    //    val kafkaSource: KafkaSource[String] = KafkaSource.builder[String]()
-    //      .setBootstrapServers(kafka_host)
-    //      .setTopics(topic)
-    //      .setGroupId("my-group")
-    //      .setStartingOffsets(OffsetsInitializer.earliest())
-    //      .setValueOnlyDeserializer(new SimpleStringSchema)
-    //      .build()
-    //
-    //    val stream: DataStream[Row] = env.fromSource(
-    //      kafkaSource, WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(20)), "mySource")
-
 
     // 定义 Kafka 配置参数
     val kafkaProperties = new java.util.Properties()
     kafkaProperties.setProperty("bootstrap.servers", kafka_host)
-    // ...其他连接器和属性设置
+    //todo ...其他连接器和属性设置
 
     // todo scheme如何定义
     // 定义字段名和字段类型
@@ -86,16 +53,10 @@ class ReadFromKafka extends ConfigurableStop[DataStream[Row]] {
          |SELECT * FROM kafka_source
      """.stripMargin
 
-    val result = tableEnv.sqlQuery(query)
-
-    val rowStream = tableEnv.toDataStream[Row](result, classOf[Row])
-
-    out.write(rowStream)
+    out.write(tableEnv.sqlQuery(query))
   }
 
-  def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[Table]): Unit = {}
 
   def setProperties(map: Map[String, Any]): Unit = {
     kafka_host = MapUtil.get(map, key = "kafka_host").asInstanceOf[String]
@@ -137,5 +98,4 @@ class ReadFromKafka extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.KafkaGroup)
   }
 
-  override val authorEmail: String = "liangdchg@163.com"
 }

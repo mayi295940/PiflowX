@@ -5,11 +5,10 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.IdGenerator
-import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
-class Join extends ConfigurableStop[DataStream[Row]] {
+class Join extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   override val description: String = "Table joins include full join, left join, right join and inner join"
@@ -20,20 +19,18 @@ class Join extends ConfigurableStop[DataStream[Row]] {
   var correlationColumn: String = _
 
   // todo 1.查询的列  2.多节点join
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val leftDF = in.read(Port.LeftPort)
-    val rightDF = in.read(Port.RightPort)
+    val leftTable = in.read(Port.LeftPort)
+    val rightTable = in.read(Port.RightPort)
 
-    val leftTable = tableEnv.fromDataStream(leftDF)
     val leftTmpTable = "Left_" + IdGenerator.uuidWithoutSplit
     tableEnv.createTemporaryView(leftTmpTable, leftTable)
 
-    val rightTable = tableEnv.fromDataStream(rightDF)
     val rightTmpTable = "Right_" + IdGenerator.uuidWithoutSplit
     tableEnv.createTemporaryView(rightTmpTable, rightTable)
 
@@ -62,8 +59,7 @@ class Join extends ConfigurableStop[DataStream[Row]] {
     }
 
     val resultTable = tableEnv.sqlQuery(sql)
-    val resultStream = tableEnv.toDataStream(resultTable)
-    out.write(resultStream)
+    out.write(resultTable)
 
   }
 
@@ -107,6 +103,6 @@ class Join extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 }

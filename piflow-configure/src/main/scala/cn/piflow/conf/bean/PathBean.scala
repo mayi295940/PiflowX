@@ -3,18 +3,20 @@ package cn.piflow.conf.bean
 import cn.piflow.conf.util.MapUtil
 
 class PathBean {
+
   var from : String = _
   var outport : String = _
   var inport : String = _
   var to : String = _
 
-  def init(from:String, outport: String, inport : String, to:String)= {
+  def init(from:String, outport: String, inport : String, to:String): Unit = {
     this.from = from
     this.outport = outport
     this.inport = inport
     this.to = to
   }
-  def init(map:Map[String,Any])= {
+
+  def init(map:Map[String,Any]): Unit = {
     this.from = MapUtil.get(map,"from").asInstanceOf[String]
     this.outport = MapUtil.get(map,"outport").asInstanceOf[String]
     this.inport = MapUtil.get(map,"inport").asInstanceOf[String]

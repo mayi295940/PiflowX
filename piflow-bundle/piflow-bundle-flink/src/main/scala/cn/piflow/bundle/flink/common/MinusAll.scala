@@ -4,11 +4,9 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.ImageUtil
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.Table
 
-class MinusAll extends ConfigurableStop[DataStream[Row]] {
+class MinusAll extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   override val description: String = "MinusAll 返回右表中不存在的记录。" +
@@ -34,25 +32,16 @@ class MinusAll extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
-    val tableEnv = pec.get[StreamTableEnvironment]()
-
-    val leftDF: DataStream[Row] = in.read(Port.LeftPort)
-    val rightDF: DataStream[Row] = in.read(Port.RightPort)
-
-    val leftTable = tableEnv.fromDataStream(leftDF)
-    val rightTable = tableEnv.fromDataStream(rightDF)
-
-    // todo : The MINUS operation on two unbounded tables is currently not supported.
+    val leftTable: Table = in.read(Port.LeftPort)
+    val rightTable: Table = in.read(Port.RightPort)
     val subtractTable = leftTable.minusAll(rightTable)
 
-    val subtractStream = tableEnv.toDataStream(subtractTable)
-
-    out.write(subtractStream)
+    out.write(subtractTable)
   }
 }

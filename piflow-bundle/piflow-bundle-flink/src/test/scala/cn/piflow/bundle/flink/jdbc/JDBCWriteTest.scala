@@ -1,15 +1,16 @@
-package cn.piflow.bundle.flink.common
+package cn.piflow.bundle.flink.jdbc
 
 import cn.piflow.bundle.flink.BaseTest
 import org.junit.Test
 
-class SQLQueryTest {
+class JDBCWriteTest {
 
   @Test
   def testFlow(): Unit = {
     //parse flow json
-    val file = "src/test/resources/common/JDBCRead.json"
+    val file = "src/test/resources/jdbc/JDBCWrite.json"
     BaseTest.testFlow(file)
   }
+
 
 }

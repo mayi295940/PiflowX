@@ -5,11 +5,10 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import org.apache.commons.lang3.StringUtils
-import org.apache.flink.streaming.api.datastream.DataStream
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
 
-class Insert extends ConfigurableStop[DataStream[Row]] {
+class Insert extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   override val description: String = "从上游流或已注册的输入表向已注册的输出表插入数据。" +
@@ -25,19 +24,17 @@ class Insert extends ConfigurableStop[DataStream[Row]] {
     outputTableName = MapUtil.get(map, "outputTableName").asInstanceOf[String]
   }
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
     if (StringUtils.isNotEmpty(inputTableName)) {
       val inputTable = tableEnv.from(inputTableName)
-      inputTable.insertInto(outputTableName)
+      inputTable.insertInto(outputTableName).execute().print()
     } else {
-      val df = in.read()
-      val inputTable = tableEnv.fromDataStream(df)
-      inputTable.insertInto(outputTableName)
+      in.read().insertInto(outputTableName).execute().print()
     }
   }
 
@@ -74,7 +71,7 @@ class Insert extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
 
 }

@@ -3,7 +3,7 @@ package cn.piflow.conf
 import cn.piflow.Stop
 import cn.piflow.conf.bean.PropertyDescriptor
 
-abstract class ConfigurableStop[DataStream] extends Stop[DataStream] {
+abstract class ConfigurableStop[DataType] extends Stop[DataType] {
 
   val authorEmail: String
   val description: String

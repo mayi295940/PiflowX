@@ -6,14 +6,12 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.IdGenerator
-import org.apache.flink.streaming.api.datastream.DataStream
-import org.apache.flink.table.api.TableDescriptor
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.types.Row
+import org.apache.flink.table.api.{Table, TableDescriptor}
 
-class DataGen extends ConfigurableStop[DataStream[Row]] {
+class DataGen extends ConfigurableStop[Table] {
 
-  override val authorEmail: String = "xjzhu@cnic.cn"
+  override val authorEmail: String = ""
   override val description: String = "Mock dataframe."
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
@@ -71,11 +69,11 @@ class DataGen extends ConfigurableStop[DataStream[Row]] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
+  override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
-  override def perform(in: JobInputStream[DataStream[Row]],
-                       out: JobOutputStream[DataStream[Row]],
-                       pec: JobContext[DataStream[Row]]): Unit = {
+  override def perform(in: JobInputStream[Table],
+                       out: JobOutputStream[Table],
+                       pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
@@ -91,9 +89,8 @@ class DataGen extends ConfigurableStop[DataStream[Row]] {
     tableEnv.createTemporaryTable(tmpTable, tableDescriptor)
 
     val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
-    val df = tableEnv.toDataStream(resultTable)
 
-    out.write(df)
+    out.write(resultTable)
   }
 
 }

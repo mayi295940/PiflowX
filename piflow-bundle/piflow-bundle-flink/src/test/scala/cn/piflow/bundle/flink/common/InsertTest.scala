@@ -3,12 +3,12 @@ package cn.piflow.bundle.flink.common
 import cn.piflow.bundle.flink.BaseTest
 import org.junit.Test
 
-class SQLQueryTest {
+class InsertTest {
 
   @Test
   def testFlow(): Unit = {
     //parse flow json
-    val file = "src/test/resources/common/JDBCRead.json"
+    val file = "src/test/resources/common/Insert.json"
     BaseTest.testFlow(file)
   }
 
