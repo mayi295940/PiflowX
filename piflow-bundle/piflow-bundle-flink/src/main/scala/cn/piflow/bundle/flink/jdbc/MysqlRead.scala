@@ -14,7 +14,7 @@ import org.apache.flink.types.Row
 class MysqlRead extends ConfigurableStop[DataStream[Row]] {
 
   val authorEmail: String = "xjzhu@cnic.cn"
-  val description: String = "Read data from mysql database with jdbc"
+  val description: String = "Read data from database with jdbc"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 

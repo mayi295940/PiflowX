@@ -28,7 +28,7 @@
       {
         "uuid": "2222",
         "name": "Subtract",
-        "bundle": "cn.piflow.bundle.flink.common.Subtract",
+        "bundle": "cn.piflow.bundle.flink.common.MinusAll",
         "properties": {
         }
       },

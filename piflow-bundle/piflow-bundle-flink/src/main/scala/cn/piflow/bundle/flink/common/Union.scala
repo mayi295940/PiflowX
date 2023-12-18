@@ -3,14 +3,14 @@ package cn.piflow.bundle.flink.common
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.types.Row
 
-class Merge extends ConfigurableStop[DataStream[Row]] {
+class Union extends ConfigurableStop[DataStream[Row]] {
 
-  override val authorEmail: String = "xjzhu@cnic.cn"
-  override val description: String = "Merge multi source."
+  override val authorEmail: String = ""
+  override val description: String = "Union多个输入源，会删除重复记录。输入源必须具有相同的字段类型。"
   override val inportList: List[String] = List(Port.AnyPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
@@ -18,7 +18,7 @@ class Merge extends ConfigurableStop[DataStream[Row]] {
 
   override def setProperties(map: Map[String, Any]): Unit = {
     val inportStr = MapUtil.get(map, "inports").asInstanceOf[String]
-    inports = inportStr.split(",").map(x => x.trim).toList
+    inports = inportStr.split(Constants.COMMA).map(x => x.trim).toList
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {

@@ -104,9 +104,9 @@ object FlinkFlowLauncher {
 
     // 集群信息
     val configuration = new Configuration()
-    configuration.setString(JobManagerOptions.ADDRESS, "192.168.56.100")
-    configuration.setInteger(JobManagerOptions.PORT, 6123)
-    configuration.setInteger(RestOptions.PORT, 8081)
+    configuration.setString(JobManagerOptions.ADDRESS, PropertyUtil.getPropertyValue("flink.jobmanager.rpc.address"))
+    configuration.setInteger(JobManagerOptions.PORT, PropertyUtil.getPropertyValue("flink.jobmanager.rpc.port").toInt)
+    configuration.setInteger(RestOptions.PORT, PropertyUtil.getPropertyValue("flink.rest.port").toInt)
 
     val program = PackagedProgram.newBuilder()
       .setConfiguration(configuration)

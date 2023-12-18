@@ -34,4 +34,6 @@ object Constants {
 
   val TAB_SIGN = "\t"
 
+  val ARROW_SIGN = "->"
+
 }

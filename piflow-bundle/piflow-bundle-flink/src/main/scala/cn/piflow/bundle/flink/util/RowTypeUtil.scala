@@ -105,14 +105,14 @@ object RowTypeUtil {
       }
 
       columnType.toLowerCase() match {
-        case "string" => sourceDDL += s"  $columnName ${DataTypes.STRING()},"
-        case "int" => sourceDDL += s"  $columnName ${DataTypes.INT()},"
-        case "double" => sourceDDL += s"  $columnName ${DataTypes.DOUBLE()},"
-        case "float" => sourceDDL += s"  $columnName ${DataTypes.FLOAT()},"
-        case "long" => sourceDDL += s"  $columnName ${DataTypes.BIGINT()},"
-        case "boolean" => sourceDDL += s"  $columnName ${DataTypes.BOOLEAN()},"
-        case "date" => sourceDDL += s"  $columnName ${DataTypes.DATE()},"
-        case "timestamp" => sourceDDL += s"  $columnName ${DataTypes.TIMESTAMP()},"
+        case "string" => sourceDDL += s"  `$columnName` ${DataTypes.STRING()},"
+        case "int" => sourceDDL += s"  `$columnName` ${DataTypes.INT()},"
+        case "double" => sourceDDL += s"  `$columnName` ${DataTypes.DOUBLE()},"
+        case "float" => sourceDDL += s"  `$columnName` ${DataTypes.FLOAT()},"
+        case "long" => sourceDDL += s"  `$columnName` ${DataTypes.BIGINT()},"
+        case "boolean" => sourceDDL += s"  `$columnName` ${DataTypes.BOOLEAN()},"
+        case "date" => sourceDDL += s"  `$columnName` ${DataTypes.DATE()},"
+        case "timestamp" => sourceDDL += s"  `$columnName` ${DataTypes.TIMESTAMP()},"
         case _ =>
           throw new RuntimeException("Unsupported type: " + columnType)
       }

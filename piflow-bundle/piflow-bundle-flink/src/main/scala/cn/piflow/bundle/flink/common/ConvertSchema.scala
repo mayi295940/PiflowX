@@ -35,7 +35,7 @@ class ConvertSchema extends ConfigurableStop[DataStream[Row]] {
     val array = new Array[ApiExpression](fields.length)
 
     for (x <- fields.indices) {
-      val old_new: Array[String] = fields(x).split("->").map(x => x.trim)
+      val old_new: Array[String] = fields(x).split(Constants.ARROW_SIGN).map(x => x.trim)
       array(x) = $(old_new(0)).as(old_new(1))
     }
 

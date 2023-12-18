@@ -22,10 +22,10 @@ class ConvertSchema extends ConfigurableStop[DataFrame] {
 
     var df = in.read()
 
-    val field = schema.split(",").map(x => x.trim)
+    val field = schema.split(Constants.COMMA).map(x => x.trim)
 
     field.foreach(f => {
-      val old_new: Array[String] = f.split("->").map(x => x.trim)
+      val old_new: Array[String] = f.split(Constants.ARROW_SIGN).map(x => x.trim)
       df = df.withColumnRenamed(old_new(0), old_new(1))
     })
 

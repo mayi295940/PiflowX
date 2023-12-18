@@ -8,10 +8,13 @@ import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.types.Row
 
-class Subtract extends ConfigurableStop[DataStream[Row]] {
+class Minus extends ConfigurableStop[DataStream[Row]] {
 
   override val authorEmail: String = ""
-  override val description: String = "Delete the existing data in the right table from the left table"
+  override val description: String = "Minus 返回左表中存在且右表中不存在的记录。" +
+    "左表中的重复记录只返回一次，换句话说，结果表中没有重复记录。" +
+    "两张表必须具有相同的字段类型。"
+
   override val inportList: List[String] = List(Port.LeftPort, Port.RightPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
@@ -46,7 +49,7 @@ class Subtract extends ConfigurableStop[DataStream[Row]] {
     val rightTable = tableEnv.fromDataStream(rightDF)
 
     // todo : The MINUS operation on two unbounded tables is currently not supported.
-    val subtractTable = leftTable.minusAll(rightTable)
+    val subtractTable = leftTable.minus(rightTable)
 
     val subtractStream = tableEnv.toDataStream(subtractTable)
 

@@ -3,7 +3,6 @@ package cn.piflow.bundle.flink.common
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.util.IdGenerator
 import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.streaming.api.datastream.DataStream
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -12,7 +11,7 @@ import org.apache.flink.types.Row
 class ShowData extends ConfigurableStop[DataStream[Row]] {
 
   // the email of author
-  val authorEmail: String = "xjzhu@cnic.cn"
+  val authorEmail: String = ""
   // the description of Stop
   val description: String = "Show Data"
   //the inport list of Stop
@@ -24,9 +23,6 @@ class ShowData extends ConfigurableStop[DataStream[Row]] {
   private var showNumber: Int = _
 
 
-  // core logic function of Stop
-  // read data by "in.read(inPortName)", the default port is ""
-  // write data by "out.write(data, outportName)", the default port is ""
   def perform(in: JobInputStream[DataStream[Row]],
               out: JobOutputStream[DataStream[Row]],
               pec: JobContext[DataStream[Row]]): Unit = {
@@ -37,23 +33,17 @@ class ShowData extends ConfigurableStop[DataStream[Row]] {
 
     val inputTable = tableEnv.fromDataStream(df)
 
-    val tmpTable = "TableShowTmp_" + IdGenerator.uuidWithoutSplit
-
-    tableEnv.createTemporaryView(tmpTable, inputTable)
-
-    val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable LIMIT $showNumber")
+    val resultTable = inputTable.limit(showNumber)
 
     val resultStream = tableEnv.toDataStream(resultTable)
 
     // 将 DataStream 结果打印到控制台
-    resultStream.print(tmpTable)
+    resultStream.print()
 
     out.write(df)
   }
 
-  def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[DataStream[Row]]): Unit = {}
 
   //set customized properties of your Stop
   def setProperties(map: Map[String, Any]): Unit = {

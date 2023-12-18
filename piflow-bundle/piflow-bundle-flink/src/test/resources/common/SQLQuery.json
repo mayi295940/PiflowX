@@ -16,7 +16,7 @@
       {
         "uuid": "2222",
         "name": "ExecuteSQL1",
-        "bundle": "cn.piflow.bundle.flink.common.ExecuteSQLStop",
+        "bundle": "cn.piflow.bundle.flink.common.SQLQuery",
         "properties": {
           "sql": "select name from  testView",
           "viewName": "testView"
