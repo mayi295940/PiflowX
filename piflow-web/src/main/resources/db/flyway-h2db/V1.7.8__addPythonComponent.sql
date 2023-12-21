@@ -2,14 +2,13 @@
 --Table structure for stops_hub_file_record
 -----------------------------------
 
-CREATE TABLE IF NOT EXISTS STOPS_HUB_FILE_RECORD
-(
-    ID                  VARCHAR(40) PRIMARY KEY NOT NULL COMMENT 'UUID',
-    FILE_NAME          VARCHAR(255) NULL DEFAULT NULL COMMENT 'file name',
-    FILE_PATH          VARCHAR(255) NULL DEFAULT NULL COMMENT 'file path',
-    STOPS_HUB_ID       VARCHAR(255) NULL DEFAULT NULL COMMENT 'stops_hub id',
-    DOCKER_IMAGES_NAME VARCHAR(255) NULL DEFAULT NULL COMMENT 'docker image name',
-    CRT_DTTM           DATETIME    NOT NULL COMMENT 'creat time'
+CREATE TABLE IF NOT EXISTS "STOPS_HUB_FILE_RECORD"(
+    "ID" VARCHAR(40) PRIMARY KEY NOT NULL,
+    "FILE_NAME"          VARCHAR(255) NULL DEFAULT NULL COMMENT 'file name',
+    "FILE_PATH"          VARCHAR(255) NULL DEFAULT NULL COMMENT 'file path',
+    "STOPS_HUB_ID"       VARCHAR(255) NULL DEFAULT NULL COMMENT 'stops_hub id',
+    "DOCKER_IMAGES_NAME" VARCHAR(255) NULL DEFAULT NULL COMMENT 'docker image name',
+    "CRT_DTTM"           DATETIME    NOT NULL COMMENT 'creat time'
 );
 
 

@@ -9,18 +9,18 @@ Configuration:
       - name: log.level.console
         value: info
       - name: log.path
-        value: log
+        value: ../../logs
       - name: project.name
         value: opendoc
       - name: log.pattern
         value: "%d{yyyy-MM-dd HH:mm:ss.SSS} -%5p ${PID:-} [%15.15t] %-30.30C{1.} : %m%n"
   Appenders:
-    Console: #输出到控制台
+    Console:  #输出到控制台
       name: CONSOLE
       target: SYSTEM_OUT
       PatternLayout:
         pattern: ${log.pattern}
-    #   启动日志
+#   启动日志
     RollingFile:
       - name: ROLLING_FILE
         fileName: ${log.path}/${project.name}.log
@@ -28,7 +28,7 @@ Configuration:
         PatternLayout:
           pattern: ${log.pattern}
         Filters:
-          #        一定要先去除不接受的日志级别，然后获取需要接受的日志级别
+#        一定要先去除不接受的日志级别，然后获取需要接受的日志级别
           ThresholdFilter:
             - level: error
               onMatch: DENY
@@ -37,12 +37,12 @@ Configuration:
               onMatch: ACCEPT
               onMismatch: DENY
         Policies:
-          TimeBasedTriggeringPolicy: # 按天分类
+          TimeBasedTriggeringPolicy:  # 按天分类
             modulate: true
             interval: 1
-        DefaultRolloverStrategy: # 文件最多100个
+        DefaultRolloverStrategy:     # 文件最多100个
           max: 100
-      #   平台日志
+#   平台日志
       - name: PLATFORM_ROLLING_FILE
         ignoreExceptions: false
         fileName: ${log.path}/platform/${project.name}_platform.log
@@ -50,12 +50,12 @@ Configuration:
         PatternLayout:
           pattern: ${log.pattern}
         Policies:
-          TimeBasedTriggeringPolicy: # 按天分类
+          TimeBasedTriggeringPolicy:  # 按天分类
             modulate: true
             interval: 1
-        DefaultRolloverStrategy: # 文件最多100个
+        DefaultRolloverStrategy:     # 文件最多100个
           max: 100
-      #   业务日志
+#   业务日志
       - name: BUSSINESS_ROLLING_FILE
         ignoreExceptions: false
         fileName: ${log.path}/bussiness/${project.name}_bussiness.log
@@ -63,12 +63,12 @@ Configuration:
         PatternLayout:
           pattern: ${log.pattern}
         Policies:
-          TimeBasedTriggeringPolicy: # 按天分类
+          TimeBasedTriggeringPolicy:  # 按天分类
             modulate: true
             interval: 1
-        DefaultRolloverStrategy: # 文件最多100个
+        DefaultRolloverStrategy:     # 文件最多100个
           max: 100
-      #   错误日志
+#   错误日志
       - name: EXCEPTION_ROLLING_FILE
         ignoreExceptions: false
         fileName: ${log.path}/exception/${project.name}_exception.log
@@ -80,12 +80,12 @@ Configuration:
         PatternLayout:
           pattern: ${log.pattern}
         Policies:
-          TimeBasedTriggeringPolicy: # 按天分类
+          TimeBasedTriggeringPolicy:  # 按天分类
             modulate: true
             interval: 1
-        DefaultRolloverStrategy: # 文件最多100个
+        DefaultRolloverStrategy:     # 文件最多100个
           max: 100
-      #   DB 日志
+#   DB 日志
       - name: DB_ROLLING_FILE
         ignoreExceptions: false
         fileName: ${log.path}/db/${project.name}_db.log
@@ -93,10 +93,10 @@ Configuration:
         PatternLayout:
           pattern: ${log.pattern}
         Policies:
-          TimeBasedTriggeringPolicy: # 按天分类
+          TimeBasedTriggeringPolicy:  # 按天分类
             modulate: true
             interval: 1
-        DefaultRolloverStrategy: # 文件最多100个
+        DefaultRolloverStrategy:     # 文件最多100个
           max: 100
   Loggers:
     Root:
