@@ -1,9 +1,9 @@
 <template>
   <section>
-    <!-- 头部分 -->
+    <!-- header -->
     <div class="navbar">
       <div class="left">
-        <span>{{ $t("sidebar.flow") }}</span>
+        <span>{{$t("sidebar.flow")}}</span>
       </div>
       <div class="right">
         <span class="button-warp" @click="handleModalSwitch">
@@ -11,53 +11,25 @@
         </span>
       </div>
     </div>
-    <!-- 检索部分 -->
+    <!-- search -->
     <div class="input">
       <Input
         suffix="ios-search"
         v-model="param"
         :placeholder="$t('modal.placeholder')"
-        style="width: 300px"
-      />
+        style="width: 300px"/>
     </div>
-    <!-- 表格部分 -->
+    <!-- Table button -->
     <Table border :columns="columns" :data="tableData">
       <template slot-scope="{ row }" slot="action">
-        <div>
-          <Tooltip content="Enter" placement="top-start">
-            <span class="button-warp" @click="handleButtonSelect(row, 1)">
-              <Icon type="ios-redo" />
+        <Tooltip v-for="(item, index) in promptContent" :key="index" :content="item.content" placement="top-start">
+            <span class="button-warp" @click="handleButtonSelect(row,index+1)">
+              <Icon :type="item.icon" />
             </span>
-          </Tooltip>
-          <Tooltip content="Edit" placement="top-start">
-            <span class="button-warp" @click="handleButtonSelect(row, 2)">
-              <Icon type="ios-create-outline" />
-            </span>
-          </Tooltip>
-          <Tooltip content="Run" placement="top-start">
-            <span class="button-warp" @click="handleButtonSelect(row, 3)">
-              <Icon type="ios-play" />
-            </span>
-          </Tooltip>
-          <Tooltip content="Debug" placement="top-start">
-            <span class="button-warp" @click="handleButtonSelect(row, 4)">
-              <Icon type="ios-bug" />
-            </span>
-          </Tooltip>
-          <Tooltip content="Delete" placement="top-start">
-            <span class="button-warp" @click="handleButtonSelect(row, 5)">
-              <Icon type="ios-trash" />
-            </span>
-          </Tooltip>
-          <Tooltip content="Save Template" placement="top-start">
-            <span class="button-warp" @click="handleButtonSelect(row, 6)">
-              <Icon type="md-checkbox-outline" />
-            </span>
-          </Tooltip>
-        </div>
+        </Tooltip>
       </template>
     </Table>
-    <!-- 分页部分 -->
+    <!-- paging -->
     <div class="page">
       <Page
         :prev-text="$t('page.prev_text')"
@@ -67,46 +39,37 @@
         :total="total"
         show-sizer
         @on-change="onPageChange"
-        @on-page-size-change="onPageSizeChange"
-      />
+        @on-page-size-change="onPageSizeChange"/>
     </div>
-    <!-- 弹窗模板部分 -->
+    <!-- Save template -->
     <Modal
       v-model="isTemplateOpen"
       :title="$t('modal.template_title')"
       :ok-text="$t('modal.ok_text')"
       :cancel-text="$t('modal.cancel_text')"
-      @on-ok="handletSetEmplate"
-    >
+      @on-ok="handletSetEmplate">
       <div class="modal-warp">
         <div class="item">
-          <Input
-            v-model="templateName"
-            :placeholder="$t('modal.placeholder')"
-          />
+          <Input v-model="templateName" :placeholder="$t('modal.placeholder')" />
         </div>
       </div>
     </Modal>
-    <!-- 弹窗添加/更新部分 -->
+    <!-- add / update -->
     <Modal
       v-model="isOpen"
-      :title="
-        id ? $t('flow_columns.update_title') : $t('flow_columns.create_title')
-      "
+      :title="id?$t('flow_columns.update_title'):$t('flow_columns.create_title')"
       :ok-text="$t('modal.ok_text')"
       :cancel-text="$t('modal.cancel_text')"
-      @on-ok="handleSaveUpdateData"
-    >
+      @on-ok="handleSaveUpdateData">
       <div class="modal-warp">
         <div class="item">
-          <label>{{ $t("flow_columns.flow_name") }}：</label>
+          <label>{{$t('flow_columns.flow_name')}}：</label>
           <Input
-            show-word-limit
-            maxlength="100"
-            v-model="name"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
+              show-word-limit
+              maxlength="100"
+              v-model="name"
+              :placeholder="$t('modal.placeholder')"
+              style="width: 350px" />
         </div>
         <div class="item">
           <label>{{ $t("flow_columns.engine_type") }}：</label>
@@ -124,54 +87,55 @@
           </Select>
         </div>
         <div class="item" v-if="engineType == 'spark'">
-          <label>{{ $t("flow_columns.driverMemory") }}：</label>
+          <label>{{$t('flow_columns.driverMemory')}}：</label>
           <Input
-            show-word-limit
-            maxlength="100"
-            v-model="driverMemory"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
+              show-word-limit
+              maxlength="100"
+              v-model="driverMemory"
+              :placeholder="$t('modal.placeholder')"
+              style="width: 350px"/>
         </div>
         <div class="item" v-if="engineType == 'spark'">
-          <label>{{ $t("flow_columns.executorNumber") }}：</label>
+          <label>{{$t('flow_columns.executorNumber')}}：</label>
           <Input
-            show-word-limit
-            maxlength="100"
-            v-model="executorNumber"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
+              show-word-limit
+              maxlength="100"
+              v-model="executorNumber"
+              :placeholder="$t('modal.placeholder')"
+              style="width: 350px"/>
         </div>
         <div class="item" v-if="engineType == 'spark'">
-          <label>{{ $t("flow_columns.executorMemory") }}：</label>
+          <label>{{$t('flow_columns.executorMemory')}}：</label>
           <Input
-            show-word-limit
-            maxlength="100"
-            v-model="executorMemory"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
+              show-word-limit
+              maxlength="100"
+              v-model="executorMemory"
+              :placeholder="$t('modal.placeholder')"
+              style="width: 350px"/>
         </div>
         <div class="item" v-if="engineType == 'spark'">
-          <label>{{ $t("flow_columns.executorCores") }}：</label>
+          <label>{{$t('flow_columns.executorCores')}}：</label>
           <Input
-            show-word-limit
-            maxlength="100"
-            v-model="executorCores"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
+              show-word-limit
+              maxlength="100"
+              v-model="executorCores"
+              :placeholder="$t('modal.placeholder')"
+              style="width: 350px"/>
         </div>
         <div class="item">
-          <label class="self">{{ $t("flow_columns.description") }}：</label>
+          <label>GlobalVariable：</label>
+          <Select class="select_type" v-model="fieldType" multiple>
+            <Option v-for="item in typeList" :value="item.id" :key="item.id">{{ item.name }}</Option>
+          </Select>
+        </div>
+        <div class="item">
+          <label class="self">{{$t('flow_columns.description')}}：</label>
           <Input
             v-model="description"
             type="textarea"
             :rows="4"
             :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
+            style="width: 350px"/>
         </div>
       </div>
     </Modal>
@@ -179,8 +143,6 @@
 </template>
 
 <script>
-// import WaterPoloChart from "./module/WaterPoloChart";
-
 export default {
   name: "flow",
   components: {},
@@ -191,22 +153,7 @@ export default {
       page: 1,
       limit: 10,
       total: 0,
-      tableData: [
-        {
-          id: "b0ca399d05004abe9a3321cf7287d9c8",
-          name: "text",
-          enginType: "spark",
-          uuid: "b0ca399d05004abe9a3321cf7287d9c8",
-          CreateTime: "2020-06-30 13:43:37",
-          description: "测试",
-          driverMemory: "1g",
-          executorNumber: "1",
-          executorMemory: "1g",
-          executorCores: "1",
-          crtDttm: "2020-06-30 13:43:37",
-          stopQuantity: 0,
-        },
-      ],
+      tableData: [],
 
       param: "",
       templateName: "",
@@ -214,20 +161,51 @@ export default {
       row: null,
       id: "",
       name: "",
-      engineType: "",
       description: "",
       driverMemory: "1g",
       executorNumber: 1,
       executorMemory: "1g",
       executorCores: 1,
-      engineTypeList: [{ name: "spark" }, { name: "flink" }],
+      fieldType: [],
+      typeList: [
+        {
+          id: 'String',
+          name: 'test1'
+        }
+      ],
+
+      promptContent: [
+        {
+          content: 'Enter',
+          icon: 'ios-redo'
+        },{
+          content: 'Edit',
+          icon: 'ios-create-outline'
+        },{
+          content: 'Run',
+          icon: 'ios-play'
+        },{
+          content: 'Debug',
+          icon: 'ios-bug'
+        },{
+          content: 'Delete',
+          icon: 'ios-trash'
+        },{
+          content: 'Save Template',
+          icon: 'md-checkbox-outline'
+        }
+      ],
+
+      globalParamsList: [],
+      engineTypeList: [{ name: "spark" }, { name: "flink" }]
     };
   },
   watch: {
-    //控制新增还是更新
     isOpen(state) {
       if (!state) {
         this.handleReset();
+      }else if (state && this.id === ''){
+        this.getGlobalList(false);
       }
     },
     param(val) {
@@ -270,11 +248,7 @@ export default {
   created() {
     this.getTableData();
   },
-  mounted() {
-    // this.height = size.PageH - 360;
-  },
   methods: {
-    // 重置
     handleReset() {
       this.page = 1;
       this.limit = 10;
@@ -287,7 +261,10 @@ export default {
       this.executorNumber = 1;
       this.executorMemory = "1g";
       this.executorCores = 1;
+      this.fieldType =[];
+      this.globalParamsList =[]
     },
+
     handleButtonSelect(row, key) {
       switch (key) {
         case 1:
@@ -301,9 +278,6 @@ export default {
               src: "/drawingBoard/page/flow/mxGraph/index.html?load=" + row.id,
             },
           });
-          // window.location.href =
-          //   window.location.origin +
-          //   `/drawingBoard/page/flow/index.html?load=${row.id}`;
           break;
         case 2:
           this.getRowData(row);
@@ -321,12 +295,11 @@ export default {
           this.row = row;
           this.isTemplateOpen = true;
           break;
-
         default:
           break;
       }
     },
-    // 新增/更新一条数据
+
     handleSaveUpdateData() {
       let data = {
         name: this.name,
@@ -336,14 +309,15 @@ export default {
         executorNumber: this.executorNumber,
         executorMemory: this.executorMemory,
         executorCores: this.executorCores,
+        globalParamsIds: this.fieldType
       };
       if (this.id) {
-        //更新数据
+        //update
         data.id = this.id;
         this.$axios
-          .get("/flow/updateFlowInfo", { params: data })
+          .post("/flow/updateFlowBaseInfo", this.$qs.stringify(data))
           .then((res) => {
-            if (res.data.code == 200) {
+            if (res.data.code === 200) {
               this.$Modal.success({
                 title: this.$t("tip.title"),
                 content:
@@ -355,7 +329,7 @@ export default {
             } else {
               this.$Message.error({
                 content: `${this.name} ` + this.$t("tip.update_fail_content"),
-                duration: 3,
+                duration: 3
               });
             }
           })
@@ -363,36 +337,29 @@ export default {
             console.log(error);
             this.$Message.error({
               content: this.$t("tip.fault_content"),
-              duration: 3,
+              duration: 3
             });
           });
       } else {
-        //新增数据
+        // add
+
         this.$axios
           .get("/flow/saveFlowInfo", { params: data })
           .then((res) => {
-            if (res.data.code == 200) {
-              // this.$Modal.success({
-              //   title: this.$t("tip.title"),
-              //   content: `${this.name} ` + this.$t("tip.add_success_content"),
-              //   onOk:()=>{
+            if (res.data.code === 200) {
               this.$router.push({
                 path: "/drawingBoard",
                 query: {
-                  src:
-                    "/drawingBoard/page/flow/mxGraph/index.html?load=" +
-                    res.data.flowId,
+                  src: "/drawingBoard/page/flow/mxGraph/index.html?load=" + res.data.flowId,
                 },
               });
-              // }
-              // });
               this.isOpen = false;
               this.handleReset();
               this.getTableData();
             } else {
               this.$Message.error({
-                content: `${this.name} ` + this.$t("tip.add_fail_content"),
-                duration: 3,
+                content: res.data.errorMsg,
+                duration: 3
               });
             }
           })
@@ -400,12 +367,12 @@ export default {
             console.log(error);
             this.$Message.error({
               content: this.$t("tip.fault_content"),
-              duration: 3,
+              duration: 3
             });
           });
       }
     },
-    //创建模板
+
     handletSetEmplate() {
       let data = {
         load: this.row.id,
@@ -413,9 +380,9 @@ export default {
         templateType: "TASK",
       };
       this.$axios
-        .get("/flowTemplate/saveFlowTemplate", { params: data })
+        .post("/flowTemplate/saveFlowTemplate", this.$qs.stringify(data))
         .then((res) => {
-          if (res.data.code == 200) {
+          if (res.data.code === 200) {
             this.$Modal.success({
               title: this.$t("tip.title"),
               content:
@@ -427,7 +394,7 @@ export default {
             this.$Message.error({
               content:
                 `${this.templateName} ` + this.$t("tip.save_fail_content"),
-              duration: 3,
+              duration: 3
             });
           }
         })
@@ -435,93 +402,99 @@ export default {
           console.log(error);
           this.$Message.error({
             content: this.$t("tip.fault_content"),
-            duration: 3,
+            duration: 3
           });
         });
     },
-    //开始运行
+
     handleRun(row) {
       let data = {
         flowId: row.id,
       };
-      this.$event.emit("looding", true);
+      this.$event.emit("loading", true);
       this.$axios
         .post("/flow/runFlow", this.$qs.stringify(data))
         .then((res) => {
-          if (res.data.code == 200) {
-            this.$event.emit("looding", false);
+          if (res.data.code === 200) {
+            this.$event.emit("loading", false);
             this.$Modal.success({
               title: this.$t("tip.title"),
               content: `${row.name} ` + this.$t("tip.run_success_content"),
-              onOk: () => {
+              onOk:()=>{
                 let src = "";
                 src = `/drawingBoard/page/process/mxGraph/index.html?drawingBoardType=PROCESS&load=${res.data.processId}`;
                 this.$router.push({
                   path: "/drawingBoard",
                   query: { src },
                 });
-              },
+              }
             });
           } else {
-            this.$event.emit("looding", false);
+            this.$event.emit("loading", false);
             this.$Message.error({
               content: `${row.name} ` + this.$t("tip.run_fail_content"),
-              duration: 3,
+              duration: 3
             });
           }
         })
         .catch((error) => {
           console.log(error);
-          this.$event.emit("looding", false);
+          this.$event.emit("loading", false);
           this.$Message.error({
             content: this.$t("tip.fault_content"),
-            duration: 3,
+            duration: 3
           });
         });
     },
 
-    //运行Dubug
     handleDubug(row) {
       let data = {
         flowId: row.id,
         runMode: "DEBUG",
       };
-      this.$event.emit("looding", true);
+      this.$event.emit("loading", true);
       this.$axios
         .post("/flow/runFlow", this.$qs.stringify(data))
         .then((res) => {
-          this.$event.emit("looding", false);
-          if (res.data.code == 200) {
+          this.$event.emit("loading", false);
+          if (res.data.code === 200) {
             this.$Modal.success({
               title: this.$t("tip.title"),
               content: `${row.name} ` + this.$t("tip.debug_success_content"),
+              onOk:()=>{
+                let src = "";
+                src = `/drawingBoard/page/process/mxGraph/index.html?drawingBoardType=PROCESS&load=${res.data.processId}`;
+                this.$router.push({
+                  path: "/drawingBoard",
+                  query: { src },
+                });
+              }
             });
           } else {
             this.$Message.error({
               content: `${row.name} ` + this.$t("tip.debug_fail_content"),
-              duration: 3,
+              duration: 3
             });
           }
         })
         .catch((error) => {
           console.log(error);
-          this.$event.emit("looding", false);
+          this.$event.emit("loading", false);
           this.$Message.error({
             content: this.$t("tip.fault_content"),
-            duration: 3,
+            duration: 3
           });
         });
     },
-    //获取行数据(编辑)
+
     getRowData(row) {
-      this.$event.emit("looding", true);
+      let data = { load: row.id };
+      this.$event.emit("loading", true);
       this.$axios
-        .get("/flow/queryFlowData", {
-          params: { load: row.id },
-        })
+        .post("/flow/queryFlowData", this.$qs.stringify(data))
         .then((res) => {
-          this.$event.emit("looding", false);
-          if (res.data.code == 200) {
+          this.$event.emit("loading", false);
+          if (res.data.code === 200) {
             let flow = res.data.flow;
             this.id = flow.id;
             this.name = flow.name;
@@ -530,7 +503,13 @@ export default {
             this.executorNumber = flow.executorNumber;
             this.executorMemory = flow.executorMemory;
             this.executorCores = flow.executorCores;
+            if (!!res.data.globalParamsList && res.data.globalParamsList.length !==0){
 
+              this.globalParamsList = res.data.globalParamsList;
+              this.getGlobalList(true)
+            }else {
+              this.getGlobalList(true)
+            }
             this.isOpen = true;
           } else {
             this.$Modal.success({
@@ -543,7 +522,7 @@ export default {
           console.log(error);
         });
     },
-    //删除某一行数据
+
     handleDeleteRow(row) {
       this.$Modal.confirm({
         title: this.$t("tip.title"),
@@ -557,7 +536,7 @@ export default {
           this.$axios
             .get("/flow/deleteFlow", { params: data })
             .then((res) => {
-              if (res.data.code == 200) {
+              if (res.data.code === 200) {
                 this.$Modal.success({
                   title: this.$t("tip.title"),
                   content:
@@ -568,7 +547,7 @@ export default {
               } else {
                 this.$Message.error({
                   content: res.data.errorMsg,
-                  duration: 3,
+                  duration: 3
                 });
               }
             })
@@ -576,16 +555,13 @@ export default {
               console.log(error);
               this.$Message.error({
                 content: this.$t("tip.fault_content"),
-                duration: 3,
+                duration: 3
               });
             });
-        },
-        onCancel: () => {
-          // this.$Message.info('Clicked cancel');
-        },
+        }
       });
     },
-    //获取表格数据
+
     getTableData() {
       let data = { page: this.page, limit: this.limit };
       if (this.param) {
@@ -596,13 +572,13 @@ export default {
           params: data,
         })
         .then((res) => {
-          if (res.data.code == 200) {
+          if (res.data.code === 200) {
             this.tableData = res.data.data;
             this.total = res.data.count;
           } else {
             this.$Message.error({
               content: this.$t("tip.request_fail_content"),
-              duration: 3,
+              duration: 3
             });
           }
         })
@@ -610,27 +586,90 @@ export default {
           console.log(error);
           this.$Message.error({
             content: this.$t("tip.fault_content"),
-            duration: 3,
+            duration: 3
           });
         });
     },
+
     onPageChange(pageNo) {
       this.page = pageNo;
       this.getTableData();
-      // this.spinShow=true;
     },
+
     onPageSizeChange(pageSize) {
       this.limit = pageSize;
       this.getTableData();
-      // this.spinShow=true;
     },
-    // 弹窗显隐切换
+
     handleModalSwitch() {
       this.isOpen = !this.isOpen;
     },
+
+    getGlobalList(noData){
+      this.$axios
+          .get("/flowGlobalParams/globalParamsList")
+          .then(res => {
+            if (res.data.code === 200) {
+              let data = res.data.data;
+              this.typeList = data;
+
+              if (!noData){
+                this.typeList.forEach(item=>{
+                  this.fieldType .push(item.id)
+                })
+              }else {
+                this.globalParamsList.forEach(item=>{
+                  this.fieldType .push(item.id)
+                })
+              }
+
+            } else {
+
+            }
+          })
+          .catch(error => {
+            console.log(error);
+            this.$Message.error({
+              content: this.$t("tip.fault_content"),
+              duration: 3
+            });
+          });
+    }
   },
 };
 </script>
 <style lang="scss" scoped>
 @import "./index.scss";
+.select_type{
+  width: 350px;
+
+  /*滚动条整体部分*/
+  ::v-deep .ivu-select-dropdown::-webkit-scrollbar {
+    width: 6px;
+    height: 10px;
+  }
+  /*滚动条的轨道*/
+  ::v-deep .ivu-select-dropdown::-webkit-scrollbar-track {
+    background-color: #FFFFFF;
+  }
+  /*滚动条里面的小方块，能向上向下移动*/
+  ::v-deep .ivu-select-dropdown::-webkit-scrollbar-thumb {
+    background-color: #ebebeb;
+    border-radius: 5px;
+    border: 1px solid #F1F1F1;
+    box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+  }
+  ::v-deep .ivu-select-dropdown::-webkit-scrollbar-thumb:hover {
+    background-color: #A8A8A8;
+  }
+  ::v-deep .ivu-select-dropdown::-webkit-scrollbar-thumb:active {
+    background-color: #787878;
+  }
+  /*边角，即两个滚动条的交汇处*/
+  ::v-deep .ivu-select-dropdown::-webkit-scrollbar-corner {
+    background-color: #FFFFFF;
+  }
+
+}
+
 </style>

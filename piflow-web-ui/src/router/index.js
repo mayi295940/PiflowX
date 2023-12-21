@@ -5,9 +5,7 @@ Vue.use(Router)
 
 export default new Router({
   // mode: 'history',
-  // mode: 'hash', //默认 有#号
   routes: [
-
     {
       path: '/login',
       name: 'login',
@@ -23,14 +21,14 @@ export default new Router({
       path: '/',
       name: 'main',
       component: () => import('../components/Main.vue'),
-      redirect: '/',//设置默认指向的路径
-      children: [ //这里就是二级路由的配置
+      redirect: '/',
+      children: [
         {
           path: '/',
           name: 'content',
           component: () => import('../components/Content.vue'),
-          redirect: '/',//设置默认指向的路径
-          children: [ //这里就是二级路由的配置
+          redirect: '/',
+          children: [
             {
               path: '/',
               name: 'sections',
@@ -39,11 +37,7 @@ export default new Router({
             {
               path: '/flow',
               name: 'flow',
-              component: () => import('../components/pages/Flow'),
-              meta: {
-                title: 'flow',
-                publicPage: true, // Permission disclosure(权限公开)
-              }
+              component: () => import('../components/pages/Flow')
             },
             {
               path: '/group',
@@ -57,7 +51,7 @@ export default new Router({
             },
             {
               path: '/template',
-              name: 'template',
+              name: 'templates',
               component: () => import('../components/pages/Template')
             },
             {
@@ -85,6 +79,26 @@ export default new Router({
               name: 'TestData',
               component: () => import('../components/pages/TestData')
             },
+            //{
+             // path: '/code',
+           //   name: 'Code',
+            //  component: () => import('../components/pages/Code')
+           // },
+            {
+              path: '/publish',
+              name: 'publish',
+              component: () => import('../components/pages/publish')
+            },
+            {
+              path: '/stopProperties',
+              name: 'stopProperties',
+              component: () => import('../components/pages/publish/properties')
+            },
+            //{
+            //  path: '/codeDetailed',
+            //  name: 'codeBlock',
+            //  component: () => import('../components/pages/Code/codeBlock')
+           // },
             {
               path: '/admin',
               name: 'admin',
@@ -94,62 +108,46 @@ export default new Router({
               path: '/stopsComponent',
               name: 'stopsComponent',
               component: () => import('../components/pages/StopsComponent')
+            },
+            {
+              path: '/globalVariable',
+              name: 'globalVariable',
+              component: () => import('../components/pages/Admin/globalVariable')
+            },
+
+            {
+              path: '/user',
+              name: 'user',
+              component: () => import('../components/pages/User')
+            },
+            {
+              path: '/user',
+              name: 'user',
+              component: () => import('../components/pages/User/index')
+            },
+            {
+              path:'/log',
+              name:'log',
+              component:() => import('../components/pages/User/log')
+            },
+            {
+              path:'/modification',
+              name:'modification',
+              component:() => import('../components/pages/User/modification')
+            },
+            {
+              path:'/bindingAccount',
+              name:'bindingAccount',
+              component:() => import('../components/pages/User/bindingAccount')
             }
           ]
         },
         {
           path: '/drawingBoard',
           name: 'drawingboard',
-          component: () => import('../components/pages/DrawingBoard'),
-          meta: {
-            title: 'drawingboard',
-            publicPage: true, // Permission disclosure(权限公开)
-          }
+          component: () => import('../components/pages/DrawingBoard')
         }
       ]
-    },
-
-
-
-
-
-    // {
-    //   path: '/',
-    //   name: 'main',
-    //   component: () => import('../components/Main.vue'),
-    //   redirect: '/',//设置默认指向的路径
-    //   children: [ //这里就是二级路由的配置
-    //     {
-    //       path: '/',
-    //       name: 'flow',
-    //       component: () => import('../components/pages/Flow')
-    //     },
-    //     {
-    //       path: '/group',
-    //       name: 'group',
-    //       component: () => import('../components/pages/Group')
-    //     },
-    //     {
-    //       path: '/processes',
-    //       name: 'processes',
-    //       component: () => import('../components/pages/Processes')
-    //     },
-    //     {
-    //       path: '/template',
-    //       name: 'template',
-    //       component: () => import('../components/pages/Template')
-    //     },
-    //     {
-    //       path: '/datasource',
-    //       name: 'datasource',
-    //       component: () => import('../components/pages/DataSource')
-    //     },
-    //     {
-    //       path: '/admin',
-    //       name: 'admin',
-    //       component: () => import('../components/pages/Admin')
-    //     },
-    //   ]
-    // },
+    }
   ]
 })

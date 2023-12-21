@@ -1,5 +1,5 @@
 module.exports = {
-    title:"PiFlow大数据流水线管理系统",
+    title:window.$SYSTEM_TITLE_ZH,
     logOut: '退出',
     sidebar: {
         dashboard: "首页",
@@ -12,24 +12,39 @@ module.exports = {
         stopHub: '自定义组件',
         sparkJar: "Spark Jar包",
         testData: "测试数据",
+        code: "在线运行",
+        publish: "一键发布",
         example: "样例",
         admin: "高级",
         admin_schedule: '监控同步任务',
-        stopsComponent: '组件显示'
+        stopsComponent: '组件显示',
+        globalVariable: '全局变量',
+        user:'用户管理',
+        log:'通知管理',
+        modification:"修改密码",
+        bindingAccount:"绑定开发者账号",
+        basicInfo:"基本信息",
+        LocalDataSource:"本地数据源",
+        LocalModelAlgorithm:"本地模型算法",
+        Example:"流水线样例",
+        admin:"管理员",
+        LabelManagement:"标签管理",
+        selectSource:"选择数据源"
     },
     page: {
         prev_text: "上一页",
         next_text: "下一页"
     },
     index: {
-        cpu: "核"
+        cpu: "核",
+        loading: "加载中..."
     },
     tip: {
-        title: "PiFlow系统提示",
+        title: "πFlow系统提示",
         existed: "用户名重复！",
         fault_content: "后台程序运行发生未知错误！",
         update_success_content: "更新成功！",
-        update_fail_content: "更新失败！",
+        update_fail_content: "更新失败或admin信息不能修改！",
         save_success_content: "保存成功！",
         save_fail_content: "保存失败！",
         add_success_content: "添加成功！",
@@ -44,11 +59,13 @@ module.exports = {
         unmount_fail_content: "卸载失败！",
         get_success_content: "数据采集成功！",
         get_fail_content: "数据采集失败！",
+        get_user_content:"用户无此权限！",
         debug_success_content: "debug 运行成功！",
         debug_fail_content: "debug 运行失败！",
         delete_success_content: "删除成功！",
         delete_fail_content: "删除失败！",
         request_fail_content: "数据请求失败！",
+        reference_content: "被引用，不允许删除！",
 
         upload_success_content: "模板上传成功！",
         upload_fail_content: "模板上传失败！",
@@ -64,13 +81,17 @@ module.exports = {
         upload_text: "提交",
         confirm: "确定",
         cancel_text: "取消",
+        reset_text: "重置",
         delete_content: "确定要删除",
-        cancel_content: "确定要取消本次创建吗"
+        cancel_content: "确定要取消本次创建吗",
+        editSave:"编辑&保存",
+        next:"下一步"
     },
     flow_columns: {
         create_title: "新建流水线",
         update_title: "更改流水线",
         flow_name: "流水线名称",
+        engine_type: "计算引擎",
         driverMemory: "Driver内存",
         executorNumber: "Executor数量",
         executorMemory: "Executor内存",
@@ -91,8 +112,8 @@ module.exports = {
     },
     progress_columns: {
         progress: "进程",
-        endTime: "开始时间",
-        startTime: "结束时间",
+        endTime: "结束时间",
+        startTime: "开始时间",
         processType: "流程类型",
         description: "描述信息",
         id: "ProcessGroupId",
@@ -116,7 +137,9 @@ module.exports = {
         CreateTime: "创建时间",
         dataSourceType: "数据源类型",
         action: "操作",
-        isLinked: "是否同步更改?相关的组件："
+        isLinked: "是否同步更改?相关的组件：",
+        yes: "Yes",
+        no: "No",
     },
     schedule_columns: {
         create_title: "新建流水线调度",
@@ -136,6 +159,7 @@ module.exports = {
     StopHub_columns: {
         upload: "新建自定义组件",
         name: "组件名称",
+        time:"日期",
         version: "版本",
         jarUrl: "Jar 地址",
         status: "状态",
@@ -157,6 +181,16 @@ module.exports = {
         fileDescription: "点 击 或 拖 动 文件 在 此 处 上 传",
         uploadPrompt: "若您上传的CSV文件包含中文字符，请使用UTF-8编码"
     },
+    code_columns: {
+        create_title: "新建在线运行",
+        update_title: "更改在线运行",
+        code_name: "代码名称",
+        name: "名称",
+        description: "描述信息",
+        CreateTime: "创建时间",
+        UpdateTime: "修改时间",
+        action: "操作"
+    },
     admin_columns: {
         create_title: "新建调度",
         update_title: "更改调度",
@@ -170,9 +204,48 @@ module.exports = {
         createTime: "创建时间",
         action: "操作"
     },
+    user_columns:{
+        create_title: "创建用户",
+        update_title: "更新用户",
+        name: "姓名",
+        username: "用户名",
+        status: "状态",
+        createTime: "创建时间",
+        action: "操作",
+        password:"密码",
+        role:"权限"
+    },
+    modification_columns:{
+        oldPasswd: "旧密码",
+        passwd: "新密码",
+        passwdCheck: "确认密码",
+        Reset: "重置",
+        Submit: "确认"
+    },
+    bindingAccount_columns:{
+        value: "账号",
+        Reset: "重置",
+        Submit: "确认"
+    },
+    log_columns:{
+        username: "用户名",
+        lastLoginIp:"ip地址",
+        createTime: "创建时间",
+        lastUpdateTime:"操作时间",
+        action: "操作动作"
+    },
     stopsComponent_columns: {
         name: "组件名称",
         description: "描述信息",
+    },
+    globalVariable_columns: {
+        create_title: "新建全局变量",
+        update_title: "更改全局变量",
+        content: "全局变量内容",
+        name: "名称",
+        type: "类型",
+        createTime: "创建时间",
+        action: "操作"
     },
     homeInfo: {
         introduction_title: "简介",
@@ -183,11 +256,54 @@ module.exports = {
         HDFS_Disk: 'HDFS磁盘使用率',
         totalCapacity: '总容量',
         Used: '已使用',
-        introduction_Info: "PiFlow是一款基于分布式计算引擎Spark开发的大数据流水线系统，以所见即所得的方式，实现大数据采集、处理、存储与分析流程化配置、运行与智能监控，提供了100+的标准化组件， 包括Hadoop 、Spark、MLlib、Hive、Solr、ElasticSearch、Redis等，更支持面向领域、灵活的二次组件开发，性能优越。",
+        introduction_Info:window.$SYSTEM_INTRODUCTION_INFO_ZH,
         flowStatistics: "流水线统计信息，包括流水线Flow数量、运行态流水线Processor数量，以及各运行状态下Processor数量。",
         scheduleStatistics: "调度统计信息，包括调度流水线/流水线组数量，以及各个状态下Schedule数量。",
         groupStatistics: "流水线组统计信息，包括流水线组Group数量、运行态流水线组Processor数量，以及各运行状态下Processor数量。",
         OtherStatistics: "其他统计信息，包括数据源DataSource数量、自定义组件插件StopsHub数量、模板Template数量。",
         ComponentStatistics: "组件统计信息，包括数据处理组件Stop数量，数据处理组件组StopGroup数量。",
-    }
+    },
+    python:{
+        packageName:"组件包名称",
+        version:"版本",
+        FileUrl:"zip地址",
+        state:"状态",
+        componentName:"组件名",
+        viewDetail:"查看详情",
+        noData:"暂无数据",
+        detailInfo:"详情信息",
+        pythonComponent:"Python组件",
+        pythonVersion:"python版本",
+        parameter:"是否有参数传入",
+        uploadLogo:"上传图标",
+        expandInfo:"拓展信息",
+        logo:"图标",
+        team:"团队",
+        componentClass:"组件类",
+        chineseName:"中文名",
+        Instructions:"使用说明",
+        description:"详细描述信息",
+        author:"组件作者",
+        email:"作者联系邮箱",
+        algorithm:"协同模型算法",
+        added:"已添加",
+        unadded:"未添加",
+        upload: '上传',
+        language: '算法语言',
+        version_lang: '语言版本',
+    },
+    basicInfo:{
+        basicInfo:"基本信息",
+        dataCenterName:"数据中心名称",
+        email:"联系邮箱",
+        org:'依托单位',
+        province:'省市',
+        address:'平台网址',
+        desc:"描述信息",
+        tel:'联系电话',
+        info:'附件信息',
+        uploadImg:'上传图片',
+        save:"保存",
+        department:'主管部门'
+    },
 }

@@ -1,4 +1,3 @@
-
 <template>
   <Menu
     :active-name="menuName"
@@ -44,20 +43,17 @@
 </template>
 <script>
 import { log } from 'util';
+import Cookies from "js-cookie";
 export default {
   data() {
     return {
       isCollapsed: false,
       menuName: "home",
       mouseOver: ""
-      // menulist: []
     };
   },
   props: ["width"],
   computed: {
-    // menuitemClasses() {
-    //   return [this.isCollapsed ? "collapsed-menu" : ""];
-    // },
     menulist() {
       return [
         {
@@ -120,6 +116,18 @@ export default {
           router: "TestData",
           name: "TestData"
         },
+       // {
+          //btnName: this.$t("sidebar.code"),
+          //icoName: "md-code",
+         // router: "Code",
+         // name: "Code"
+        //},
+        {
+          btnName: this.$t("sidebar.publish"),
+          icoName: "md-checkbox-outline",
+          router: "publish",
+          name: "publish"
+        },
         {
           btnName: this.$t("sidebar.example"),
           icoName: "md-cube",
@@ -162,6 +170,38 @@ export default {
               icoName: "ios-paper",
               btnName: this.$t("sidebar.stopsComponent"),
               name: "stopsComponent",
+            },{
+              router: "/globalVariable",
+              icoName: "ios-paper",
+              btnName: this.$t("sidebar.globalVariable"),
+              name: "globalVariable",
+            }
+          ]
+        },
+        {
+          btnName: this.$t("sidebar.user"),
+          icoName: "ios-people",
+          children: [
+            {
+              router: "/user",
+              icoName: "ios-paper",
+              btnName:  this.$t("sidebar.user"),
+              name: "user",
+            },{
+              router: "/log",
+              icoName: "ios-paper",
+              btnName:  this.$t("sidebar.log"),
+              name: "log",
+            },{
+              router: "/modification",
+              icoName: "ios-paper",
+              btnName:  this.$t("sidebar.modification"),
+              name: "modification",
+            },{
+              router: "/bindingAccount",
+              icoName: "ios-paper",
+              btnName:  this.$t("sidebar.bindingAccount"),
+              name: "bindingAccount",
             }
           ]
         }
@@ -172,6 +212,21 @@ export default {
     this.$event.on("isCollapsed", e => {
       this.isCollapsed = e;
     });
+
+    let isRole = JSON.parse(Cookies.get('setUser'));
+    if (!!isRole && isRole[0].role.stringValue !== "ADMIN"){
+      this.menulist.forEach((item,index,arr)=>{
+        if (!!item.children){
+          item.children.forEach((items,inx,arrs)=>{
+            if ( items.name=== "user" || items.name=== "stopsComponent"){
+              arrs.splice(inx,1);
+            }
+          })
+        }
+      })
+    }
+
+
   },
   mounted() {
     let menuName = window.sessionStorage.getItem("menuName");
@@ -182,31 +237,20 @@ export default {
     if (!menuName){
       window.sessionStorage.setItem("menuName", this.menuName);
       this.menuName = window.sessionStorage.getItem("menuName");
-
     }
-    // this.$refs.sideNav;
-    // window.sessionStorage.removeItem("menuName");
-
-
-    // let list = JSON.parse(window.sessionStorage.getItem("sysMenuVoList"));
-
   },
   watch: {
     $route() {
-      //路由变化时就重新执行这个方法 更新传来的参数
       this.getRouter();
     }
   },
   methods: {
-    // handleMouseOver(name) {
-    //   this.mouseOver = name;
-    // },
     handleMenuSelect(name) {
       if (this.menuName !== name) {
         window.sessionStorage.setItem("menuName", name);
       }
     },
-    //监听路由动态
+
     getRouter() {
       let menuName = window.sessionStorage.getItem("menuName");
       // console.log(this.$route.path);//为当前所在页面路由
@@ -236,7 +280,7 @@ export default {
     margin: 0 20px;
   }
   .item-par,
-  /deep/ .ivu-menu-submenu-title {
+  ::v-deep .ivu-menu-submenu-title {
     margin-top: 1px;
     color: #333333;
     font-size: 12px;
@@ -252,23 +296,23 @@ export default {
   }
 
   .item-par:hover,
-  /deep/ .ivu-menu-submenu-title:hover {
+  ::v-deep .ivu-menu-submenu-title:hover {
     filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
     background: #fcfcfc;
     border-color: #ccc;
     color: #497b95;
   }
 
-  /deep/ .ivu-menu-item-selected {
+  ::v-deep .ivu-menu-item-selected {
     color: #fff !important;
     vertical-align: middle;
-    background: #3da375 !important;
+    background: var(--sidebar-color) !important;
     border-color: #47869e;
     box-shadow: 0 1px 1px rgba(255, 255, 255, 0.3) inset;
   }
 }
 
-/deep/ .ivu-menu {
+::v-deep .ivu-menu {
   .ivu-menu-item {
     border: 1px solid #ddd;
     border-top: 0;

@@ -1,5 +1,5 @@
 module.exports = {
-    title: "PiFlow Big Data Pipeline System",
+    title: window.$SYSTEM_TITLE_EN,
     logOut: 'Log out',
     sidebar: {
         dashboard: "Dashboard",
@@ -12,24 +12,39 @@ module.exports = {
         stopHub: "StopHub",
         sparkJar: "SparkJar",
         testData: "TestData",
+        code: "Code",
+        publish: "Publish",
         example: "Example",
         admin: "Admin",
         admin_schedule: 'Schedule',
-        stopsComponent: 'StopsComponent'
+        stopsComponent: 'StopsComponent',
+        globalVariable: 'GlobalVariable',
+        user:"User",
+        log:"Log",
+        modification:"Modification",
+        bindingAccount:"BindingAccount",
+        basicInfo:"Basic Information",
+        LocalDataSource:"Local Data",
+        LocalModelAlgorithm:"Local Model",
+        Example:"Flow Sample",
+        admin:"Admin",
+        LabelManagement:"Label Management",
+        selectSource:"Select Label"
     },
     page: {
         prev_text: "Previous",
         next_text: "Next"
     },
     index: {
-        cpu: "cores"
+        cpu: "cores",
+        loading: "Loading..."
     },
     tip: {
-        title: "PiFlow system tips",
+        title: "πFlow system tips",
         existed: "UserName Existed！",
         fault_content: "An unknown error occurred in the background run！",
         update_success_content: "update succeeded！",
-        update_fail_content: "update failed！",
+        update_fail_content: "update failed or admin information cannot be changed！",
         save_success_content: "template saved successfully！",
         save_fail_content: "template save failed！",
         add_success_content: "added succeeded！",
@@ -44,11 +59,13 @@ module.exports = {
         unmount_fail_content: "unmount failed！",
         get_success_content: "Data acquisition successful！",
         get_fail_content: "Data acquisition failed！",
+        get_user_content:"User does not have this permission!",
         debug_success_content: "debug succeeded！",
         debug_fail_content: "debug failed！",
         delete_success_content: "deleted successfully！",
         delete_fail_content: "deletion failed！",
         request_fail_content: "Data request failed！",
+        reference_content: "referenced, not allowed to delete!",
 
         upload_success_content: "Template upload successful！",
         upload_fail_content: "Template upload failed！",
@@ -58,19 +75,23 @@ module.exports = {
         data_fail_content: "Data acquisition failed！",
     },
     modal: {
-        placeholder: "please enter the content...",
+        placeholder: "Please enter…",
         template_title: "Template name",
         ok_text: "Submit",
         upload_text: "upload",
         confirm: "Confirm",
         cancel_text: "Cancel",
+        reset_text: "Reset",
         delete_content: "Are you sure to delete",
-        cancel_content: "Are you sure you want to cancel this creation"
+        cancel_content: "Are you sure you want to cancel this creation",
+        editSave:"Edit or save",
+        next:"Next"
     },
     flow_columns: {
         create_title: "Create Flow",
         update_title: "Update Flow",
         flow_name: "FlowName",
+        engine_type: "EngineType",
         driverMemory: "DriverMemory",
         executorNumber: "ExecutorNumber",
         executorMemory: "ExecutorMemory",
@@ -116,7 +137,9 @@ module.exports = {
         CreateTime: "CreateTime",
         dataSourceType: "DataSourceType",
         action: "Actions",
-        isLinked: "Do you synchronize the changes? Related components are："
+        isLinked: "Do you synchronize the changes? Related components are：",
+        yes: "Yes",
+        no: "No",
     },
     schedule_columns: {
         create_title: "Create Schedule",
@@ -136,6 +159,7 @@ module.exports = {
     StopHub_columns: {
         upload: "Upload Jar",
         name: "Name",
+        time:"Time",
         version: "Version",
         jarUrl: "JarUrl",
         status: "Status",
@@ -157,6 +181,16 @@ module.exports = {
         fileDescription: "Click or drag file here to upload",
         uploadPrompt: "If the CSV file you upload contains Chinese characters, please use UTF-8 encoding"
     },
+    code_columns: {
+        create_title: "Create Code",
+        update_title: "Update Code",
+        code_name: "CodeName",
+        name: "Name",
+        description: "Description",
+        CreateTime: "CreateTime",
+        UpdateTime: "UpdateTime",
+        action: "Actions"
+    },
     admin_columns: {
         create_title: "Create Schedule",
         update_title: "Update Schedule",
@@ -170,9 +204,48 @@ module.exports = {
         createTime: "CreateTime",
         action: "Actions"
     },
+    user_columns:{
+        create_title: "Create User",
+        update_title: "Update User",
+        name: "Name",
+        username: "userName",
+        status: "Status",
+        createTime: "CreateTime",
+        action: "Actions",
+        password:"Password",
+        role:"Role"
+    },
+    modification_columns:{
+        oldPasswd: "old Password",
+        passwd: "new Password",
+        passwdCheck: "Confirm",
+        Reset: "Reset",
+        Submit: "Submit"
+    },
+    bindingAccount_columns:{
+        value: "Account",
+        Reset: "Reset",
+        Submit: "Submit"
+    },
+    log_columns:{
+        username: "userName",
+        lastLoginIp:"ip",
+        createTime: "createTime",
+        lastUpdateTime:"lastUpdateTime",
+        action: "action"
+    },
     stopsComponent_columns: {
         name: "Name",
         description: "Description",
+    },
+    globalVariable_columns: {
+        create_title: "Create GlobalVariable",
+        update_title: "Update GlobalVariable",
+        content: "Value",
+        name: "Name",
+        type: "Type",
+        createTime: "CreateTime",
+        action: "Actions"
     },
     homeInfo: {
         introduction_title: "Introduction",
@@ -183,11 +256,54 @@ module.exports = {
         HDFS_Disk: 'HDFS disk usage',
         totalCapacity: 'total capacity',
         Used: 'Used',
-        introduction_Info: "PiFlow is a big data pipeline system developed based on the distributed computing engine Spark. It realizes the flow configuration, operation and intelligent monitoring of big data collection, processing, storage and analysis in a WYSIWYG way, providing 100+ standardization Components, including Hadoop, Spark, MLlib, Hive, Solr, ElasticSearch, Redis, etc., supporting field-oriented and flexible secondary component development with superior performance.",
+        introduction_Info:window.$SYSTEM_INTRODUCTION_INFO_EN,
         flowStatistics: "Pipeline statistics, include the number of pipeline flows, the number of processors in the running state, and the number of processors in each running state.",
         scheduleStatistics: "Scheduling statistics, include the number of scheduling pipelines/pipeline groups, and the number of schedules in each state.",
         groupStatistics: "Pipeline group statistics, include the number of pipeline groups, the number of processors of the pipeline groups in the running state, and the number of processors in each running state.",
         OtherStatistics: "Other statistics include the number of DataSources, the number of custom component plug-ins StopsHub, and the number of templates.",
         ComponentStatistics: "Component statistics, include the number of data processing components Stop and the number of data processing component groups StopGroup.",
-    }
+    },
+    python:{
+        packageName:"ComponentPackageName",
+        version:"Version",
+        FileUrl:"FileUrl",
+        state:"State",
+        componentName:"Component name",
+        viewDetail:"View details",
+        noData:"NoData",
+        detailInfo:"Detailed information",
+        pythonComponent:"Python component：",
+        pythonVersion:"Python version：",
+        parameter:"Whether a parameter is passed",
+        uploadLogo:"Upload icon",
+        expandInfo:"Expand info",
+        logo:"logo",
+        team:"Team",
+        componentClass:"Component class",
+        chineseName:"Chinese name",
+        Instructions:"Instructions",
+        description:"description",
+        author:"author",
+        email:"email",
+        algorithm:"Collaborative model algorithm",
+        added:"added",
+        unadded:"unadded",
+        upload: 'Upload',
+        language: 'Language',
+        version_lang: 'Version',
+    },
+    basicInfo:{
+        basicInfo:"Basic Information",
+        dataCenterName:"Data center name:",
+        email:"Contact Email:",
+        org:'Supporting Institution:',
+        province:'Province / City:',
+        address:'Platform Website:',
+        desc:"Description:",
+        tel:'Contact Number:',
+        info:'Attachment:',
+        uploadImg:'Upload Image:',
+        save:"Save",
+        department:'Administration:'
+    },
 }

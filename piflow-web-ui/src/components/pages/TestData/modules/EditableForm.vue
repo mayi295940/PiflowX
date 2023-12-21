@@ -38,9 +38,6 @@ export default {
     }},
   data () {
     return {
-      // tableColumn: [
-      //   { type: 'checkbox', width: 40 },
-      // ],
       tableToolbar: {
         perfect: true,
         zoom: true,
@@ -72,9 +69,6 @@ export default {
     },
     schemaId(newVal){
       this.schemaId = newVal;
-    },
-    tableColumn(newVal){
-      // console.log(newVal)
     }
   },
   methods: {
@@ -82,6 +76,7 @@ export default {
       let { row: newRow } = await this.$refs.xTable.insertAt('', row)
       await this.$refs.xTable.setActiveRow(newRow, '')
     },
+
     saveSchemaValues(){
       const { insertRecords, removeRecords, updateRecords } = this.$refs.xTable.getRecordset();
       let schemaValuesList=[];
@@ -190,7 +185,7 @@ export default {
             let data = res.data;
             if (data.code === 200) {
               this.$Modal.success({
-                title: "PiFlow system tips",
+                title: "πFlow system tips",
                 content: data.errorMsg,
                 onOk: () => {
                   this.fatherMethod();
