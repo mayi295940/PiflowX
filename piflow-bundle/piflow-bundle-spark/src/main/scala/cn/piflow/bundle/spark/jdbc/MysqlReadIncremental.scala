@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.jdbc
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableIncrementalStop, Language, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -120,5 +120,7 @@ class MysqlReadIncremental extends ConfigurableIncrementalStop[DataFrame] {
   }
 
   override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

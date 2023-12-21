@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.script
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf._
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
@@ -85,5 +85,7 @@ class DataFrameRowParser extends ConfigurableStop[DataFrame] {
     //df.show()
     out.write(df)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

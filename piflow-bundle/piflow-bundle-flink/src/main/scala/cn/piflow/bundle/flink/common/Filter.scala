@@ -4,7 +4,7 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.IdGenerator
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
@@ -60,6 +60,7 @@ class Filter extends ConfigurableStop[Table] {
     // todo inputTable.where()
 
     out.write(resultTable)
-
   }
+
+  override def getEngineType: String = Constants.ENGIN_FLINK
 }

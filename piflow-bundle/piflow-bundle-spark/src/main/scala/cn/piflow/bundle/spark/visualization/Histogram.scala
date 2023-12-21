@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.visualization
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableVisualizationStop, Port, StopGroup, VisualizationType}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class Histogram extends ConfigurableVisualizationStop[DataFrame] {
@@ -91,4 +91,7 @@ class Histogram extends ConfigurableVisualizationStop[DataFrame] {
       out.write(dataFrame)
     }
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

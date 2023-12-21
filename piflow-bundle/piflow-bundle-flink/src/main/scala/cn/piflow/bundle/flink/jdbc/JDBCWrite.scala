@@ -172,5 +172,7 @@ class JDBCWrite extends ConfigurableStop[Table] {
     List(StopGroup.JdbcGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_FLINK
+
 
 }

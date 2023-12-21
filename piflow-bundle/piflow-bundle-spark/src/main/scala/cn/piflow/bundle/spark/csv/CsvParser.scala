@@ -54,9 +54,7 @@ class CsvParser extends ConfigurableStop[DataFrame] {
 
   }
 
-  def initialize(ctx: ProcessContext[DataFrame]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
   def setProperties(map: Map[String, Any]): Unit = {
     csvPath = MapUtil.get(map, "csvPath").asInstanceOf[String]
@@ -115,6 +113,8 @@ class CsvParser extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.CsvGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }
 

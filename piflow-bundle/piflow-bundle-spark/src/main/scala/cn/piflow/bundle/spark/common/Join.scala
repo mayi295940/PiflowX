@@ -3,10 +3,11 @@ package cn.piflow.bundle.spark.common
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{Column, DataFrame}
 
 class Join extends ConfigurableStop[DataFrame] {
+
   override val authorEmail: String = "yangqidong@cnic.cn"
   override val description: String = "Table joins include full join, left join, right join and inner join"
   override val inportList: List[String] = List(Port.LeftPort, Port.RightPort)
@@ -23,8 +24,8 @@ class Join extends ConfigurableStop[DataFrame] {
     val rightDF = in.read(Port.RightPort)
 
     var seq: Seq[String] = Seq()
-    correlationColumn.split(",").foreach(x => {
-      seq = seq.++(Seq(x.trim.toString))
+    correlationColumn.split(Constants.COMMA).foreach(x => {
+      seq = seq.++(Seq(x.trim))
     })
 
     var df: DataFrame = null
@@ -78,8 +79,8 @@ class Join extends ConfigurableStop[DataFrame] {
   }
 
 
-  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {
+  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
-  }
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

@@ -138,5 +138,7 @@ class CsvParser extends ConfigurableStop[Table] {
     List(StopGroup.CsvGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_FLINK
+
 }
 

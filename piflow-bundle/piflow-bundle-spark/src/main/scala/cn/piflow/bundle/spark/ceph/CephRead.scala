@@ -155,4 +155,6 @@ class CephRead extends ConfigurableStop[DataFrame] {
     List(StopGroup.CephGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

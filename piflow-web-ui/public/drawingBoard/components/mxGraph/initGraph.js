@@ -815,7 +815,7 @@ function queryStopsProperty(stopPageId) {
                 $('#customizeBasic_td_1_2_input2_id').attr("name", stopsVoData.pageId);
                 $('#customizeBasic_td_2_2_span_id').text(stopsVoData.description);
                 $('#customizeBasic_td_3_2_label_id').text(stopsVoData.groups);
-                $('#customizeBasic_td_4_2_label_id').text(stopsVoData.bundel);
+                $('#customizeBasic_td_4_2_label_id').text(stopsVoData.bundle);
                 $('#customizeBasic_td_5_2_label_id').text(stopsVoData.version);
                 $('#customizeBasic_td_6_2_label_id').text(stopsVoData.owner);
                 $('#customizeBasic_td_7_2_label_id').text(stopsVoData.crtDttmString);

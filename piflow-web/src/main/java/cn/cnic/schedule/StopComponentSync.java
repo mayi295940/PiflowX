@@ -13,6 +13,8 @@ public class StopComponentSync extends QuartzJobBean {
   @Override
   protected void executeInternal(JobExecutionContext jobExecutionContext)
       throws JobExecutionException {
-    stopGroupServiceImpl.updateGroupAndStopsListByServer("systemSync");
+
+    stopGroupServiceImpl.updateGroupAndStopsListByServer("systemSync", null);
+
   }
 }

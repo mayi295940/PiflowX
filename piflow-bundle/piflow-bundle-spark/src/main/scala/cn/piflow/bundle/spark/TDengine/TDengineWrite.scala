@@ -8,6 +8,7 @@ import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 
 class TDengineWrite extends ConfigurableStop[DataFrame] {
+
   override val authorEmail: String = "llei@cnic.com"
   override val description: String = "Write data to TDengine"
   override val inportList: List[String] = List(Port.DefaultPort)
@@ -102,4 +103,7 @@ class TDengineWrite extends ConfigurableStop[DataFrame] {
   }
 
   override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

@@ -1,7 +1,7 @@
 package cn.piflow.bundle.spark.clean
 
 import cn.piflow.bundle.spark.util.CleanUtil
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -90,5 +90,7 @@ class PhoneNumberClean extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.CleanGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

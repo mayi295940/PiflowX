@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.normalization
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
 
@@ -91,4 +91,7 @@ class ZScore extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.NormalizationGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

@@ -75,4 +75,6 @@ class MockData extends ConfigurableStop[Table] {
     out.write(tableEnv.fromDataStream(df))
   }
 
+  override def getEngineType: String = Constants.ENGIN_FLINK
+
 }

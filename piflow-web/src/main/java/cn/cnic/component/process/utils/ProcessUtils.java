@@ -529,7 +529,7 @@ public class ProcessUtils {
       Map<String, Object> thirdStopVo = new HashMap<>();
       thirdStopVo.put("uuid", processStop.getId());
       thirdStopVo.put("name", processStop.getName());
-      thirdStopVo.put("bundle", processStop.getBundel());
+      thirdStopVo.put("bundle", processStop.getBundle());
 
       // StopProperty
       List<ProcessStopProperty> processStopPropertyList = processStop.getProcessStopPropertyList();

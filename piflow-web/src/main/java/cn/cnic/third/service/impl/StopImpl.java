@@ -8,6 +8,7 @@ import cn.cnic.third.service.IStop;
 import cn.cnic.third.vo.stop.StopsHubVo;
 import cn.cnic.third.vo.stop.ThirdStopsComponentPropertyVo;
 import cn.cnic.third.vo.stop.ThirdStopsComponentVo;
+import cn.piflow.Constants;
 import com.alibaba.fastjson.JSON;
 import java.util.*;
 import javax.annotation.Resource;
@@ -52,21 +53,30 @@ public class StopImpl implements IStop {
   }
 
   @Override
-  public Map<String, List<String>> getStopsListWithGroup() {
+  public Map<String, List<String>> getStopsListWithGroup(String engineType) {
+
+    Map<String, String> param = new HashMap<>();
+    if (StringUtils.isNotBlank(engineType)) {
+      param.put("engineType", engineType);
+    }
     String sendGetData =
-        HttpUtils.doGet(SysParamsCache.getStopsListWithGroupUrl(), null, 30 * 1000);
+        HttpUtils.doGet(SysParamsCache.getStopsListWithGroupUrl(), param, 30 * 1000);
+
     logger.debug("return msg：" + sendGetData);
     if (StringUtils.isBlank(sendGetData)) {
       return null;
     }
+
     Map<String, List<String>> stopsListWithGroup = new HashMap<>();
+
     String jsonResult = JSONObject.fromObject(sendGetData).getString("stopWithGroup");
-    String[] bundleAndGroupArray = jsonResult.split(",");
+
+    String[] bundleAndGroupArray = jsonResult.split(Constants.COMMA());
     for (String str : bundleAndGroupArray) {
       if (StringUtils.isBlank(str)) {
         continue;
       }
-      String[] split = str.split(":");
+      String[] split = str.split(Constants.COLON());
       List<String> bundleList = stopsListWithGroup.get(split[0]);
       if (null == bundleList) {
         bundleList = new ArrayList<>();
@@ -116,7 +126,7 @@ public class StopImpl implements IStop {
     // Convert a json object to a java object
     thirdStopsComponentVo.setName(jsonObject.getString("name"));
     thirdStopsComponentVo.setBundle(jsonObject.getString("bundle"));
-    thirdStopsComponentVo.setOwner(jsonObject.getString("owner"));
+    thirdStopsComponentVo.setEngineType(jsonObject.getString("engineType"));
     thirdStopsComponentVo.setOwner(jsonObject.getString("owner"));
     thirdStopsComponentVo.setInports(jsonObject.getString("inports"));
     thirdStopsComponentVo.setOutports(jsonObject.getString("outports"));
@@ -124,7 +134,7 @@ public class StopImpl implements IStop {
     thirdStopsComponentVo.setCustomized(jsonObject.getBoolean("isCustomized"));
     thirdStopsComponentVo.setDescription(jsonObject.getString("description"));
     thirdStopsComponentVo.setIcon(jsonObject.getString("icon"));
-    // thirdStopsComponentVo.setVisualizationType(jsonObject.getString("visualizationType"));
+    //thirdStopsComponentVo.setVisualizationType(jsonObject.getString("visualizationType"));
 
     JSONArray jsonArray = jsonObject.getJSONArray("properties");
     if (null != jsonArray && jsonArray.size() > 0) {

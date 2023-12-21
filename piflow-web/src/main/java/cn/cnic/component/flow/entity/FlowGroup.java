@@ -21,6 +21,9 @@ public class FlowGroup extends BaseHibernateModelUUIDNoCorpAgentId {
   @Column(columnDefinition = "varchar(255) COMMENT 'flow name'")
   private String name;
 
+  @Column(columnDefinition = "varchar(10) COMMENT 'flow engin type'")
+  private String engineType;
+
   @Column(name = "description", columnDefinition = "text(0) COMMENT 'description'")
   private String description;
 

@@ -551,7 +551,7 @@ function queryStopsProperty(stopPageId, loadId) {
                     $('#span_stopsVo_name').text(stopsVoData.name);
                     $('#span_processStopVo_description').text(stopsVoData.description);
                     $('#span_processStopVo_groups').text(stopsVoData.groups);
-                    $('#span_flowStopsVo_bundle').text(stopsVoData.bundel);
+                    $('#span_flowStopsVo_bundle').text(stopsVoData.bundle);
                     $('#span_flowStopsVo_version').text(stopsVoData.version);
                     $('#span_processStopVo_owner').text(stopsVoData.owner);
                     $('#span_processStopVo_crtDttmString').text(stopsVoData.crtDttmString);

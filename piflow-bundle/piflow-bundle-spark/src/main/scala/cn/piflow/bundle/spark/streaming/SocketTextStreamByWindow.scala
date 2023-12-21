@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.streaming
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.dstream.DStream
@@ -106,5 +106,7 @@ class SocketTextStreamByWindow
     dstream.window(Seconds(windowDuration), Seconds(slideDuration))
     //dstream.reduceByWindow(_ + _,Seconds(windowDuration),Seconds(slideDuration))
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

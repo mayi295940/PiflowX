@@ -104,4 +104,7 @@ class GetMongoDB extends ConfigurableStop[DataFrame] {
     val finalDF: DataFrame = session.sql(sql).toDF()
     out.write(finalDF)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

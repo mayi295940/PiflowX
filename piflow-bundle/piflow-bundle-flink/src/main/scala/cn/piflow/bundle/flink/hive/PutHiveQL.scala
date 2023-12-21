@@ -87,4 +87,6 @@ class PutHiveQL extends ConfigurableStop[Table] {
   }
 
   override def initialize(ctx: ProcessContext[Table]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_FLINK
 }

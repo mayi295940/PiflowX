@@ -1,11 +1,12 @@
 package cn.piflow.bundle.spark.rdf
 
 import cn.piflow.bundle.spark.util.Entity
+
 import java.util.regex.{Matcher, Pattern}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.{DataTypes, StringType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -143,9 +144,9 @@ class RdfToDF extends ConfigurableStop[DataFrame] {
     List(StopGroup.RDFGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
-  }
+  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
   override def perform(in: JobInputStream[DataFrame],
                        out: JobOutputStream[DataFrame],

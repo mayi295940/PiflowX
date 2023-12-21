@@ -17,7 +17,7 @@ public class ProcessStopVo implements Serializable {
 
   private ProcessVo processVo;
   private String name;
-  private String bundel;
+  private String bundle;
   private String groups;
   private String owner;
   private String description;

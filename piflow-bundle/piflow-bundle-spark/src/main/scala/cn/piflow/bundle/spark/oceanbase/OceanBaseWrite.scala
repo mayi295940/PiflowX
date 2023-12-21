@@ -105,7 +105,8 @@ class OceanBaseWrite extends ConfigurableStop[DataFrame] {
     List(StopGroup.JdbcGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {
+  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
-  }
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

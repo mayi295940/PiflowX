@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.normalization
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -175,11 +175,13 @@ class Discretization extends ConfigurableStop[DataFrame] {
   }
 
   override def getIcon(): Array[Byte] = {
-    // 返回组件图标
     ImageUtil.getImage("icon/normalization/DiscretizationNormalization.png")
   }
 
   override def getGroup(): List[String] = {
     List(StopGroup.NormalizationGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

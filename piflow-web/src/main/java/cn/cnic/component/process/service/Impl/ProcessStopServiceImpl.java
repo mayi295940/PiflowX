@@ -42,7 +42,7 @@ public class ProcessStopServiceImpl implements IProcessStopService {
     }
     ProcessStopVo processStopVo = ProcessUtils.processStopPoToVo(processStopByPageId);
     StopsComponent stopsComponentByBundle =
-        stopsComponentMapper.getStopsComponentByBundle(processStopByPageId.getBundel());
+        stopsComponentMapper.getStopsComponentByBundle(processStopByPageId.getBundle());
     if (null != stopsComponentByBundle) {
       processStopVo.setVisualizationType(stopsComponentByBundle.getVisualizationType());
     }

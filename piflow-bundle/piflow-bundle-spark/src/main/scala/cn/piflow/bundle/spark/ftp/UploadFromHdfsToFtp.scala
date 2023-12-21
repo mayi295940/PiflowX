@@ -4,7 +4,7 @@ import cn.piflow.bundle.core.util.FtpDownAndUploadUtil
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.DataFrame
 
 class UploadFromHdfsToFtp extends ConfigurableStop[DataFrame] {
@@ -114,7 +114,8 @@ class UploadFromHdfsToFtp extends ConfigurableStop[DataFrame] {
     List(StopGroup.FtpGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {
+  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
-  }
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

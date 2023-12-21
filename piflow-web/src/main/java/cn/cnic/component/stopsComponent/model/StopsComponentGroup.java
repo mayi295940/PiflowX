@@ -17,7 +17,9 @@ public class StopsComponentGroup extends BaseHibernateModelUUIDNoCorpAgentId {
 
   private static final long serialVersionUID = 1L;
 
-  private String groupName; // Group name
+  private String groupName;
+
+  private String engineType;
 
   // Group contains stop
   @ManyToMany(fetch = FetchType.LAZY)
@@ -26,5 +28,5 @@ public class StopsComponentGroup extends BaseHibernateModelUUIDNoCorpAgentId {
       joinColumns = @JoinColumn(name = "groups_id"),
       inverseJoinColumns = @JoinColumn(name = "stops_template_id"))
   @Where(clause = "enable_flag=1")
-  private List<StopsComponent> stopsComponentList = new ArrayList<StopsComponent>();
+  private List<StopsComponent> stopsComponentList = new ArrayList<>();
 }

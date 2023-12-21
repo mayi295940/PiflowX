@@ -76,9 +76,11 @@ public class MxGraphCtrl {
 
   @RequestMapping("/uploadNodeImage")
   @ResponseBody
-  public String uploadNodeImage(@RequestParam("file") MultipartFile file, String imageType) {
+  public String uploadNodeImage(@RequestParam("file") MultipartFile file,
+                                String imageType,
+                                String nodeEngineType) {
     String username = SessionUserUtil.getCurrentUsername();
-    return mxNodeImageServiceImpl.uploadNodeImage(username, file, imageType);
+    return mxNodeImageServiceImpl.uploadNodeImage(username, file, imageType, nodeEngineType);
   }
 
   @RequestMapping("/nodeImageList")

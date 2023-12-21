@@ -18,6 +18,7 @@ import cn.cnic.component.stopsComponent.utils.StopsHubUtils;
 import cn.cnic.third.service.IStop;
 import cn.cnic.third.vo.stop.StopsHubVo;
 import cn.cnic.third.vo.stop.ThirdStopsComponentVo;
+import cn.piflow.Constants;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import java.util.*;
@@ -107,16 +108,18 @@ public class StopsHubServiceImpl implements IStopsHubService {
     for (ThirdStopsComponentVo s : stops) {
       groupNameList.addAll(Arrays.asList(s.getGroups().split(",")));
     }
+
     List<String> distinctGroupNameList =
         groupNameList.stream().distinct().collect(Collectors.toList());
     List<StopsComponentGroup> stopsComponentGroupList =
-        stopsComponentGroupMapper.getStopGroupByGroupNameList(distinctGroupNameList);
+        stopsComponentGroupMapper.getStopGroupByGroupNameList(distinctGroupNameList, stopsHub.getEngineType());
     for (StopsComponentGroup sGroup : stopsComponentGroupList) {
       stopsComponentGroupMap.put(sGroup.getGroupName(), sGroup);
     }
+
     for (ThirdStopsComponentVo s : stops) {
 
-      List<String> stopGroupNameList = Arrays.asList(s.getGroups().split(","));
+      String[] stopGroupNameList = s.getGroups().split(Constants.COMMA());
       for (String groupName : stopGroupNameList) {
 
         StopsComponentGroup stopsComponentGroup = stopsComponentGroupMap.get(groupName);

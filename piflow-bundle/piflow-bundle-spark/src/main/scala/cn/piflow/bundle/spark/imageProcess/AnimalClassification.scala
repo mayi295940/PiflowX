@@ -94,9 +94,7 @@ class AnimalClassification extends ConfigurableStop[DataFrame] {
     out.write(df)
   }
 
-  def initialize(ctx: ProcessContext[DataFrame]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
   def setProperties(map: Map[String, Any]) = {
     imagePath = MapUtil.get(map, "imagePath").asInstanceOf[String]
@@ -130,5 +128,7 @@ class AnimalClassification extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.Alg_ImageProcessGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

@@ -4,7 +4,15 @@ import cn.cnic.base.BaseHibernateModelUUIDNoCorpAgentId;
 import cn.cnic.component.mxGraph.entity.MxGraphModel;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OrderBy;
@@ -20,6 +28,9 @@ public class Flow extends BaseHibernateModelUUIDNoCorpAgentId {
 
   @Column(columnDefinition = "varchar(255) COMMENT 'flow name'")
   private String name;
+
+  @Column(columnDefinition = "varchar(20) COMMENT 'flow type'")
+  private String engineType;
 
   @Column(columnDefinition = "varchar(255) COMMENT 'flow uuid'")
   private String uuid;
@@ -56,10 +67,10 @@ public class Flow extends BaseHibernateModelUUIDNoCorpAgentId {
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "flow")
   @Where(clause = "enable_flag=1")
   @OrderBy(clause = "lastUpdateDttm desc")
-  private List<Stops> stopsList = new ArrayList<Stops>();
+  private List<Stops> stopsList = new ArrayList<>();
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "flow")
   @Where(clause = "enable_flag=1")
   @OrderBy(clause = "lastUpdateDttm desc")
-  private List<Paths> pathsList = new ArrayList<Paths>();
+  private List<Paths> pathsList = new ArrayList<>();
 }

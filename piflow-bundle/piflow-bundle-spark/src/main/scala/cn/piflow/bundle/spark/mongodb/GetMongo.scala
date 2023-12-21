@@ -1,11 +1,10 @@
 package cn.piflow.bundle.spark.mongodb
 
 import java.util
-
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor, MongoDatabase}
 import com.mongodb.{MongoClient, MongoCredential, ServerAddress}
 import org.apache.spark.rdd.RDD
@@ -160,5 +159,7 @@ class GetMongo extends ConfigurableStop[DataFrame] {
   }
 
   override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

@@ -4,7 +4,7 @@ import cn.piflow.bundle.core.util.RemoteShellExecutor
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class GetFile extends ConfigurableStop[DataFrame] {
@@ -28,7 +28,6 @@ class GetFile extends ConfigurableStop[DataFrame] {
     val spark: SparkSession = pec.get[SparkSession]()
     val executor: RemoteShellExecutor = new RemoteShellExecutor(IP, User, PassWord)
     executor.exec(s"hdfs dfs -get ${hdfsFile}  ${localPath}")
-
   }
 
 
@@ -98,6 +97,8 @@ class GetFile extends ConfigurableStop[DataFrame] {
   }
 
   override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }
 

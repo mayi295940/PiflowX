@@ -99,7 +99,7 @@ public interface StopsComponentMapper {
    * @param bundle
    * @return
    */
-  @Select("select fst.* from flow_stops_template fst where fst.bundel=#{bundle} and enable_flag=1")
+  @Select("select fst.* from flow_stops_template fst where fst.bundle=#{bundle} and enable_flag=1")
   @Results({
     @Result(id = true, column = "id", property = "id"),
     @Result(
@@ -113,8 +113,8 @@ public interface StopsComponentMapper {
   })
   StopsComponent getStopsComponentByBundle(String bundle);
 
-  @Delete("delete from flow_stops_template")
-  int deleteStopsComponent();
+  @Delete("delete from flow_stops_template where engine_type = #{engineType}")
+  int deleteStopsComponent(String engineType);
 
   @Delete("delete from flow_stops_template where id = #{id}")
   int deleteStopsComponentById(String id);

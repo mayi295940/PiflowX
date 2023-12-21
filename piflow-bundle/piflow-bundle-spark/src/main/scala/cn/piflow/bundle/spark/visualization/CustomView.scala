@@ -60,4 +60,7 @@ class CustomView extends ConfigurableVisualizationStop[DataFrame] {
     visualizationPath = processId + Constants.SINGLE_SLASH + stopName
     visualizationPath
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

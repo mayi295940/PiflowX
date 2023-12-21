@@ -19,7 +19,7 @@ public class ProcessStopMapperProvider {
   private int enableFlag;
   private long version;
   private String name;
-  private String bundel;
+  private String bundle;
   private String groups;
   private String owner;
   private String description;
@@ -56,7 +56,7 @@ public class ProcessStopMapperProvider {
 
       // Selection field
       this.name = SqlUtils.preventSQLInjection(processStop.getName());
-      this.bundel = SqlUtils.preventSQLInjection(processStop.getBundel());
+      this.bundle = SqlUtils.preventSQLInjection(processStop.getBundle());
       this.groups = SqlUtils.preventSQLInjection(processStop.getGroups());
       this.owner = SqlUtils.preventSQLInjection(processStop.getOwner());
       this.description = SqlUtils.preventSQLInjection(processStop.getDescription());
@@ -97,7 +97,7 @@ public class ProcessStopMapperProvider {
     this.enableFlag = 1;
     this.version = 0L;
     this.name = null;
-    this.bundel = null;
+    this.bundle = null;
     this.groups = null;
     this.owner = null;
     this.description = null;
@@ -148,7 +148,7 @@ public class ProcessStopMapperProvider {
 
       // handle other fields
       sql.VALUES("name", name);
-      sql.VALUES("bundel", bundel);
+      sql.VALUES("bundle", bundle);
       sql.VALUES("groups", groups);
       sql.VALUES("owner", owner);
       sql.VALUES("description", description);
@@ -189,7 +189,7 @@ public class ProcessStopMapperProvider {
       sql.append("version,");
       sql.append("enable_flag,");
       sql.append("name,");
-      sql.append("bundel,");
+      sql.append("bundle,");
       sql.append("groups,");
       sql.append("owner,");
       sql.append("description,");
@@ -228,7 +228,7 @@ public class ProcessStopMapperProvider {
           sql.append(version + ",");
           sql.append(enableFlag + ",");
           sql.append(name + ",");
-          sql.append(bundel + ",");
+          sql.append(bundle + ",");
           sql.append(groups + ",");
           sql.append(owner + ",");
           sql.append(description + ",");
@@ -353,7 +353,7 @@ public class ProcessStopMapperProvider {
         // handle other fields
         sql.SET("enable_flag = " + enableFlag);
         sql.SET("name = " + name);
-        sql.SET("bundel = " + bundel);
+        sql.SET("bundle = " + bundle);
         sql.SET("groups = " + groups);
         sql.SET("owner = " + owner);
         sql.SET("description = " + description);

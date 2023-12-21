@@ -24,7 +24,7 @@ public class StopsVo implements Serializable {
 
   private String name;
 
-  private String bundel;
+  private String bundle;
 
   private String groups;
 

@@ -56,4 +56,6 @@ class XmlSave extends ConfigurableStop[DataFrame] {
     List(StopGroup.XmlGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

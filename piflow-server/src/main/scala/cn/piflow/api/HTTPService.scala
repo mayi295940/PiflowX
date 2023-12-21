@@ -40,6 +40,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
 
   // private var processMap: Map[String, SparkAppHandle] = Map[String, SparkAppHandle]()
   private var processMap: Map[String, Any] = Map[String, Any]()
+
   private var flowGroupMap: Map[String, GroupExecution] = Map[String, GroupExecution]()
   //var projectMap = Map[String, GroupExecution]()
 
@@ -52,8 +53,12 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
   def toJson(entity: RequestEntity): Map[String, Any] = {
     entity match {
       case HttpEntity.Strict(_, data) =>
-        val temp = JsonUtil.jsonToMap(data.utf8String)
-        temp
+        if (data.isEmpty) {
+          Map()
+        } else {
+          val temp = JsonUtil.jsonToMap(data.utf8String)
+          temp
+        }
       case _ => Map()
     }
   }
@@ -287,11 +292,13 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     }
     case HttpRequest(GET, Uri.Path("/stop/listWithGroup"), headers, entity, protocol) => {
 
-      try {
-        val stops = API.getAllStopsWithGroup()
+        try {
+        val engineType = req.getUri().query().getOrElse("engineType", "")
+        val stops = API.getAllStopsWithGroup(engineType)
         Future.successful(HttpResponse(SUCCESS_CODE, entity = stops))
       } catch {
         case ex: Throwable => {
+          ex.printStackTrace()
           println(ex)
           Future.successful(HttpResponse(FAIL_CODE, entity = "Can not found stop !"))
         }
@@ -664,7 +671,7 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
     Http().bindAndHandleAsync(route, ip, port)
     println("Server:" + ip + ":" + port + " Started!!!")
 
-    initSchedule()
+    // initSchedule()
     new MonitorScheduler().start()
 
   }

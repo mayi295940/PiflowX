@@ -84,15 +84,17 @@ public class SysInitRecordsServiceImpl implements ISysInitRecordsService {
     ExecutorService es =
         new ThreadPoolExecutor(
             1, 5, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(100000));
-    List<String> stopsBundleList = loadStopGroup(currentUser);
+
+    // todo  engin处理
+    List<String> stopsBundleList = loadStopGroup(currentUser, "");
     if (null != stopsBundleList && !stopsBundleList.isEmpty()) {
       if (null != stopsBundleList && stopsBundleList.size() > 0) {
-        for (String stopListInfos : stopsBundleList) {
+        for (String stopListInfoList : stopsBundleList) {
           es.execute(
               () -> {
-                Boolean aBoolean1 = loadStop(stopListInfos);
+                Boolean aBoolean1 = loadStop(stopListInfoList);
                 if (!aBoolean1) {
-                  logger.warn("stop load failed, bundle : " + stopListInfos);
+                  logger.warn("stop load failed, bundle : " + stopListInfoList);
                 }
               });
         }
@@ -116,6 +118,7 @@ public class SysInitRecordsServiceImpl implements ISysInitRecordsService {
         }
       }
     }
+
     SysParamsCache.THREAD_POOL_EXECUTOR = ((ThreadPoolExecutor) es);
     rtnMap.put("code", 200);
     return JsonUtils.toJsonNoException(rtnMap);
@@ -142,16 +145,16 @@ public class SysInitRecordsServiceImpl implements ISysInitRecordsService {
     return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("progress", progressNumLong);
   }
 
-  private List<String> loadStopGroup(String currentUser) {
-    Map<String, List<String>> stopsListWithGroup = stopImpl.getStopsListWithGroup();
+  private List<String> loadStopGroup(String currentUser, String engineType) {
+    Map<String, List<String>> stopsListWithGroup = stopImpl.getStopsListWithGroup(engineType);
     if (null == stopsListWithGroup || stopsListWithGroup.isEmpty()) {
       return null;
     }
     // The call is successful, empty the "StopsComponentGroup" and "StopsComponent" message and
     // insert
-    int deleteGroup = stopsComponentGroupDomain.deleteStopsComponentGroup();
+    int deleteGroup = stopsComponentGroupDomain.deleteStopsComponentGroup(engineType);
     logger.debug("Successful deletion Group" + deleteGroup + "piece of data!!!");
-    int deleteStopsInfo = stopsComponentDomain.deleteStopsComponent();
+    int deleteStopsInfo = stopsComponentDomain.deleteStopsComponent(engineType);
     logger.info("Successful deletion StopsInfo" + deleteStopsInfo + "piece of data!!!");
 
     int addStopsComponentGroupRows = 0;
@@ -175,7 +178,7 @@ public class SysInitRecordsServiceImpl implements ISysInitRecordsService {
     }
     logger.debug("Successful insert Group" + addStopsComponentGroupRows + "piece of data!!!");
     // Deduplication
-    HashSet<String> stopsBundleListDeduplication = new HashSet<String>(stopsBundleList);
+    HashSet<String> stopsBundleListDeduplication = new HashSet<>(stopsBundleList);
     stopsBundleList.clear();
     stopsBundleList.addAll(stopsBundleListDeduplication);
     return stopsBundleList;
@@ -191,7 +194,7 @@ public class SysInitRecordsServiceImpl implements ISysInitRecordsService {
     List<String> list = Arrays.asList(thirdStopsComponentVo.getGroups().split(","));
     // Query group information according to groupName in stops
     List<StopsComponentGroup> stopGroupByName =
-        stopsComponentGroupMapper.getStopGroupByNameList(list);
+        stopsComponentGroupMapper.getStopGroupByNameList(list, thirdStopsComponentVo.getEngineType());
     StopsComponent stopsComponent =
         StopsComponentUtils.thirdStopsComponentVoToStopsTemplate(
             "init", thirdStopsComponentVo, stopGroupByName);
@@ -235,7 +238,7 @@ public class SysInitRecordsServiceImpl implements ISysInitRecordsService {
     if (null == stops) {
       return;
     }
-    String bundle = stops.getBundel();
+    String bundle = stops.getBundle();
     StopsComponent stopsComponentByBundle = stopsComponentMapper.getStopsComponentByBundle(bundle);
     if (null == stopsComponentByBundle) {
       logger.info("The Stops component (" + bundle + ") has been deleted");

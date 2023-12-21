@@ -20,7 +20,9 @@ public class StopsComponent extends BaseHibernateModelUUIDNoCorpAgentId {
 
   private String name;
 
-  private String bundel;
+  private String bundle;
+
+  private String engineType;
 
   private String groups;
 

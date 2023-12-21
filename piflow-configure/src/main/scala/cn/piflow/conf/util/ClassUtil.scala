@@ -1,5 +1,6 @@
 package cn.piflow.conf.util
 
+import cn.piflow.Constants
 import cn.piflow.conf.ConfigurableStop
 import cn.piflow.conf.bean.PropertyDescriptor
 import javassist.Modifier
@@ -15,12 +16,12 @@ object ClassUtil {
   val configurableStopClass: String = "cn.piflow.conf.ConfigurableStop"
   val configurableIncrementalStop: String = "cn.piflow.conf.ConfigurableIncrementalStop"
 
-  def findAllConfigurableStop[DataType](): List[ConfigurableStop[DataType]] = {
+  def findAllConfigurableStop[DataType](packagePrefix: String = ""): List[ConfigurableStop[DataType]] = {
 
     var stopList: List[ConfigurableStop[DataType]] = List()
 
     //find internal stop
-    val reflections = new Reflections("")
+    val reflections = new Reflections(packagePrefix)
     val allClasses = reflections.getSubTypesOf(classOf[ConfigurableStop[DataType]])
     val it = allClasses.iterator()
     while (it.hasNext) {
@@ -180,7 +181,9 @@ object ClassUtil {
   private def constructStopInfoJValue[DataType](bundle: String, stop: ConfigurableStop[DataType]): JValue = {
     val stopName = bundle.split("\\.").last
     val propertyDescriptorList: List[PropertyDescriptor] = stop.getPropertyDescriptor()
-    propertyDescriptorList.foreach(p => if (p.allowableValues == null || p.allowableValues == None) p.allowableValues = List(""))
+    propertyDescriptorList.foreach(p =>
+      if (p.allowableValues == null || p.allowableValues == None) p.allowableValues = List("")
+    )
     val base64Encoder = new BASE64Encoder()
     var iconArrayByte: Array[Byte] = Array[Byte]()
     try {
@@ -200,10 +203,11 @@ object ClassUtil {
       "StopInfo" ->
         ("name" -> stopName) ~
           ("bundle" -> bundle) ~
+          ("engineType" -> stop.getEngineType) ~
           ("owner" -> stop.authorEmail) ~
-          ("inports" -> stop.inportList.mkString(",")) ~
-          ("outports" -> stop.outportList.mkString(",")) ~
-          ("groups" -> stop.getGroup().mkString(",")) ~
+          ("inports" -> stop.inportList.mkString(Constants.COMMA)) ~
+          ("outports" -> stop.outportList.mkString(Constants.COMMA)) ~
+          ("groups" -> stop.getGroup().mkString(Constants.COMMA)) ~
           ("isCustomized" -> stop.getCustomized().toString) ~
           // ("isDataSource" -> stop.getIsDataSource().toString) ~
           /*("customizedAllowKey" -> "") ~

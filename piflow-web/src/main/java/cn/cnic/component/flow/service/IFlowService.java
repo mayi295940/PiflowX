@@ -14,7 +14,7 @@ public interface IFlowService {
    * @return
    */
   @Transactional
-  public Flow getFlowById(String username, boolean isAdmin, String id);
+  Flow getFlowById(String username, boolean isAdmin, String id);
 
   /**
    * Query flow information based on pageId
@@ -24,7 +24,7 @@ public interface IFlowService {
    * @return
    */
   @Transactional
-  public FlowVo getFlowByPageId(String fid, String pageId);
+  FlowVo getFlowByPageId(String fid, String pageId);
 
   /**
    * Query flow information based on id
@@ -33,7 +33,7 @@ public interface IFlowService {
    * @return
    */
   @Transactional
-  public String getFlowVoById(String id);
+  String getFlowVoById(String id);
 
   /**
    * add flow(Contains drawing board information)
@@ -42,17 +42,17 @@ public interface IFlowService {
    * @return
    */
   @Transactional
-  public String addFlow(String username, FlowVo flowVo);
+  String addFlow(String username, FlowVo flowVo);
 
   @Transactional
-  public String updateFlow(String username, Flow flow);
+  String updateFlow(String username, Flow flow);
 
   @Transactional
-  public String deleteFLowInfo(String username, boolean isAdmin, String id);
+  String deleteFLowInfo(String username, boolean isAdmin, String id);
 
-  public Integer getMaxStopPageId(String flowId);
+  Integer getMaxStopPageId(String flowId);
 
-  public List<FlowVo> getFlowList();
+  List<FlowVo> getFlowList();
 
   /**
    * Paging query flow
@@ -64,10 +64,10 @@ public interface IFlowService {
    * @param param search for the keyword
    * @return
    */
-  public String getFlowListPage(
+  String getFlowListPage(
       String username, boolean isAdmin, Integer offset, Integer limit, String param);
 
-  public String getFlowExampleList();
+  String getFlowExampleList();
 
   /**
    * Call the start interface and save the return information
@@ -75,17 +75,16 @@ public interface IFlowService {
    * @param flowId
    * @return
    */
-  public String runFlow(String username, boolean isAdmin, String flowId, String runMode);
+  String runFlow(String username, boolean isAdmin, String flowId, String runMode);
 
-  public String updateFlowBaseInfo(String username, String fId, FlowVo flowVo);
+  String updateFlowBaseInfo(String username, String fId, FlowVo flowVo);
 
-  public String updateFlowNameById(
+  String updateFlowNameById(
       String username, String id, String flowGroupId, String flowName, String pageId);
 
-  public Boolean updateFlowNameById(String username, String id, String flowName);
+  Boolean updateFlowNameById(String username, String id, String flowName);
 
-  public Integer getMaxFlowPageIdByFlowGroupId(String flowGroupId);
+  Integer getMaxFlowPageIdByFlowGroupId(String flowGroupId);
 
-  public String drawingBoardData(
-      String username, boolean isAdmin, String load, String parentAccessPath);
+  String drawingBoardData(String username, boolean isAdmin, String load, String parentAccessPath);
 }

@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.hbase
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -182,7 +182,8 @@ class ReadHbase extends ConfigurableStop[DataFrame] {
     List(StopGroup.HbaseGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {
+  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
-  }
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

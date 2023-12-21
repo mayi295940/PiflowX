@@ -108,4 +108,7 @@ class TidbRead extends ConfigurableStop[DataFrame] {
   }
 
   override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

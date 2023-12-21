@@ -8,26 +8,26 @@ import java.io.{BufferedInputStream, File}
 
 object ImageUtil {
 
-  def getImage(imagePath:String, bundle:String = "") : Array[Byte] = {
-    if(bundle == ""){
-      try{
+  def getImage(imagePath: String, bundle: String = ""): Array[Byte] = {
+    if (bundle == "") {
+      try {
         val classLoader = this.getClass.getClassLoader
         val imageInputStream = classLoader.getResourceAsStream(imagePath)
         val input = new BufferedInputStream(imageInputStream)
         Image.fromStream(input).bytes(sksamuel.scrimage.writer)
-      }catch {
+      } catch {
         case ex: Exception => {
           println(ex);
           Array[Byte]()
         }
       }
-    }else{
+    } else {
       val pluginManager = PluginManager.getInstance
       pluginManager.getConfigurableStopIcon(imagePath, bundle)
     }
   }
 
-  def saveImage(imageBytes :  Array[Byte], savePath : String) = {
+  def saveImage(imageBytes: Array[Byte], savePath: String) = {
     Image(imageBytes).output(new File(savePath))(scrimage.writer)
   }
 

@@ -4,6 +4,7 @@ import cn.cnic.ApplicationTests;
 import cn.cnic.base.util.LoggerUtil;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentGroupMapper;
 import cn.cnic.component.stopsComponent.model.StopsComponentGroup;
+import cn.piflow.Constants;
 import java.util.List;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -17,7 +18,8 @@ public class StopsComponentGroupMapperTest extends ApplicationTests {
 
   @Test
   public void testGetStopGroupList() {
-    List<StopsComponentGroup> stopGroupList = stopsComponentGroupMapper.getStopGroupList();
+    List<StopsComponentGroup> stopGroupList =
+        stopsComponentGroupMapper.getStopGroupList(Constants.ENGIN_FLINK());
     if (null == stopGroupList) {
       logger.info("The query result is empty");
     }

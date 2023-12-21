@@ -228,9 +228,11 @@ class spider extends ConfigurableStop[DataFrame] {
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.Spider.toString)
+    List(StopGroup.Spider)
   }
 
   override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

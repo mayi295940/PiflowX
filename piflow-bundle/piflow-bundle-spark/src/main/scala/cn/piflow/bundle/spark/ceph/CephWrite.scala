@@ -8,7 +8,6 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class CephWrite extends ConfigurableStop[DataFrame] {
 
-
   val authorEmail: String = "niuzj@gmqil.com"
   val description: String = "Read data from  ceph"
   val inportList: List[String] = List(Port.DefaultPort)
@@ -164,5 +163,7 @@ class CephWrite extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.CephGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

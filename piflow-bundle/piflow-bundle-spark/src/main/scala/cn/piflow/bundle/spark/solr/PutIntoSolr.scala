@@ -82,5 +82,6 @@ class PutIntoSolr extends ConfigurableStop[DataFrame] {
     descriptor
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

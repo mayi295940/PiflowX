@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.graphx
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -35,9 +35,7 @@ class LoadGraph extends ConfigurableStop[DataFrame] {
 
   }
 
-  def initialize(ctx: ProcessContext[DataFrame]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
   def setProperties(map: Map[String, Any]): Unit = {
     dataPath = MapUtil.get(map, "dataPath").asInstanceOf[String]
@@ -61,7 +59,9 @@ class LoadGraph extends ConfigurableStop[DataFrame] {
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.GraphX.toString)
+    List(StopGroup.GraphX)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

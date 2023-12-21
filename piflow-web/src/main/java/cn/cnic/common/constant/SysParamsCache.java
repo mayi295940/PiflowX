@@ -1,5 +1,6 @@
 package cn.cnic.common.constant;
 
+import cn.piflow.Constants;
 import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -30,32 +31,52 @@ public class SysParamsCache {
     SYS_CONTEXT_PATH = sysContextPath;
   }
 
-  // Image path (read in configuration file)
-  public static String IMAGES_PATH;
+  public static String ENGINE_FLINK_IMAGES_PATH;
 
-  public static void setImagesPath(String imagesPath) {
-    IMAGES_PATH = imagesPath;
+  public static String ENGINE_SPARK_IMAGES_PATH;
+
+  public static void setImagesPath(String imagesPath, String engineType) {
+    if (Constants.ENGIN_FLINK().equalsIgnoreCase(engineType)) {
+      ENGINE_FLINK_IMAGES_PATH = imagesPath;
+    } else {
+      ENGINE_SPARK_IMAGES_PATH = imagesPath;
+    }
   }
 
-  // Videos path (read in configuration file)
-  public static String VIDEOS_PATH;
+  public static String ENGINE_FLINK_VIDEOS_PATH;
 
-  public static void setVideosPath(String videosPath) {
-    VIDEOS_PATH = videosPath;
+  public static String ENGINE_SPARK_VIDEOS_PATH;
+
+  public static void setVideosPath(String videosPath, String engineType) {
+    if (Constants.ENGIN_FLINK().equalsIgnoreCase(engineType)) {
+      ENGINE_FLINK_VIDEOS_PATH = videosPath;
+    } else {
+      ENGINE_SPARK_VIDEOS_PATH = videosPath;
+    }
   }
 
   // Xml file path (read in configuration file)
-  public static String XML_PATH;
+  public static String ENGINE_FLINK_XML_PATH;
+  public static String ENGINE_SPARK_XML_PATH;
 
-  public static void setXmlPath(String xmlPath) {
-    XML_PATH = xmlPath;
+  public static void setXmlPath(String xmlPath, String engineType) {
+    if (Constants.ENGIN_FLINK().equalsIgnoreCase(engineType)) {
+      ENGINE_FLINK_XML_PATH = xmlPath;
+    } else {
+      ENGINE_SPARK_XML_PATH = xmlPath;
+    }
   }
 
   // Xml file path (read in configuration file)
-  public static String CSV_PATH;
+  public static String ENGINE_FLINK_CSV_PATH;
+  public static String ENGINE_SPARK_CSV_PATH;
 
-  public static void setCsvPath(String csvPath) {
-    CSV_PATH = csvPath;
+  public static void setCsvPath(String csvPath, String engineType) {
+    if (Constants.ENGIN_FLINK().equalsIgnoreCase(engineType)) {
+      ENGINE_FLINK_CSV_PATH = csvPath;
+    } else {
+      ENGINE_SPARK_CSV_PATH = csvPath;
+    }
   }
 
   public static Boolean IS_IFRAME;

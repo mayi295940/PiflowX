@@ -37,7 +37,7 @@ public class StopsComponentGroupDomain {
     int affectedRows = insertStopsComponentGroupRows;
     if (insertStopsComponentGroupRows > 0) {
       List<StopsComponent> stopsComponentList = stopsComponentGroup.getStopsComponentList();
-      if (null == stopsComponentList || stopsComponentList.size() <= 0) {
+      if (null == stopsComponentList || stopsComponentList.size() == 0) {
         return affectedRows;
       }
       int insertStopsTemplateRows =
@@ -54,33 +54,29 @@ public class StopsComponentGroupDomain {
     return stopsComponentGroupMapper.insertStopGroup(stopsComponentGroup);
   }
 
-  public List<StopsComponentGroup> getStopGroupByNameList(List<String> groupNameList) {
-    return stopsComponentGroupMapper.getStopGroupByNameList(groupNameList);
-  }
-
   public StopsComponentGroup getStopsComponentGroupByGroupName(String groupName) {
     if (StringUtils.isBlank(groupName)) {
       return null;
     }
     List<StopsComponentGroup> stopGroupByName =
         stopsComponentGroupMapper.getStopGroupByName(groupName);
-    if (null == stopGroupByName || stopGroupByName.size() <= 0) {
+    if (null == stopGroupByName || stopGroupByName.size() == 0) {
       return null;
     }
     return stopGroupByName.get(0);
   }
 
-  public int deleteStopsComponentGroup() {
+  public int deleteStopsComponentGroup(String engineType) {
     // the group table information is cleared
     // The call is successful, the group table information is cleared and then inserted.
-    stopsComponentGroupMapper.deleteGroupCorrelation();
-    int deleteRows = stopsComponentGroupMapper.deleteGroup();
+    stopsComponentGroupMapper.deleteGroupCorrelation(engineType);
+    int deleteRows = stopsComponentGroupMapper.deleteGroup(engineType);
     logger.debug("Successful deletion Group" + deleteRows + "piece of data!!!");
     return deleteRows;
   }
 
-  public List<StopsComponentGroup> getStopGroupList() {
-    return stopsComponentGroupMapper.getStopGroupList();
+  public List<StopsComponentGroup> getStopGroupList(String engineType) {
+    return stopsComponentGroupMapper.getStopGroupList(engineType);
   }
 
   public List<StopsComponentGroupVo> getManageStopGroupList() {

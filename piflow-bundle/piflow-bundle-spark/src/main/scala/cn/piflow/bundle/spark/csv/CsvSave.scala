@@ -2,7 +2,7 @@ package cn.piflow.bundle.spark.csv
 
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import org.apache.spark.sql.{DataFrame, SaveMode}
 
@@ -20,13 +20,11 @@ class CsvSave extends ConfigurableStop[DataFrame] {
   var saveMode: String = _
 
   override def setProperties(map: Map[String, Any]): Unit = {
-
     csvSavePath = MapUtil.get(map, "csvSavePath").asInstanceOf[String]
     header = MapUtil.get(map, "header").asInstanceOf[String].toBoolean
     delimiter = MapUtil.get(map, "delimiter").asInstanceOf[String]
     partition = MapUtil.get(map, key = "partition").asInstanceOf[String]
     saveMode = MapUtil.get(map, "saveMode").asInstanceOf[String]
-
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
@@ -117,5 +115,8 @@ class CsvSave extends ConfigurableStop[DataFrame] {
         .save(csvSavePath)
     }
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }
 

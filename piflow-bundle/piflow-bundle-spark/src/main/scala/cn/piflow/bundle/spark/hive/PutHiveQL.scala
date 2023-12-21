@@ -4,7 +4,7 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf._
 import cn.piflow.util.HdfsUtil
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class PutHiveQL extends ConfigurableStop[DataFrame] {
@@ -72,5 +72,7 @@ class PutHiveQL extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.HiveGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

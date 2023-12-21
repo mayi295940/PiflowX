@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.kafka
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -91,8 +91,10 @@ class WriteToKafka extends ConfigurableStop[DataFrame] {
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.KafkaGroup.toString)
+    List(StopGroup.KafkaGroup)
   }
 
   override val authorEmail: String = "06whuxx@163.com"
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 }

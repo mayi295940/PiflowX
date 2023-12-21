@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.script
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -78,7 +78,8 @@ class PythonRun extends ConfigurableStop[DataFrame] {
 
     outDataFrame.show()
     out.write(outDataFrame)
-
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

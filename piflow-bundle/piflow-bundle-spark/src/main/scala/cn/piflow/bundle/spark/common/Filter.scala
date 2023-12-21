@@ -1,12 +1,13 @@
 package cn.piflow.bundle.spark.common
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
-import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import org.apache.spark.sql.{Column, DataFrame}
+import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow._
+import org.apache.spark.sql.DataFrame
 
 class Filter extends ConfigurableStop[DataFrame] {
+
   override val authorEmail: String = "xjzhu@cnic.cn"
   override val description: String = "Filter by condition"
   override val inportList: List[String] = List(Port.DefaultPort)
@@ -47,8 +48,9 @@ class Filter extends ConfigurableStop[DataFrame] {
                        out: JobOutputStream[DataFrame],
                        pec: JobContext[DataFrame]): Unit = {
 
-    val df = in.read()
-    val filterDF: DataFrame = df.filter(condition)
-    out.write(filterDF)
+    out.write(in.read().filter(condition))
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

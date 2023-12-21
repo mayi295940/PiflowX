@@ -52,7 +52,7 @@ public class StopMapperTest extends ApplicationTests {
 
     // Test stops components
     stops.setName("test_stops_" + num);
-    stops.setBundel("Bundel tests stops components" + num);
+    stops.setBundle("Bundle tests stops components" + num);
     stops.setGroups("Groups tests the stops component" + num);
     stops.setOwner("Owner tests stops components" + num);
     stops.setDescription("Desc tests stops components" + num);

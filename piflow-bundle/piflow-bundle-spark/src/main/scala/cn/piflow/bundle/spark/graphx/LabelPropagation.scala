@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.graphx
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -43,9 +43,7 @@ class LabelPropagation extends ConfigurableStop[DataFrame] {
     out.write(vertexPortOut, res.vertices.toDF())
   }
 
-  def initialize(ctx: ProcessContext[DataFrame]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
   def setProperties(map: Map[String, Any]): Unit = {
     maxIter = MapUtil.get(map, "maxIter").asInstanceOf[String]
@@ -71,5 +69,7 @@ class LabelPropagation extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.GraphX)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

@@ -370,7 +370,7 @@ function queryProcessStopsProperty(processId, pageId) {
                     $("#stopNameShow").text(processStopVo.name);
                     $("#span_processStopVo_description").text(processStopVo.description);
                     $("#span_processStopVo_groups").text(processStopVo.groups);
-                    $("#stopsBundleShow").text(processStopVo.bundel);
+                    $("#stopsBundleShow").text(processStopVo.bundle);
                     $("#span_processStopVo_owner").text(processStopVo.owner);
                     if ( processStopVo.visualizationType === '' ){
                         $("#process_info_inc_load_chart").css('display','none');

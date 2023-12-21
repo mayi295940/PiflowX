@@ -142,7 +142,7 @@ public class FlowXmlUtils {
         String stopId = StringCustomUtils.replaceSpecialSymbolsXml(stops.getId());
         String pageId = StringCustomUtils.replaceSpecialSymbolsXml(stops.getPageId());
         String stopName = StringCustomUtils.replaceSpecialSymbolsXml(stops.getName());
-        String bundel = StringCustomUtils.replaceSpecialSymbolsXml(stops.getBundel());
+        String bundle = StringCustomUtils.replaceSpecialSymbolsXml(stops.getBundle());
         String stopDescription = StringCustomUtils.replaceSpecialSymbolsXml(stops.getDescription());
         Boolean checkpoint = stops.getIsCheckpoint();
         Boolean isCustomized = stops.getIsCustomized();
@@ -164,8 +164,8 @@ public class FlowXmlUtils {
         if (StringUtils.isNotBlank(stopName)) {
           xmlStrSb.append(spliceStr("name", stopName));
         }
-        if (StringUtils.isNotBlank(bundel)) {
-          xmlStrSb.append(spliceStr("bundel", bundel));
+        if (StringUtils.isNotBlank(bundle)) {
+          xmlStrSb.append(spliceStr("bundle", bundle));
         }
         if (StringUtils.isNotBlank(stopDescription)) {
           xmlStrSb.append(spliceStr("description", stopDescription));
@@ -841,8 +841,8 @@ public class FlowXmlUtils {
       }
       Element stopElement = rootElt.element("stop");
       Stops stops = new Stops();
-      String bundel =
-          StringCustomUtils.recoverSpecialSymbolsXml(stopElement.attributeValue("bundel"));
+      String bundle =
+          StringCustomUtils.recoverSpecialSymbolsXml(stopElement.attributeValue("bundle"));
       String description =
           StringCustomUtils.recoverSpecialSymbolsXml(stopElement.attributeValue("description"));
       String id = StringCustomUtils.recoverSpecialSymbolsXml(stopElement.attributeValue("id"));
@@ -870,7 +870,7 @@ public class FlowXmlUtils {
       stops.setPageId((Integer.parseInt(pageId) + maxPageId) + "");
       stops.setName(name);
       stops.setDescription(description);
-      stops.setBundel(bundel);
+      stops.setBundle(bundle);
       stops.setId(id);
       stops.setInports(inports);
       stops.setOutports(outports);
@@ -1254,8 +1254,8 @@ public class FlowXmlUtils {
         return null;
       }
       Stops stops = new Stops();
-      String bundel =
-          StringCustomUtils.recoverSpecialSymbolsXml(stopElement.attributeValue("bundel"));
+      String bundle =
+          StringCustomUtils.recoverSpecialSymbolsXml(stopElement.attributeValue("bundle"));
       String description =
           StringCustomUtils.recoverSpecialSymbolsXml(stopElement.attributeValue("description"));
       // String id = StringCustomUtils.recoverSpecialSymbolsXml(stopElement.attributeValue("id"));
@@ -1285,7 +1285,7 @@ public class FlowXmlUtils {
       stops.setPageId((Integer.parseInt(pageId) + maxPageId) + "");
       stops.setName(name);
       stops.setDescription(description);
-      stops.setBundel(bundel);
+      stops.setBundle(bundle);
       // stops.setId(id);
       stops.setInports(inports);
       stops.setOutports(outports);

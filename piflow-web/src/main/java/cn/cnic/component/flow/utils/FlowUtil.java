@@ -194,7 +194,7 @@ public class FlowUtil {
           stopsNew.setLastUpdateUser(username);
           // copy Stops new
           stopsNew.setName(stops.getName());
-          stopsNew.setBundel(stops.getBundel());
+          stopsNew.setBundle(stops.getBundle());
           stopsNew.setGroups(stops.getGroups());
           stopsNew.setOwner(stops.getOwner());
           stopsNew.setDescription(stops.getDescription());

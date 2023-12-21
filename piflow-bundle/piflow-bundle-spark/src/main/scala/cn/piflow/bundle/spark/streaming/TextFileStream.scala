@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.streaming
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStreamingStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -70,4 +70,7 @@ class TextFileStream
   override def perform(in: JobInputStream[DataFrame],
                        out: JobOutputStream[DataFrame],
                        pec: JobContext[DataFrame]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

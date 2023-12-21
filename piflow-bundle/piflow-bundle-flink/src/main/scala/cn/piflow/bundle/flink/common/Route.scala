@@ -4,7 +4,7 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.util.IdGenerator
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
@@ -69,4 +69,7 @@ class Route extends ConfigurableStop[Table] {
   override def getGroup(): List[String] = {
     List(StopGroup.CommonGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_FLINK
+
 }

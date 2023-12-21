@@ -18,11 +18,13 @@ public class FlowVo implements Serializable {
 
   private String name;
 
+  private String engineType;
+
   private String uuid;
 
   private String crtDttmString;
 
-  private String description; // description
+  private String description;
 
   private String driverMemory;
 
@@ -40,7 +42,7 @@ public class FlowVo implements Serializable {
 
   private MxGraphModelVo mxGraphModelVo; // Drawing board information
 
-  private List<StopsVo> stopsVoList = new ArrayList<StopsVo>(); // Current stream all stops
+  private List<StopsVo> stopsVoList = new ArrayList<>(); // Current stream all stops
 
-  private List<PathsVo> pathsVoList = new ArrayList<PathsVo>(); // Current stream all paths
+  private List<PathsVo> pathsVoList = new ArrayList<>(); // Current stream all paths
 }

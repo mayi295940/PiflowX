@@ -111,8 +111,8 @@ class DeleteHdfs extends ConfigurableStop[DataFrame] {
     List(StopGroup.HdfsGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {
+  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
-  }
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

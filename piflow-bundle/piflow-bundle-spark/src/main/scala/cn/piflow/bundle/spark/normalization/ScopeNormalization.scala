@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.normalization
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -111,4 +111,6 @@ class ScopeNormalization extends ConfigurableStop[DataFrame] {
     val dfNew = df.withColumn(outputCol, (col(inputCol) - min) / (max - min) * (range._2 - range._1) + range._1)
     dfNew
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 }

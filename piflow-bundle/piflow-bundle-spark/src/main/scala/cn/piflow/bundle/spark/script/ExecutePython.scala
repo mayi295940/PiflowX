@@ -5,7 +5,7 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.util.FileUtil
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import jep.Jep
 import org.apache.spark.sql.DataFrame
 
@@ -59,4 +59,6 @@ class ExecutePython extends ConfigurableStop[DataFrame] {
     FileUtil.writeFile(script, scriptPath)
     jep.runScript(scriptPath)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 }

@@ -55,7 +55,7 @@ public class PropertyServiceImpl implements IPropertyService {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("data is null");
     }
     StopsComponent stopsComponentByBundle =
-        stopsComponentMapper.getStopsComponentByBundle(stops.getBundel());
+        stopsComponentMapper.getStopsComponentByBundle(stops.getBundle());
     StopsVo stopsVo = StopsUtils.stopPoToVo(stops, stopsComponentByBundle);
     if (null == stopsVo) {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("data is null");

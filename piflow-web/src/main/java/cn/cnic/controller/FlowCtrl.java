@@ -4,11 +4,14 @@ import cn.cnic.base.util.SessionUserUtil;
 import cn.cnic.component.flow.entity.Flow;
 import cn.cnic.component.flow.service.IFlowService;
 import cn.cnic.component.flow.vo.FlowVo;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+@Api(tags = "flow")
 @Controller
 @RequestMapping("/flow")
 public class FlowCtrl {
@@ -18,11 +21,11 @@ public class FlowCtrl {
   /**
    * flowList page query
    *
-   * @param page
-   * @param limit
-   * @param param
-   * @return
+   * @param page page
+   * @param limit limit
+   * @param param param
    */
+  @ApiOperation("getFlowListPage")
   @RequestMapping("/getFlowListPage")
   @ResponseBody
   public String getFlowListPage(Integer page, Integer limit, String param) {
@@ -31,12 +34,8 @@ public class FlowCtrl {
     return flowServiceImpl.getFlowListPage(username, isAdmin, page, limit, param);
   }
 
-  /**
-   * Enter the front page of the drawing board
-   *
-   * @param request
-   * @return
-   */
+  /** Enter the front page of the drawing board */
+  @ApiOperation("drawingBoardData")
   @RequestMapping("/drawingBoardData")
   @ResponseBody
   public String drawingBoardData(String load, String parentAccessPath) {
@@ -45,12 +44,8 @@ public class FlowCtrl {
     return flowServiceImpl.drawingBoardData(username, isAdmin, load, parentAccessPath);
   }
 
-  /**
-   * run Flow
-   *
-   * @param request
-   * @return
-   */
+  /** run Flow */
+  @ApiOperation("runFlow")
   @RequestMapping("/runFlow")
   @ResponseBody
   public String runFlow(String flowId, String runMode) {
@@ -59,6 +54,7 @@ public class FlowCtrl {
     return flowServiceImpl.runFlow(username, isAdmin, flowId, runMode);
   }
 
+  @ApiOperation("queryFlowData")
   @RequestMapping("/queryFlowData")
   @ResponseBody
   public String queryFlowData(String load) {
@@ -68,9 +64,9 @@ public class FlowCtrl {
   /**
    * save flow
    *
-   * @param flowVo
-   * @return
+   * @param flowVo flow vo
    */
+  @ApiOperation("saveFlowInfo")
   @RequestMapping("/saveFlowInfo")
   @ResponseBody
   public String saveFlowInfo(FlowVo flowVo) {
@@ -81,9 +77,9 @@ public class FlowCtrl {
   /**
    * update Flow
    *
-   * @param flow
-   * @return
+   * @param flow flow bean
    */
+  @ApiOperation("updateFlowInfo")
   @RequestMapping("/updateFlowInfo")
   @ResponseBody
   public String updateFlowInfo(Flow flow) {
@@ -94,9 +90,9 @@ public class FlowCtrl {
   /**
    * Delete flow association information according to flowId
    *
-   * @param id
-   * @return
+   * @param id flow id
    */
+  @ApiOperation("deleteFlow")
   @RequestMapping("/deleteFlow")
   @ResponseBody
   public String deleteFlow(String id) {
@@ -105,6 +101,7 @@ public class FlowCtrl {
     return flowServiceImpl.deleteFLowInfo(username, isAdmin, id);
   }
 
+  @ApiOperation("updateFlowBaseInfo")
   @RequestMapping("/updateFlowBaseInfo")
   @ResponseBody
   public String updateFlowBaseInfo(String fId, FlowVo flowVo) {

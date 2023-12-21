@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.streaming
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
@@ -108,5 +108,7 @@ class SocketTextStream
     val dstream = ssc.socketTextStream(hostname, Integer.parseInt(port))
     dstream.asInstanceOf[DStream[String]]
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

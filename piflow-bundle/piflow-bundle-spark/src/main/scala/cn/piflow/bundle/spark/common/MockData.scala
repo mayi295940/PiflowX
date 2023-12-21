@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.common
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -71,17 +71,18 @@ class MockData extends ConfigurableStop[DataFrame] {
     val spark = pec.get[SparkSession]()
     import spark.implicits._
 
-    val field = this.schema.split(",")
+    val field = this.schema.split(Constants.COMMA)
     val structFieldArray: Array[StructField] = new Array[StructField](field.size)
 
     for (i <- 0 until field.size) {
-      val columnInfo = field(i).trim.split(":")
+      val columnInfo = field(i).trim.split(Constants.COLON)
       val column = columnInfo(0).trim
       val columnType = columnInfo(1).trim
       var isNullable = false
       if (columnInfo.size == 3) {
         isNullable = columnInfo(2).trim.toBoolean
       }
+
       columnType match {
         case "String" => structFieldArray(i) = StructField(column, StringType, isNullable)
         case "Int" => structFieldArray(i) = StructField(column, IntegerType, isNullable)
@@ -134,6 +135,7 @@ class MockData extends ConfigurableStop[DataFrame] {
           }.toList
         )
     }
-
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 }

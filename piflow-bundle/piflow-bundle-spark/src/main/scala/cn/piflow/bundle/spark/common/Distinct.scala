@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.common
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.DataFrame
 
 class Distinct extends ConfigurableStop[DataFrame] {
@@ -61,4 +61,7 @@ class Distinct extends ConfigurableStop[DataFrame] {
     }
     out.write(outDf)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

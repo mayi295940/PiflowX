@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.common
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.DataFrame
 
 class Trager extends ConfigurableStop[DataFrame] {
@@ -40,5 +40,7 @@ class Trager extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.CommonGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

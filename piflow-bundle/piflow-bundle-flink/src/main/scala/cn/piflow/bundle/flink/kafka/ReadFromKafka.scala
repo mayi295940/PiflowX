@@ -3,7 +3,7 @@ package cn.piflow.bundle.flink.kafka
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.api.{DataTypes, Table}
 import org.apache.flink.table.types.DataType
@@ -97,5 +97,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
   override def getGroup(): List[String] = {
     List(StopGroup.KafkaGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_FLINK
 
 }

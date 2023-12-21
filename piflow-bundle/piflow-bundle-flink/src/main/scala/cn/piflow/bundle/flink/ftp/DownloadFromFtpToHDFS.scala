@@ -4,7 +4,7 @@ import cn.piflow.bundle.core.util.FtpDownAndUploadUtil
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.table.api.Table
 
 class DownloadFromFtpToHDFS extends ConfigurableStop[Table] {
@@ -118,4 +118,7 @@ class DownloadFromFtpToHDFS extends ConfigurableStop[Table] {
   }
 
   override def initialize(ctx: ProcessContext[Table]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_FLINK
+
 }

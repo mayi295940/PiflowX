@@ -1,9 +1,9 @@
 package cn.cnic.component.flow.mapper.provider;
 
-import cn.piflow.util.DateUtils;
 import cn.cnic.base.util.SqlUtils;
 import cn.cnic.component.flow.entity.Stops;
 import cn.cnic.third.vo.flow.ThirdFlowInfoStopVo;
+import cn.piflow.util.DateUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class StopsMapperProvider {
   private String lastUpdateUser;
   private int enableFlag;
   private long version;
-  private String bundel;
+  private String bundle;
   private String description;
   private String groups;
   private String name;
@@ -51,7 +51,7 @@ public class StopsMapperProvider {
     this.lastUpdateDttmStr = SqlUtils.preventSQLInjection(lastUpdateDttmStr);
 
     // Selection field
-    this.bundel = SqlUtils.preventSQLInjection(stops.getBundel());
+    this.bundle = SqlUtils.preventSQLInjection(stops.getBundle());
     this.description = SqlUtils.preventSQLInjection(stops.getDescription());
     this.groups = SqlUtils.preventSQLInjection(stops.getGroups());
     this.name = SqlUtils.preventSQLInjection(stops.getName());
@@ -81,7 +81,7 @@ public class StopsMapperProvider {
     this.lastUpdateUser = null;
     this.enableFlag = 1;
     this.version = 0L;
-    this.bundel = null;
+    this.bundle = null;
     this.description = null;
     this.groups = null;
     this.name = null;
@@ -113,12 +113,13 @@ public class StopsMapperProvider {
       stringBuffer.append("(");
       stringBuffer.append(SqlUtils.baseFieldName() + ",");
       stringBuffer.append(
-          "bundel,description,groups,name,inports,in_port_type,outports,out_port_type,owner,page_id,is_checkpoint,is_customized,fk_flow_id,fk_data_source_id");
+          "bundle,description,groups,name,inports,in_port_type,outports,out_port_type,owner,page_id,"
+              + "is_checkpoint,is_customized,fk_flow_id,fk_data_source_id");
       stringBuffer.append(") ");
       stringBuffer.append("VALUES");
       stringBuffer.append("(");
       stringBuffer.append(SqlUtils.baseFieldValues(stops) + ",");
-      stringBuffer.append(this.bundel + ",");
+      stringBuffer.append(this.bundle + ",");
       stringBuffer.append(this.description + ",");
       stringBuffer.append(this.groups + ",");
       stringBuffer.append(this.name + ",");
@@ -155,7 +156,7 @@ public class StopsMapperProvider {
       sql.append("flow_stops ");
       sql.append("(");
       sql.append(SqlUtils.baseFieldName() + ",");
-      sql.append("bundel,");
+      sql.append("bundle,");
       sql.append("description,");
       sql.append("groups,");
       sql.append("name,");
@@ -179,7 +180,7 @@ public class StopsMapperProvider {
           sql.append("(");
           sql.append(SqlUtils.baseFieldValues(stops) + ",");
           // handle other fields
-          sql.append(bundel + ",");
+          sql.append(bundle + ",");
           sql.append(description + ",");
           sql.append(groups + ",");
           sql.append(name + ",");
@@ -226,7 +227,7 @@ public class StopsMapperProvider {
 
       // handle other fields
       sql.SET("enable_flag = " + enableFlag);
-      sql.SET("bundel = " + bundel);
+      sql.SET("bundle = " + bundle);
       sql.SET("description = " + description);
       sql.SET("groups = " + groups);
       sql.SET("name = " + name);

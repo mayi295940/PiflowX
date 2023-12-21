@@ -26,7 +26,7 @@ public class ProcessStop extends BaseHibernateModelUUIDNoCorpAgentId {
 
   private String name;
 
-  private String bundel;
+  private String bundle;
 
   private String groups;
 

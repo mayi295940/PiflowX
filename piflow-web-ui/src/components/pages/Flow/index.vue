@@ -109,6 +109,21 @@
           />
         </div>
         <div class="item">
+          <label>{{ $t("flow_columns.engine_type") }}：</label>
+          <Select
+            v-model="engineType"
+            :placeholder="$t('modal.placeholder')"
+            style="width: 350px"
+          >
+            <Option
+              v-for="item in engineTypeList"
+              :value="item.name"
+              :key="item.name"
+              >{{ item.name }}</Option
+            >
+          </Select>
+        </div>
+        <div class="item" v-if="engineType == 'spark'">
           <label>{{ $t("flow_columns.driverMemory") }}：</label>
           <Input
             show-word-limit
@@ -118,7 +133,7 @@
             style="width: 350px"
           />
         </div>
-        <div class="item">
+        <div class="item" v-if="engineType == 'spark'">
           <label>{{ $t("flow_columns.executorNumber") }}：</label>
           <Input
             show-word-limit
@@ -128,7 +143,7 @@
             style="width: 350px"
           />
         </div>
-        <div class="item">
+        <div class="item" v-if="engineType == 'spark'">
           <label>{{ $t("flow_columns.executorMemory") }}：</label>
           <Input
             show-word-limit
@@ -138,7 +153,7 @@
             style="width: 350px"
           />
         </div>
-        <div class="item">
+        <div class="item" v-if="engineType == 'spark'">
           <label>{{ $t("flow_columns.executorCores") }}：</label>
           <Input
             show-word-limit
@@ -180,6 +195,7 @@ export default {
         {
           id: "b0ca399d05004abe9a3321cf7287d9c8",
           name: "text",
+          enginType: "spark",
           uuid: "b0ca399d05004abe9a3321cf7287d9c8",
           CreateTime: "2020-06-30 13:43:37",
           description: "测试",
@@ -198,11 +214,13 @@ export default {
       row: null,
       id: "",
       name: "",
+      engineType: "",
       description: "",
       driverMemory: "1g",
       executorNumber: 1,
       executorMemory: "1g",
       executorCores: 1,
+      engineTypeList: [{ name: "spark" }, { name: "flink" }],
     };
   },
   watch: {
@@ -224,6 +242,11 @@ export default {
         {
           title: this.$t("flow_columns.name"),
           key: "name",
+          sortable: true,
+        },
+        {
+          title: this.$t("flow_columns.engine_type"),
+          key: "engineType",
           sortable: true,
         },
         {
@@ -258,6 +281,7 @@ export default {
       this.id = "";
       this.row = null;
       this.name = "";
+      this.engineType = "";
       this.description = "";
       this.driverMemory = "1g";
       this.executorNumber = 1;
@@ -306,6 +330,7 @@ export default {
     handleSaveUpdateData() {
       let data = {
         name: this.name,
+        engineType: this.engineType,
         description: this.description,
         driverMemory: this.driverMemory,
         executorNumber: this.executorNumber,

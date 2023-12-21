@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.common
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.ImageUtil
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -32,9 +32,7 @@ class Subtract extends ConfigurableStop[DataFrame] {
     List(StopGroup.CommonGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {
-
-  }
+  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
   override def perform(in: JobInputStream[DataFrame],
                        out: JobOutputStream[DataFrame],
@@ -46,4 +44,7 @@ class Subtract extends ConfigurableStop[DataFrame] {
 
     out.write(outDF)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

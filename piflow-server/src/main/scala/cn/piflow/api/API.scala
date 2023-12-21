@@ -1,8 +1,8 @@
 package cn.piflow.api
 
-import cn.piflow.conf.VisualizationType
 import cn.piflow.conf.bean.{FlowBean, GroupBean}
 import cn.piflow.conf.util.{ClassUtil, MapUtil, OptionUtil, PluginManager}
+import cn.piflow.conf.{ConfigurableStop, VisualizationType}
 import cn.piflow.launcher.flink.{FlinkFlowLauncher, FlinkLauncher}
 import cn.piflow.launcher.spark.SparkFlowLauncher
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
@@ -500,7 +500,9 @@ object API {
       val str = ClassUtil.findConfigurableStopInfo(bundle)
       str
     } catch {
-      case ex: Exception => println(ex); throw ex
+      case ex: Throwable =>
+        ex.printStackTrace()
+        throw ex
     }
   }
 
@@ -516,16 +518,25 @@ object API {
     """{"stops":"""" + stops.mkString(",") + """"}"""
   }
 
-  def getAllStopsWithGroup(): String = {
+  def getAllStopsWithGroup(engineType: String): String = {
 
     var resultList: List[String] = List()
-    var stops = List[Tuple2[String, String]]()
-    val configurableStopList = ClassUtil.findAllConfigurableStop()
+    var stops = List[(String, String)]()
+
+    var configurableStopList: List[Any] = null
+
+    if (Constants.ENGIN_SPARK.equalsIgnoreCase(engineType)) {
+      configurableStopList = ClassUtil.findAllConfigurableStop[DataFrame]("cn.piflow.bundle.spark")
+    } else {
+      configurableStopList = ClassUtil.findAllConfigurableStop[Table]("cn.piflow.bundle.flink")
+    }
+
     configurableStopList.foreach(s => {
       //generate (group,bundle) pair and put into stops
-      val groupList = s.getGroup()
+      val configurableStop = s.asInstanceOf[ConfigurableStop[Any]]
+      val groupList = configurableStop.getGroup()
       groupList.foreach(group => {
-        val tuple = (group, s.getClass.getName)
+        val tuple = (group, configurableStop.getClass.getName)
         stops = tuple +: stops
       })
     })

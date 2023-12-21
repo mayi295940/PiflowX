@@ -66,6 +66,8 @@ class DropField extends ConfigurableStop[Table] {
     List(StopGroup.CommonGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_FLINK
+
 }
 
 

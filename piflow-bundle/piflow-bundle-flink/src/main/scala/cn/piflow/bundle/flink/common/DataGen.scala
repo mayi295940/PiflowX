@@ -93,4 +93,6 @@ class DataGen extends ConfigurableStop[Table] {
     out.write(resultTable)
   }
 
+  override def getEngineType: String = Constants.ENGIN_FLINK
+
 }

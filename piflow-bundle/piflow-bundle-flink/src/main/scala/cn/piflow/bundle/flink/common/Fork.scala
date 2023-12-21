@@ -51,4 +51,7 @@ class Fork extends ConfigurableStop[Table] {
   override def getGroup(): List[String] = {
     List(StopGroup.CommonGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_FLINK
+
 }

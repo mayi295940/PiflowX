@@ -8,6 +8,7 @@ import cn.cnic.component.stopsComponent.model.StopsComponent;
 import cn.cnic.component.stopsComponent.model.StopsComponentGroup;
 import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
 import cn.cnic.third.vo.stop.ThirdStopsComponentVo;
+import cn.piflow.Constants;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -82,17 +83,33 @@ public class StopsComponentUtils {
         outPortType = PortType.USER_DEFAULT;
       }
     }
+
     String icon = thirdStopsComponentVo.getIcon();
     if (StringUtils.isNotBlank(icon)) {
-      ImageUtils.generateImage(
-          icon, thirdStopsComponentVo.getName() + "_128x128", "png", SysParamsCache.IMAGES_PATH);
+      String engineType = thirdStopsComponentVo.getEngineType();
+      if (Constants.ENGIN_FLINK().equalsIgnoreCase(engineType)) {
+        ImageUtils.generateImage(
+            icon,
+            thirdStopsComponentVo.getName() + "_128x128",
+            "png",
+            SysParamsCache.ENGINE_FLINK_IMAGES_PATH);
+      } else {
+        ImageUtils.generateImage(
+            icon,
+            thirdStopsComponentVo.getName() + "_128x128",
+            "png",
+            SysParamsCache.ENGINE_SPARK_IMAGES_PATH);
+      }
     }
+
     StopsComponent stopsComponent = stopsComponentNewNoId(username);
     stopsComponent.setId(UUIDUtils.getUUID32());
-    stopsComponent.setBundel(thirdStopsComponentVo.getBundle());
+    stopsComponent.setBundle(thirdStopsComponentVo.getBundle());
+    stopsComponent.setEngineType(thirdStopsComponentVo.getEngineType());
     stopsComponent.setDescription(thirdStopsComponentVo.getDescription());
     stopsComponent.setGroups(thirdStopsComponentVo.getGroups());
     stopsComponent.setName(thirdStopsComponentVo.getName());
+    stopsComponent.setEngineType(thirdStopsComponentVo.getEngineType());
     stopsComponent.setInports(inports);
     stopsComponent.setInPortType(inPortType);
     stopsComponent.setOutports(outports);

@@ -5,7 +5,7 @@ import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.util.PropertyUtil
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 
@@ -128,5 +128,6 @@ class DockerExecute extends ConfigurableStop[DataFrame] {
     List(StopGroup.ScriptGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

@@ -36,4 +36,8 @@ object Constants {
 
   val ARROW_SIGN = "->"
 
+  val ENGIN_SPARK = "spark"
+
+  val ENGIN_FLINK = "flink"
+
 }

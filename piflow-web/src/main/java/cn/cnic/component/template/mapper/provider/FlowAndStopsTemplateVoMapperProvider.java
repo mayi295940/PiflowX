@@ -135,7 +135,7 @@ public class FlowAndStopsTemplateVoMapperProvider {
     String sqlStr = "";
     if (null != stops) {
       String id = stops.getId();
-      String bundel = stops.getBundel();
+      String bundle = stops.getBundle();
       String description = stops.getDescription().equals("null") ? null : stops.getDescription();
       String name = stops.getName();
       String inports = stops.getInports();
@@ -172,8 +172,8 @@ public class FlowAndStopsTemplateVoMapperProvider {
       sql.VALUES("enable_flag", enableFlagInt + "");
 
       // handle other fields
-      if (StringUtils.isNotBlank(bundel)) {
-        sql.VALUES("bundel", SqlUtils.addSqlStr(bundel));
+      if (StringUtils.isNotBlank(bundle)) {
+        sql.VALUES("bundle", SqlUtils.addSqlStr(bundle));
       }
       if (StringUtils.isNotBlank(description)) {
         sql.VALUES("description", SqlUtils.addSqlStr(description));

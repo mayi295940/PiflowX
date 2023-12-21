@@ -1,13 +1,12 @@
 package cn.piflow.bundle.spark.kafka
 
 import java.util.Properties
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.types.{StructField, StructType}
-
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringSerializer
@@ -118,8 +117,11 @@ class ReadFromKafka extends ConfigurableStop[DataFrame] {
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.KafkaGroup.toString)
+    List(StopGroup.KafkaGroup)
   }
 
   override val authorEmail: String = "06whuxx@163.com"
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

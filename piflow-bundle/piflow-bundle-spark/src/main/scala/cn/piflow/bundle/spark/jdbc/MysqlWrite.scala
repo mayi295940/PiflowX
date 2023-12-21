@@ -120,5 +120,6 @@ class MysqlWrite extends ConfigurableStop[DataFrame] {
     List(StopGroup.JdbcGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

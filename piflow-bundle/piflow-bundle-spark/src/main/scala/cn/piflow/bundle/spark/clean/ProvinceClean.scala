@@ -4,10 +4,11 @@ import cn.piflow.bundle.spark.util.CleanUtil
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class ProvinceClean extends ConfigurableStop[DataFrame] {
+
   val authorEmail: String = "songdongze@cnic.cn"
   val description: String = "Cleaning province data"
   val inportList: List[String] = List(Port.DefaultPort)
@@ -89,5 +90,7 @@ class ProvinceClean extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.CleanGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

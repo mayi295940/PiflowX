@@ -11,6 +11,8 @@ import cn.cnic.component.stopsComponent.vo.StopsComponentVo;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Resource;
+
+import cn.piflow.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
@@ -98,11 +100,9 @@ public class StopsComponentDomain {
     return stopsComponentMapper.insertStopsComponent(stopsComponent);
   }
 
-  public int deleteStopsComponent() {
-    // empty the "Stop" message and insert
+  public int deleteStopsComponent(String engineType) {
     stopsComponentPropertyMapper.deleteStopsComponentProperty();
-    int deleteRows = stopsComponentMapper.deleteStopsComponent();
-    return deleteRows;
+    return stopsComponentMapper.deleteStopsComponent(engineType);
   }
 
   public StopsComponent getStopsComponentById(String id) {
@@ -146,11 +146,12 @@ public class StopsComponentDomain {
     logger.debug("Successful delete " + stopsComponent.getName() + " !!!");
 
     // delete group
-    String[] stopsComponentGroup = stopsComponent.getGroups().split(",");
+    String[] stopsComponentGroup = stopsComponent.getGroups().split(Constants.COMMA());
     List<StopsComponentGroup> stopsComponentGroupList =
-        stopsComponentGroupMapper.getStopGroupByNameList(Arrays.asList(stopsComponentGroup));
-    for (StopsComponentGroup sGroup : stopsComponentGroupList) {
+        stopsComponentGroupMapper.getStopGroupByNameList(
+            Arrays.asList(stopsComponentGroup), stopsComponent.getEngineType());
 
+    for (StopsComponentGroup sGroup : stopsComponentGroupList) {
       int count = stopsComponentGroupMapper.getGroupStopCount(sGroup.getId());
       if (count == 0) {
         stopsComponentGroupMapper.deleteGroupById(sGroup.getId());
@@ -196,8 +197,9 @@ public class StopsComponentDomain {
     return stopsComponentGroupMapper.insertStopGroup(stopsComponentGroup);
   }
 
-  public List<StopsComponentGroup> getStopGroupByNameList(List<String> groupNameList) {
-    return stopsComponentGroupMapper.getStopGroupByNameList(groupNameList);
+  public List<StopsComponentGroup> getStopGroupByNameList(
+      List<String> groupNameList, String engineType) {
+    return stopsComponentGroupMapper.getStopGroupByNameList(groupNameList, engineType);
   }
 
   public StopsComponentGroup getStopsComponentGroupByGroupName(String groupName) {
@@ -212,18 +214,18 @@ public class StopsComponentDomain {
     return stopGroupByName.get(0);
   }
 
-  public int deleteStopsComponentGroup() {
+  public int deleteStopsComponentGroup(String engineType) {
     // the group table information is cleared
     // The call is successful, the group table information is cleared and then
     // inserted.
-    stopsComponentGroupMapper.deleteGroupCorrelation();
-    int deleteRows = stopsComponentGroupMapper.deleteGroup();
+    stopsComponentGroupMapper.deleteGroupCorrelation(engineType);
+    int deleteRows = stopsComponentGroupMapper.deleteGroup(engineType);
     logger.debug("Successful deletion Group" + deleteRows + "piece of data!!!");
     return deleteRows;
   }
 
-  public List<StopsComponentGroup> getStopGroupList() {
-    return stopsComponentGroupMapper.getStopGroupList();
+  public List<StopsComponentGroup> getStopGroupList(String engineType) {
+    return stopsComponentGroupMapper.getStopGroupList(engineType);
   }
 
   public int insertAssociationGroupsStopsTemplate(String stopGroupId, String stopsTemplateId) {
@@ -231,8 +233,8 @@ public class StopsComponentDomain {
         stopGroupId, stopsTemplateId);
   }
 
-  public List<StopsComponentGroup> getStopGroupByGroupNameList(List<String> groupName) {
-    return stopsComponentGroupMapper.getStopGroupByGroupNameList(groupName);
+  public List<StopsComponentGroup> getStopGroupByGroupNameList(List<String> groupName, String engineType) {
+    return stopsComponentGroupMapper.getStopGroupByGroupNameList(groupName, engineType);
   }
 
   public int deleteGroupCorrelationByGroupIdAndStopId(String stopGroupId, String stopsTemplateId) {

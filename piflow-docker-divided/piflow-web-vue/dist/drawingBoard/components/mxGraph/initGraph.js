@@ -2074,7 +2074,7 @@ function loadXml(loadStr) {
     eraseRecord()
 }
 
-//Request interface to reload'stops'
+//Request interface to reload 'stops'
 function reloadStops() {
     // fullScreen.show();
     window.parent.postMessage(true);

@@ -53,5 +53,6 @@ class JsonSave extends ConfigurableStop[DataFrame] {
     List(StopGroup.JsonGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

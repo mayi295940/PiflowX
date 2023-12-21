@@ -3,7 +3,7 @@ package cn.piflow.bundle.flink.hive
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.api.{SqlDialect, Table}
 import org.apache.flink.table.catalog.hive.HiveCatalog
@@ -84,6 +84,8 @@ class SelectHiveQLRetract extends ConfigurableStop[Table] {
   }
 
   override def initialize(ctx: ProcessContext[Table]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_FLINK
 
 }
 

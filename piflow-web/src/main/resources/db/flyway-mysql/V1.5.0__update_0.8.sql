@@ -32,9 +32,6 @@ CREATE TABLE IF NOT EXISTS `stops_hub` (
   `status` VARCHAR(255) COMMENT 'StopsHue status',
   primary key (id)) engine=InnoDB;
 
--- rename table
-ALTER  TABLE flow_sotps_groups RENAME TO flow_stops_groups;
-
 -- add column
 ALTER TABLE `flow_process` ADD COLUMN `fk_group_schedule_id` VARCHAR(40);
 ALTER TABLE `flow_stops_property` ADD COLUMN `example` TEXT(0) COMMENT 'property example';

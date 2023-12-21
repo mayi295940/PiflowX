@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.visualization
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableVisualizationStop, Port, StopGroup, VisualizationType}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -73,4 +73,7 @@ class ScatterPlotChart extends ConfigurableVisualizationStop[DataFrame] {
       out.write(dataFrame)
     }
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

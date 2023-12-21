@@ -72,4 +72,6 @@ class PutHiveStreaming extends ConfigurableStop[DataFrame] {
     List(StopGroup.HiveGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

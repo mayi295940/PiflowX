@@ -35,4 +35,6 @@ abstract class ConfigurableStop[DataType] extends Stop[DataType] {
     this.isCustomized
   }
 
+  def getEngineType: String
+
 }

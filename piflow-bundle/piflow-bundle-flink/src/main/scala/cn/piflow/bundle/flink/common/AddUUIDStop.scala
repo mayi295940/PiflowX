@@ -3,8 +3,7 @@ package cn.piflow.bundle.flink.common
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.util.IdGenerator
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
@@ -25,11 +24,7 @@ class AddUUIDStop extends ConfigurableStop[Table] {
 
     val inputTable = in.read()
 
-    val tmpTable = "AddUUIDTmp_" + IdGenerator.uuidWithoutSplit
-
-    tableEnv.createTemporaryView(tmpTable, inputTable)
-
-    val resultTable = tableEnv.sqlQuery(s"SELECT UUID() AS ${column}, * FROM $tmpTable")
+    val resultTable = tableEnv.sqlQuery(s"SELECT UUID() AS ${column}, * FROM $inputTable")
 
     out.write(resultTable)
 
@@ -64,4 +59,5 @@ class AddUUIDStop extends ConfigurableStop[Table] {
 
   override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
+  override def getEngineType: String = Constants.ENGIN_FLINK
 }

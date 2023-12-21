@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.ml_feature
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -184,4 +184,7 @@ class WordToVec extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.MLGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

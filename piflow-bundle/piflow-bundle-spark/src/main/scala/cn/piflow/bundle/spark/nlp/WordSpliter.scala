@@ -87,4 +87,6 @@ class WordSpliter extends ConfigurableStop[DataFrame] {
     List(StopGroup.Alg_NLPGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

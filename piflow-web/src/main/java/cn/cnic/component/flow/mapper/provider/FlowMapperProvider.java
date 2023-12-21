@@ -1,8 +1,8 @@
 package cn.cnic.component.flow.mapper.provider;
 
-import cn.piflow.util.DateUtils;
 import cn.cnic.base.util.SqlUtils;
 import cn.cnic.component.flow.entity.Flow;
+import cn.piflow.util.DateUtils;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.jdbc.SQL;
@@ -18,6 +18,7 @@ public class FlowMapperProvider {
   private long version;
   private String description;
   private String name;
+  private String engineType;
   private String uuid;
   private String driverMemory;
   private String executorCores;
@@ -49,6 +50,7 @@ public class FlowMapperProvider {
       // Selection field
       this.description = SqlUtils.preventSQLInjection(flow.getDescription());
       this.name = SqlUtils.preventSQLInjection(flow.getName());
+      this.engineType = SqlUtils.preventSQLInjection(flow.getEngineType());
       this.uuid = SqlUtils.preventSQLInjection(flow.getUuid());
       this.driverMemory = SqlUtils.preventSQLInjection(flow.getDriverMemory());
       this.executorCores = SqlUtils.preventSQLInjection(flow.getExecutorCores());
@@ -68,6 +70,7 @@ public class FlowMapperProvider {
     this.version = 0L;
     this.description = null;
     this.name = null;
+    this.engineType = null;
     this.uuid = null;
     this.driverMemory = null;
     this.executorCores = null;
@@ -113,6 +116,7 @@ public class FlowMapperProvider {
       // handle other fields
       sql.VALUES("description", description);
       sql.VALUES("name", name);
+      sql.VALUES("engine_type", engineType);
       sql.VALUES("uuid", uuid);
       sql.VALUES("driver_memory", driverMemory);
       sql.VALUES("executor_cores", executorCores);

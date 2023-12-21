@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.common
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.DataFrame
 
 class Merge extends ConfigurableStop[DataFrame] {
@@ -19,7 +19,7 @@ class Merge extends ConfigurableStop[DataFrame] {
               out: JobOutputStream[DataFrame],
               pec: JobContext[DataFrame]): Unit = {
 
-    out.write(in.ports().map(in.read(_)).reduce((x, y) => x.union(y)));
+    out.write(in.ports().map(in.read).reduce((x, y) => x.union(y)));
   }
 
   def initialize(ctx: ProcessContext[DataFrame]): Unit = {
@@ -28,7 +28,7 @@ class Merge extends ConfigurableStop[DataFrame] {
 
   def setProperties(map: Map[String, Any]): Unit = {
     val inportStr = MapUtil.get(map, "inports").asInstanceOf[String]
-    inports = inportStr.split(",").map(x => x.trim).toList
+    inports = inportStr.split(Constants.COMMA).map(x => x.trim).toList
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
@@ -50,5 +50,7 @@ class Merge extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.CommonGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

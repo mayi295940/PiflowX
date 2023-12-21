@@ -6,8 +6,6 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import org.apache.spark.sql.{Column, DataFrame}
 
-import scala.beans.BeanProperty
-
 
 class SelectField extends ConfigurableStop[DataFrame] {
 
@@ -24,7 +22,7 @@ class SelectField extends ConfigurableStop[DataFrame] {
 
     val df = in.read()
 
-    val field = columnNames.split(",").map(x => x.trim)
+    val field = columnNames.split(Constants.COMMA).map(x => x.trim)
     val columnArray: Array[Column] = new Array[Column](field.length)
 
     for (i <- field.indices) {
@@ -35,9 +33,7 @@ class SelectField extends ConfigurableStop[DataFrame] {
     out.write(finalFieldDF)
   }
 
-  def initialize(ctx: ProcessContext[DataFrame]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
   def setProperties(map: Map[String, Any]): Unit = {
     columnNames = MapUtil.get(map, "columnNames").asInstanceOf[String]
@@ -64,6 +60,8 @@ class SelectField extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.CommonGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }
 

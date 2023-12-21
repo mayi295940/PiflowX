@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.visualization
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableVisualizationStop, Port, StopGroup, VisualizationType}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -58,4 +58,7 @@ class TableShow extends ConfigurableVisualizationStop[DataFrame] {
     val tableShowDF = spark.sql(sqlText)
     out.write(tableShowDF.repartition(1))
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

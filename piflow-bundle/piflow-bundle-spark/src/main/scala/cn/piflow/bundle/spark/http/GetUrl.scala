@@ -1,11 +1,10 @@
 package cn.piflow.bundle.spark.http
 
 import java.util
-
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
@@ -171,9 +170,11 @@ class GetUrl extends ConfigurableStop[DataFrame] {
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.HttpGroup.toString)
+    List(StopGroup.HttpGroup)
   }
 
   override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

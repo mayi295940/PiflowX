@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.hive
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -11,6 +11,7 @@ import org.apache.spark.sql.{DataFrame, Row, SQLContext, SparkSession}
  * HIVE JDBC DRIVER DESIGN FOR HIVE 1.2.1
  */
 class SelectHiveQLByJDBC extends ConfigurableStop[DataFrame] {
+
   override val authorEmail: String = "xiaomeng7890@gmail.com"
   override val description: String = "some hive can only achieve by jdbc, this stop is designed for this"
   override val inportList: List[String] = List(Port.DefaultPort)
@@ -136,4 +137,7 @@ class SelectHiveQLByJDBC extends ConfigurableStop[DataFrame] {
     val organizationRDD = sc.makeRDD(rows)
     sqlContext.createDataFrame(organizationRDD, sqlContext.read.table(tableName).schema)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

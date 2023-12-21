@@ -18,6 +18,9 @@ public class StopsHub extends BaseHibernateModelUUIDNoCorpAgentId {
   @Column(columnDefinition = "varchar(1000) COMMENT 'jar mount id'")
   private String mountId;
 
+  @Column(columnDefinition = "varchar(10) COMMENT 'engine type'")
+  private String engineType;
+
   @Column(columnDefinition = "varchar(1000) COMMENT 'jar name'")
   private String jarName;
 

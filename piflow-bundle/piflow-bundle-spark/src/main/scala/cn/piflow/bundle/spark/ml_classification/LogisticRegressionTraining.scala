@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.ml_classification
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.ml.classification.LogisticRegression
 
@@ -177,5 +177,6 @@ class LogisticRegressionTraining extends ConfigurableStop[DataFrame] {
     List(StopGroup.MLGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

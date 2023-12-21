@@ -70,6 +70,7 @@ class ExecuteSQLStop extends ConfigurableStop[DataFrame] {
     List(StopGroup.CommonGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }
 

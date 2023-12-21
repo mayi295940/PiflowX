@@ -2,7 +2,7 @@ package cn.piflow.bundle.spark.redis
 
 import cn.piflow.bundle.core.util.JedisClusterImplSer
 import cn.piflow.bundle.spark.util.RedisUtil
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -99,5 +99,7 @@ class WriteToRedis extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.RedisGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

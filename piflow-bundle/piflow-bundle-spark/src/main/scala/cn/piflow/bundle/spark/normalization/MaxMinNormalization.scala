@@ -84,6 +84,9 @@ class MaxMinNormalization extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.NormalizationGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }
 
 

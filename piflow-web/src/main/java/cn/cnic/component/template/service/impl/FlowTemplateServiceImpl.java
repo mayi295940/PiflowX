@@ -17,6 +17,7 @@ import cn.cnic.component.template.jpa.domain.FlowTemplateDomain;
 import cn.cnic.component.template.service.IFlowTemplateService;
 import cn.cnic.component.template.utils.FlowTemplateUtils;
 import cn.cnic.component.template.vo.FlowTemplateVo;
+import cn.piflow.Constants;
 import java.util.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -67,8 +68,11 @@ public class FlowTemplateServiceImpl implements IFlowTemplateService {
     if (StringUtils.isBlank(templateType)) {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("param 'templateType' is empty");
     }
-    String templateXmlStr = "";
-    TemplateType saveTemplateType = null;
+
+    String templateXmlPath;
+    String templateXmlStr;
+    TemplateType saveTemplateType;
+
     switch (templateType) {
       case "TASK":
         {
@@ -77,6 +81,13 @@ public class FlowTemplateServiceImpl implements IFlowTemplateService {
             return ReturnMapUtils.setFailedMsgRtnJsonStr(
                 "Flow information is empty,loadId：" + loadId);
           }
+
+          if (Constants.ENGIN_FLINK().equalsIgnoreCase(flowById.getEngineType())) {
+            templateXmlPath = SysParamsCache.ENGINE_FLINK_XML_PATH;
+          } else {
+            templateXmlPath = SysParamsCache.ENGINE_SPARK_XML_PATH;
+          }
+
           saveTemplateType = TemplateType.TASK;
           String mxGraphXml_Flow = "";
           MxGraphModel mxGraphModel = flowById.getMxGraphModel();
@@ -95,6 +106,13 @@ public class FlowTemplateServiceImpl implements IFlowTemplateService {
             return ReturnMapUtils.setFailedMsgRtnJsonStr(
                 "Group information is empty,loadId：" + loadId);
           }
+
+          if (Constants.ENGIN_FLINK().equalsIgnoreCase(flowGroupById.getEngineType())) {
+            templateXmlPath = SysParamsCache.ENGINE_FLINK_XML_PATH;
+          } else {
+            templateXmlPath = SysParamsCache.ENGINE_SPARK_XML_PATH;
+          }
+
           saveTemplateType = TemplateType.GROUP;
           // Splicing XML according to flowGroupById
           templateXmlStr = FlowXmlUtils.flowGroupToXmlStr(flowGroupById);
@@ -106,7 +124,8 @@ public class FlowTemplateServiceImpl implements IFlowTemplateService {
 
     logger.info(templateXmlStr);
     String saveFileName = UUIDUtils.getUUID32();
-    String path = FileUtils.createXml(templateXmlStr, saveFileName, SysParamsCache.XML_PATH);
+
+    String path = FileUtils.createXml(templateXmlStr, saveFileName, templateXmlPath);
 
     FlowTemplate flowTemplate = FlowTemplateUtils.newFlowTemplateNoId(username);
     // flowTemplate.setId(UUIDUtils.getUUID32());
@@ -187,7 +206,10 @@ public class FlowTemplateServiceImpl implements IFlowTemplateService {
     if (file.isEmpty()) {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("Upload failed, please try again later");
     }
-    Map<String, Object> uploadMap = FileUtils.uploadRtnMap(file, SysParamsCache.XML_PATH, null);
+
+    // todo 上传xml文件路径
+    Map<String, Object> uploadMap =
+        FileUtils.uploadRtnMap(file, SysParamsCache.ENGINE_FLINK_XML_PATH, null);
     if (null == uploadMap || uploadMap.isEmpty()) {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("Upload failed, please try again later");
     }

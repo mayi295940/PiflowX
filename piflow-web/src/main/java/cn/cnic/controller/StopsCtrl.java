@@ -1,6 +1,5 @@
 package cn.cnic.controller;
 
-import cn.cnic.base.util.LoggerUtil;
 import cn.cnic.base.util.ReturnMapUtils;
 import cn.cnic.base.util.SessionUserUtil;
 import cn.cnic.component.flow.service.ICustomizedPropertyService;
@@ -9,17 +8,21 @@ import cn.cnic.component.flow.service.IStopsService;
 import cn.cnic.component.flow.vo.StopsCustomizedPropertyVo;
 import cn.cnic.component.stopsComponent.service.IStopGroupService;
 import cn.cnic.component.stopsComponent.service.IStopsHubService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import org.slf4j.Logger;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Api(tags = "stops")
 @RestController
 @RequestMapping("/stops")
 public class StopsCtrl {
-
-  Logger logger = LoggerUtil.getLogger();
 
   @Resource private IStopGroupService stopGroupServiceImpl;
 
@@ -32,25 +35,27 @@ public class StopsCtrl {
   @Resource private IStopsHubService stopsHubServiceImpl;
 
   /**
-   * 'stops'and'groups' on the left of'reload'
+   * 'stops' and 'groups' on the left of' reload'
    *
-   * @param load
-   * @return
+   * @param load flow id
    */
+  @ApiOperation("reloadStops")
   @RequestMapping("/reloadStops")
   @ResponseBody
   public String reloadStops(String load) {
     String username = SessionUserUtil.getCurrentUsername();
-    stopGroupServiceImpl.updateGroupAndStopsListByServer(username);
+    stopGroupServiceImpl.updateGroupAndStopsListByServer(username, load);
     return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("load", load);
   }
 
+  @ApiOperation("queryIdInfo")
   @RequestMapping("/queryIdInfo")
   @ResponseBody
   public String getStopGroup(String fid, String stopPageId) {
     return propertyServiceImpl.queryAll(fid, stopPageId);
   }
 
+  @ApiOperation("deleteLastReloadData")
   @RequestMapping("/deleteLastReloadData")
   @ResponseBody
   public String deleteLastReloadData(String stopId) {
@@ -60,9 +65,9 @@ public class StopsCtrl {
   /**
    * Get the usage of the current connection port
    *
-   * @param request
-   * @return
+   * @param request request
    */
+  @ApiOperation("getStopsPort")
   @RequestMapping("/getStopsPort")
   @ResponseBody
   public String getStopsPort(HttpServletRequest request) {
@@ -81,10 +86,10 @@ public class StopsCtrl {
   /**
    * Multiple saves to modify
    *
-   * @param content
-   * @param id
-   * @return
+   * @param content content
+   * @param id id
    */
+  @ApiOperation("updateStops")
   @RequestMapping("/updateStops")
   @ResponseBody
   public String updateStops(HttpServletRequest request, String[] content, String id) {
@@ -92,6 +97,7 @@ public class StopsCtrl {
     return propertyServiceImpl.updatePropertyList(username, content);
   }
 
+  @ApiOperation("updateStopsOne")
   @RequestMapping("/updateStopsOne")
   @ResponseBody
   public String updateStops(HttpServletRequest request, String content, String id) {
@@ -99,6 +105,7 @@ public class StopsCtrl {
     return propertyServiceImpl.updateProperty(username, content, id);
   }
 
+  @ApiOperation("updateStopsById")
   @RequestMapping("/updateStopsById")
   @ResponseBody
   public String updateStopsById(HttpServletRequest request) throws Exception {
@@ -108,6 +115,7 @@ public class StopsCtrl {
     return stopsServiceImpl.updateStopsCheckpoint(username, id, isCheckpointStr);
   }
 
+  @ApiOperation("updateStopsNameById")
   @RequestMapping("/updateStopsNameById")
   @ResponseBody
   public String updateStopsNameById(HttpServletRequest request) throws Exception {
@@ -120,6 +128,7 @@ public class StopsCtrl {
     return stopsServiceImpl.updateStopName(username, isAdmin, id, flowId, stopName, pageId);
   }
 
+  @ApiOperation("addStopCustomizedProperty")
   @RequestMapping("/addStopCustomizedProperty")
   @ResponseBody
   public String addStopCustomizedProperty(StopsCustomizedPropertyVo stopsCustomizedPropertyVo) {
@@ -128,6 +137,7 @@ public class StopsCtrl {
         username, stopsCustomizedPropertyVo);
   }
 
+  @ApiOperation("updateStopsCustomizedProperty")
   @RequestMapping("/updateStopsCustomizedProperty")
   @ResponseBody
   public String updateStopsCustomizedProperty(StopsCustomizedPropertyVo stopsCustomizedPropertyVo) {
@@ -136,6 +146,7 @@ public class StopsCtrl {
         username, stopsCustomizedPropertyVo);
   }
 
+  @ApiOperation("deleteStopsCustomizedProperty")
   @RequestMapping("/deleteStopsCustomizedProperty")
   @ResponseBody
   public String deleteStopsCustomizedProperty(String customPropertyId) {
@@ -143,6 +154,7 @@ public class StopsCtrl {
     return customizedPropertyServiceImpl.deleteStopsCustomizedProperty(username, customPropertyId);
   }
 
+  @ApiOperation("deleteRouterStopsCustomizedProperty")
   @RequestMapping("/deleteRouterStopsCustomizedProperty")
   @ResponseBody
   public String deleteRouterStopsCustomizedProperty(String customPropertyId) {
@@ -151,6 +163,7 @@ public class StopsCtrl {
         username, customPropertyId);
   }
 
+  @ApiOperation("getRouterStopsCustomizedProperty")
   @RequestMapping("/getRouterStopsCustomizedProperty")
   @ResponseBody
   public String getRouterStopsCustomizedProperty(String customPropertyId) {
@@ -160,11 +173,11 @@ public class StopsCtrl {
   /**
    * Query and enter the process list
    *
-   * @param page
-   * @param limit
-   * @param param
-   * @return
+   * @param page page
+   * @param limit limit
+   * @param param param
    */
+  @ApiOperation("stopsHubListPage")
   @RequestMapping("/stopsHubListPage")
   @ResponseBody
   public String stopsHubListPage(Integer page, Integer limit, String param) {
@@ -176,9 +189,9 @@ public class StopsCtrl {
   /**
    * Upload stopsHub jar file and save stopsHub
    *
-   * @param file
-   * @return
+   * @param file file
    */
+  @ApiOperation("uploadStopsHubFile")
   @RequestMapping(value = "/uploadStopsHubFile", method = RequestMethod.POST)
   @ResponseBody
   public String uploadStopsHubFile(@RequestParam("file") MultipartFile file) {
@@ -189,9 +202,9 @@ public class StopsCtrl {
   /**
    * Mount stopsHub
    *
-   * @param id
-   * @return
+   * @param id id
    */
+  @ApiOperation("mountStopsHub")
   @RequestMapping(value = "/mountStopsHub", method = RequestMethod.POST)
   @ResponseBody
   public String mountStopsHub(HttpServletRequest request, String id) {
@@ -203,9 +216,9 @@ public class StopsCtrl {
   /**
    * unmount stopsHub
    *
-   * @param id
-   * @return
+   * @param id id
    */
+  @ApiOperation("unmountStopsHub")
   @RequestMapping(value = "/unmountStopsHub", method = RequestMethod.POST)
   @ResponseBody
   public String unmountStopsHub(HttpServletRequest request, String id) {
@@ -217,9 +230,9 @@ public class StopsCtrl {
   /**
    * unmount stopsHub
    *
-   * @param id
-   * @return
+   * @param id id
    */
+  @ApiOperation("delStopsHub")
   @RequestMapping(value = "/delStopsHub", method = RequestMethod.POST)
   @ResponseBody
   public String delStopsHub(HttpServletRequest request, String id) {

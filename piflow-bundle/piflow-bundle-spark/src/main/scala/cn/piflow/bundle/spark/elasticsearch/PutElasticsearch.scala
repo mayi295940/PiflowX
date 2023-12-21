@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.elasticsearch
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.DataFrame
 
 class PutElasticsearch extends ConfigurableStop[DataFrame] {
@@ -33,9 +33,7 @@ class PutElasticsearch extends ConfigurableStop[DataFrame] {
       .save()
   }
 
-  def initialize(ctx: ProcessContext[DataFrame]): Unit = {
-
-  }
+  def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
   def setProperties(map: Map[String, Any]): Unit = {
     es_nodes = MapUtil.get(map, key = "es_nodes").asInstanceOf[String]
@@ -104,5 +102,7 @@ class PutElasticsearch extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.ESGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

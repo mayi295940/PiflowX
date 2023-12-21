@@ -11,7 +11,7 @@ public class StopsComponentVo {
 
   private String id;
   private String name;
-  private String bundel;
+  private String bundle;
   private String groups;
   private String owner;
   private String description;

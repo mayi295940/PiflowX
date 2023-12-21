@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.visualization
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableVisualizationStop, Port, StopGroup, VisualizationType}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class PieChart extends ConfigurableVisualizationStop[DataFrame] {
@@ -84,4 +84,7 @@ class PieChart extends ConfigurableVisualizationStop[DataFrame] {
     val pieChartDF = spark.sql(sqlText)
     out.write(pieChartDF.repartition(1))
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

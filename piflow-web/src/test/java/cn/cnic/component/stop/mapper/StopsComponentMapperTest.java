@@ -76,8 +76,8 @@ public class StopsComponentMapperTest extends ApplicationTests {
     String[] group = stopImpl.getAllGroup();
     if (null != group && group.length > 0) {
       // The call is successful, the group table information is cleared and then inserted.
-      stopsComponentGroupMapper.deleteGroupCorrelation();
-      int deleteGroup = stopsComponentGroupMapper.deleteGroup();
+      stopsComponentGroupMapper.deleteGroupCorrelation(null);
+      int deleteGroup = stopsComponentGroupMapper.deleteGroup(null);
       logger.debug("Group" + deleteGroup + "data was successfully deleted！！！");
       int a = 0;
       for (String string : group) {
@@ -107,7 +107,8 @@ public class StopsComponentMapperTest extends ApplicationTests {
     if (null != stopNameList && stopNameList.length > 0) {
       // The call is successful and the Stop message is cleared before insertion
       stopsComponentPropertyMapper.deleteStopsComponentProperty();
-      int deleteStopsInfo = stopsComponentMapper.deleteStopsComponent();
+      // todo 传参？
+      int deleteStopsInfo = stopsComponentMapper.deleteStopsComponent(null);
       logger.info("Successful deletion StopsInfo" + deleteStopsInfo + "piece of data!!!");
       int num = 0;
       for (String stopListInfos : stopNameList) {
@@ -121,7 +122,8 @@ public class StopsComponentMapperTest extends ApplicationTests {
         }
         // Query group information according to groupName in stops
         List<StopsComponentGroup> stopGroupByName =
-            stopsComponentGroupMapper.getStopGroupByNameList(list);
+            stopsComponentGroupMapper.getStopGroupByNameList(
+                list, thirdStopsComponentVo.getEngineType());
         StopsComponent stopsComponent =
             StopsComponentUtils.thirdStopsComponentVoToStopsTemplate(
                 "init", thirdStopsComponentVo, stopGroupByName);

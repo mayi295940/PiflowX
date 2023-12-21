@@ -95,4 +95,6 @@ class ExecuteScala extends ConfigurableStop[DataFrame] {
     val result = objectMirror.reflectMethod(method)(in, out, pec)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

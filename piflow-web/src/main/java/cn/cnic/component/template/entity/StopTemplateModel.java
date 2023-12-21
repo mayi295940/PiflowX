@@ -35,7 +35,7 @@ public class StopTemplateModel implements Serializable {
 
   private String name;
 
-  private String bundel;
+  private String bundle;
 
   private String owner;
 

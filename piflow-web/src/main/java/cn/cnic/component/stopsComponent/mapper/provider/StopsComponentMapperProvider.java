@@ -7,10 +7,11 @@ import org.apache.ibatis.jdbc.SQL;
 
 public class StopsComponentMapperProvider {
 
-  private String bundel;
+  private String bundle;
   private String description;
   private String groups;
   private String name;
+  private String engineType;
   private String owner;
   private String inports;
   private String inPortType;
@@ -24,10 +25,11 @@ public class StopsComponentMapperProvider {
       return false;
     }
     // Selection field
-    this.bundel = SqlUtils.preventSQLInjection(stopsComponent.getBundel());
+    this.bundle = SqlUtils.preventSQLInjection(stopsComponent.getBundle());
     this.description = SqlUtils.preventSQLInjection(stopsComponent.getDescription());
     this.groups = SqlUtils.preventSQLInjection(stopsComponent.getGroups());
     this.name = SqlUtils.preventSQLInjection(stopsComponent.getName());
+    this.engineType = SqlUtils.preventSQLInjection(stopsComponent.getEngineType());
     this.inports = SqlUtils.preventSQLInjection(stopsComponent.getInports());
     this.inPortType =
         SqlUtils.preventSQLInjection(
@@ -46,10 +48,11 @@ public class StopsComponentMapperProvider {
   }
 
   private void reset() {
-    this.bundel = null;
+    this.bundle = null;
     this.description = null;
     this.groups = null;
     this.name = null;
+    this.engineType = null;
     this.inports = null;
     this.inPortType = null;
     this.outports = null;
@@ -106,7 +109,7 @@ public class StopsComponentMapperProvider {
         "SELECT agst.stops_template_id FROM association_groups_stops_template agst WHERE agst.groups_id= ");
     strBuf.append(SqlUtils.preventSQLInjection(groupId));
     strBuf.append(") ");
-    strBuf.append("AND fst.BUNDEL NOT IN ");
+    strBuf.append("AND fst.BUNDLE NOT IN ");
     strBuf.append("(");
     strBuf.append("SELECT fstm.bundle FROM flow_stops_template_manage fstm ");
     strBuf.append("WHERE fstm.enable_flag = 1 ");
@@ -128,7 +131,7 @@ public class StopsComponentMapperProvider {
     SqlUtils.preventSQLInjection(groupId);
 
     strBuf.append("SELECT fst.*, fstm0.is_show FROM flow_stops_template fst ");
-    strBuf.append("LEFT JOIN flow_stops_template_manage fstm0 ON fstm0.bundle=fst.BUNDEL ");
+    strBuf.append("LEFT JOIN flow_stops_template_manage fstm0 ON fstm0.bundle=fst.BUNDLE ");
     strBuf.append(
         "AND fstm0.stops_groups=(SELECT fsg0.group_name FROM flow_stops_groups fsg0 WHERE fsg0.id="
             + SqlUtils.preventSQLInjection(groupId)
@@ -169,14 +172,17 @@ public class StopsComponentMapperProvider {
       strBuf.append("( ");
       strBuf.append(SqlUtils.baseFieldName() + ", ");
       strBuf.append(
-          "bundel, description, groups, name, owner, inports, in_port_type, outports, out_port_type, is_customized, visualization_type ");
+          "bundle, engine_type,description, groups, name, owner, inports, in_port_type, "
+              + "outports, out_port_type, is_customized, visualization_type ");
       strBuf.append(") ");
 
       strBuf.append("values ");
       strBuf.append("(");
       strBuf.append(SqlUtils.baseFieldValues(stopsComponent) + ", ");
       strBuf.append(
-          bundel
+          bundle
+              + ","
+              + engineType
               + ","
               + description
               + ","
@@ -198,7 +204,7 @@ public class StopsComponentMapperProvider {
               + ","
               + visualizationType);
       strBuf.append(")");
-      sqlStr = strBuf.toString() + ";";
+      sqlStr = strBuf + ";";
     }
     this.reset();
     return sqlStr;

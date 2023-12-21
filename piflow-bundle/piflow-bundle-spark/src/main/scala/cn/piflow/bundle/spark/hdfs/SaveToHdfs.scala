@@ -181,5 +181,7 @@ class SaveToHdfs extends ConfigurableStop[DataFrame] {
     List(StopGroup.HdfsGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }
 

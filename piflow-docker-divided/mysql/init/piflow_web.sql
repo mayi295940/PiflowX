@@ -118,7 +118,7 @@ CREATE TABLE `data_source`  (
   `stops_template_bundle` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `FKqwv1iytgkhhgnjdvhqbsknas6`(`stops_template_bundle`) USING BTREE,
-  CONSTRAINT `FKqwv1iytgkhhgnjdvhqbsknas6` FOREIGN KEY (`stops_template_bundle`) REFERENCES `flow_stops_template` (`bundel`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `FKqwv1iytgkhhgnjdvhqbsknas6` FOREIGN KEY (`stops_template_bundle`) REFERENCES `flow_stops_template` (`bundle`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -527,7 +527,7 @@ CREATE TABLE `flow_process_stop`  (
   `last_update_dttm` datetime(0) NOT NULL,
   `last_update_user` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `version` bigint(20) NULL DEFAULT NULL,
-  `bundel` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `bundle` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `description` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
   `end_time` datetime(0) NULL DEFAULT NULL,
   `groups` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
@@ -592,7 +592,7 @@ CREATE TABLE `flow_stops`  (
   `last_update_dttm` datetime(0) NOT NULL,
   `last_update_user` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `version` bigint(20) NULL DEFAULT NULL,
-  `bundel` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `bundle` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `description` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
   `groups` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `in_port_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
@@ -890,7 +890,7 @@ CREATE TABLE `flow_stops_template`  (
   `last_update_dttm` datetime(0) NOT NULL,
   `last_update_user` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `version` bigint(20) NULL DEFAULT NULL,
-  `bundel` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `bundle` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `description` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
   `groups` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `in_port_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
@@ -904,7 +904,7 @@ CREATE TABLE `flow_stops_template`  (
   `visualization_type` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'visualization type',
   `is_data_source` bit(1) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `bundel`(`bundel`) USING BTREE
+  INDEX `bundle`(`bundle`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -1426,7 +1426,7 @@ CREATE TABLE `stops_hub`  (
 DROP TABLE IF EXISTS `stops_template`;
 CREATE TABLE `stops_template`  (
   `id` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `bundel` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `bundle` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `crt_dttm` datetime(0) NOT NULL,
   `crt_user` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `description` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,

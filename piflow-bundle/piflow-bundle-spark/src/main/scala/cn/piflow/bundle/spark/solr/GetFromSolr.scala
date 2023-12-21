@@ -246,4 +246,7 @@ class GetFromSolr extends ConfigurableStop[DataFrame] {
     descriptor = indent :: descriptor
     descriptor
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

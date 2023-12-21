@@ -14,6 +14,7 @@ public class ThirdStopsComponentVo implements Serializable {
   private String name;
   private String bundle;
   private String owner;
+  private String engineType;
   private String inports;
   private String outports;
   private String groups;

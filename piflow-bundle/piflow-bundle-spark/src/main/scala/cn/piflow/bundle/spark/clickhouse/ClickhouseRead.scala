@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.clickhouse
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class ClickhouseRead extends ConfigurableStop[DataFrame] {
@@ -115,5 +115,7 @@ class ClickhouseRead extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.JdbcGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

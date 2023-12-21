@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.json
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -52,5 +52,7 @@ class JsonStringParser extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.JsonGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

@@ -2,7 +2,7 @@ package cn.piflow.bundle.spark.file
 
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -81,4 +81,7 @@ class RegexTextProcess extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.FileGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

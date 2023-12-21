@@ -10,6 +10,7 @@ import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 class CsvStringParser extends ConfigurableStop[DataFrame] {
+
   override val authorEmail: String = "yangqidong@cnic.cn"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
@@ -98,8 +99,8 @@ class CsvStringParser extends ConfigurableStop[DataFrame] {
     List(StopGroup.CsvGroup)
   }
 
-  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {
+  override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 
-  }
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

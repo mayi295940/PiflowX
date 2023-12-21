@@ -2,11 +2,10 @@ package cn.piflow.bundle.spark.hdfs
 
 import java.io.InputStream
 import java.net.{HttpURLConnection, URL}
-
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataOutputStream, FileSystem, Path}
 import org.apache.spark.rdd.RDD
@@ -116,5 +115,6 @@ class FileDownHdfs extends ConfigurableStop[DataFrame] {
     List(StopGroup.HdfsGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

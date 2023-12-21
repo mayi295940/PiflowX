@@ -574,7 +574,8 @@ public class TestDataServiceImpl implements ITestDataService {
     if (header) {
       schema = null;
     }
-    Map<String, Object> uploadMap = FileUtils.uploadRtnMap(file, SysParamsCache.CSV_PATH, null);
+    Map<String, Object> uploadMap =
+        FileUtils.uploadRtnMap(file, SysParamsCache.ENGINE_FLINK_CSV_PATH, null);
     if (null == uploadMap || uploadMap.isEmpty()) {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("Upload failed, please try again later");
     }

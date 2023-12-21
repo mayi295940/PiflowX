@@ -126,4 +126,6 @@ class ChineseSpeechRecognition extends ConfigurableStop[DataFrame] {
     List(StopGroup.Alg_ASRGroup)
   }
 
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }

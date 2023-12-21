@@ -39,7 +39,7 @@ public class IStopTest extends ApplicationTests {
 
   @Test
   public void testGetStopsListWithGroup() {
-    Map<String, List<String>> stopsListWithGroup = stopImpl.getStopsListWithGroup();
+    Map<String, List<String>> stopsListWithGroup = stopImpl.getStopsListWithGroup(null);
     logger.debug(stopsListWithGroup.toString());
   }
 

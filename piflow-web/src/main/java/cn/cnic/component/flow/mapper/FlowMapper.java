@@ -8,6 +8,7 @@ import org.apache.ibatis.mapping.FetchType;
 
 @Mapper
 public interface FlowMapper {
+
   /**
    * add flow
    *
@@ -15,7 +16,7 @@ public interface FlowMapper {
    * @return
    */
   @InsertProvider(type = FlowMapperProvider.class, method = "addFlow")
-  public int addFlow(Flow flow);
+  int addFlow(Flow flow);
 
   /**
    * update flow
@@ -24,7 +25,7 @@ public interface FlowMapper {
    * @return
    */
   @UpdateProvider(type = FlowMapperProvider.class, method = "updateFlow")
-  public int updateFlow(Flow flow);
+  int updateFlow(Flow flow);
 
   /**
    * Query all workflows
@@ -32,7 +33,7 @@ public interface FlowMapper {
    * @return
    */
   @SelectProvider(type = FlowMapperProvider.class, method = "getFlowList")
-  public List<Flow> getFlowList();
+  List<Flow> getFlowList();
 
   /**
    * Query all workflow paging queries
@@ -41,7 +42,7 @@ public interface FlowMapper {
    * @return
    */
   @SelectProvider(type = FlowMapperProvider.class, method = "getFlowListParam")
-  public List<Flow> getFlowListParam(
+  List<Flow> getFlowListParam(
       @Param("username") String username,
       @Param("isAdmin") boolean isAdmin,
       @Param("param") String param);
@@ -52,7 +53,7 @@ public interface FlowMapper {
    * @return
    */
   @SelectProvider(type = FlowMapperProvider.class, method = "getFlowExampleList")
-  public List<Flow> getFlowExampleList();
+  List<Flow> getFlowExampleList();
 
   /**
    * Query workflow based on workflow Id
@@ -93,10 +94,10 @@ public interface FlowMapper {
                 select = "cn.cnic.component.flow.mapper.PathsMapper.getPathsListByFlowId",
                 fetchType = FetchType.LAZY))
   })
-  public Flow getFlowById(String id);
+  Flow getFlowById(String id);
 
   @UpdateProvider(type = FlowMapperProvider.class, method = "updateEnableFlagById")
-  public int updateEnableFlagById(@Param("username") String username, @Param("id") String id);
+  int updateEnableFlagById(@Param("username") String username, @Param("id") String id);
 
   /**
    * According to the flow query PageId maximum
@@ -105,7 +106,7 @@ public interface FlowMapper {
    * @return
    */
   @Select("select MAX(page_id+0) from flow_stops where fk_flow_id = #{flowId} and enable_flag = 1 ")
-  public Integer getMaxStopPageId(@Param("flowId") String flowId);
+  Integer getMaxStopPageId(@Param("flowId") String flowId);
 
   /**
    * According to the flow query stopName
@@ -114,7 +115,7 @@ public interface FlowMapper {
    * @return
    */
   @Select("SELECT fs.name from flow_stops fs WHERE fs.enable_flag=1 and fs.fk_flow_id = #{flowId}")
-  public String[] getStopNamesByFlowId(@Param("flowId") String flowId);
+  String[] getStopNamesByFlowId(@Param("flowId") String flowId);
 
   /**
    * According to the flow query PageId maximum
@@ -124,7 +125,7 @@ public interface FlowMapper {
    */
   @Select(
       "select MAX(page_id+0) from flow where enable_flag = 1 and fk_flow_group_id = #{flowGroupId} ")
-  public Integer getMaxFlowPageIdByFlowGroupId(@Param("flowGroupId") String flowGroupId);
+  Integer getMaxFlowPageIdByFlowGroupId(@Param("flowGroupId") String flowGroupId);
 
   /**
    * @param flowGroupId
@@ -132,7 +133,7 @@ public interface FlowMapper {
    */
   @Select(
       "SELECT f.name from flow f WHERE f.enable_flag=1 and f.fk_flow_group_id = #{flowGroupId} and id != #{id} ")
-  public List<String> getFlowNamesByFlowGroupId(
+  List<String> getFlowNamesByFlowGroupId(
       @Param("flowGroupId") String flowGroupId, @Param("id") String id);
 
   @Select(
@@ -175,7 +176,7 @@ public interface FlowMapper {
                 select = "cn.cnic.component.flow.mapper.PathsMapper.getPathsListByFlowId",
                 fetchType = FetchType.LAZY))
   })
-  public List<Flow> getFlowListGroupId(String flowGroupId);
+  List<Flow> getFlowListGroupId(String flowGroupId);
 
   /**
    * query flow name by flow name
@@ -185,5 +186,5 @@ public interface FlowMapper {
    */
   @Select(
       "SELECT name FROM flow WHERE enable_flag=1 AND fk_flow_group_id IS NULL AND is_example=0 AND name=#{flowName} ")
-  public String getFlowName(@Param("flowName") String flowName);
+  String getFlowName(@Param("flowName") String flowName);
 }

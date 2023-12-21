@@ -1,6 +1,6 @@
 package cn.piflow.bundle.spark.rdf
 
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -387,7 +387,9 @@ class CsvToNeo4J extends ConfigurableStop[DataFrame]{
 
   override def getIcon(): Array[Byte] = ImageUtil.getImage("icon/rdf/CsvToNeo4J.png")
 
-  override def getGroup(): List[String] =  List(StopGroup.RDFGroup.toString)
+  override def getGroup(): List[String] =  List(StopGroup.RDFGroup)
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
   override def initialize(ctx: ProcessContext[DataFrame]): Unit = {}
 

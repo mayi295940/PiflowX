@@ -1,7 +1,7 @@
 package cn.piflow.bundle.spark.clean
 
 import cn.piflow.bundle.spark.util.CleanUtil
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
@@ -9,6 +9,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.types.StructField
 
 class TitleClean extends ConfigurableStop[DataFrame] {
+
   val authorEmail: String = "06whuxx@163.com"
   val description: String = "Cleaning title data"
   val inportList: List[String] = List(Port.DefaultPort)
@@ -89,5 +90,7 @@ class TitleClean extends ConfigurableStop[DataFrame] {
   override def getGroup(): List[String] = {
     List(StopGroup.CleanGroup)
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
 
 }

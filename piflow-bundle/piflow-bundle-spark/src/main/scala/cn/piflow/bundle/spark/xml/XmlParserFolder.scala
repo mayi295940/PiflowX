@@ -1,11 +1,10 @@
 package cn.piflow.bundle.spark.xml
 
 import java.net.URI
-
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf._
-import cn.piflow.{JobContext, JobInputStream, JobOutputStream, ProcessContext}
+import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -127,5 +126,8 @@ class XmlParserFolder extends ConfigurableStop[DataFrame] {
     }
     df
   }
+
+  override def getEngineType: String = Constants.ENGIN_SPARK
+
 }
 
