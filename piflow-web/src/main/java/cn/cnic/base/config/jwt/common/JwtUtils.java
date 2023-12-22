@@ -3,13 +3,13 @@ package cn.cnic.base.config.jwt.common;
 import cn.cnic.base.vo.UserVo;
 import cn.cnic.common.Eunm.SysRoleType;
 import cn.cnic.component.system.entity.SysRole;
-import com.alibaba.fastjson.JSON;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import net.sf.json.JSONArray;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,7 +22,7 @@ public class JwtUtils {
   private static final String CLAIM_KEY_USER_ID = "user_id";
   private static final String CLAIM_KEY_AUTHORITIES = "scope";
 
-  private final Map<String, String> tokenMap = new ConcurrentHashMap<>(32);
+  private Map<String, String> tokenMap = new ConcurrentHashMap<>(32);
 
   @Value("${jwt.secret}")
   private String secret;
@@ -127,11 +127,11 @@ public class JwtUtils {
     UserVo jwtUser = (UserVo) userDetails;
     final String userId = getUserIdFromToken(token);
     final String username = getUsernameFromToken(token);
-    // final Date created = getCreatedDateFromToken(token);
-    return (userId.equals(jwtUser.getId())
+    //        final Date created = getCreatedDateFromToken(token);
+    return (userId == jwtUser.getId()
         && username.equals(jwtUser.getUsername())
         && !isTokenExpired(token)
-    //  && !isCreatedBeforeLastPasswordReset(created,
+    //                && !isCreatedBeforeLastPasswordReset(created,
     // userDetail.getLastPasswordResetDate())
     );
   }
@@ -140,7 +140,7 @@ public class JwtUtils {
     Map<String, Object> claims = generateClaims(userDetail);
     // 只授于更新 token 的权限
     String roles[] = new String[] {JwtUtils.ROLE_REFRESH_TOKEN};
-    claims.put(CLAIM_KEY_AUTHORITIES, JSON.toJSON(roles).toString());
+    claims.put(CLAIM_KEY_AUTHORITIES, JSONArray.fromObject(roles).toString());
     return generateRefreshToken(userDetail.getUsername(), claims);
   }
 
@@ -157,9 +157,12 @@ public class JwtUtils {
   }
 
   public boolean containToken(String userName, String token) {
-    return userName != null
-            && tokenMap.containsKey(userName)
-            && tokenMap.get(userName).equals(token);
+    if (userName != null
+        && tokenMap.containsKey(userName)
+        && tokenMap.get(userName).equals(token)) {
+      return true;
+    }
+    return false;
   }
 
   private Claims getClaimsFromToken(String token) {

@@ -1,27 +1,25 @@
 package cn.cnic.component.system.mapper;
 
-import cn.cnic.component.system.entity.SysMenu;
-import cn.cnic.component.system.mapper.provider.SysMenuMapperProvider;
+import cn.cnic.component.system.entity.SysInitRecords;
+import cn.cnic.component.system.mapper.provider.SysInitRecordsMapperProvider;
 import java.util.List;
+import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface SysInitRecordsMapper {
 
-  /**
-   * getSysMenuList
-   *
-   * @param role
-   * @return
-   */
-  @SelectProvider(type = SysMenuMapperProvider.class, method = "getSysMenuList")
-  public List<SysMenu> getSysMenuList(@Param("role") String role);
+  @InsertProvider(type = SysInitRecordsMapperProvider.class, method = "insertSysInitRecords")
+  Integer insertSysInitRecords(SysInitRecords sysInitRecords);
 
-  @SelectProvider(type = SysMenuMapperProvider.class, method = "getSampleMenuList")
-  public List<SysMenu> getSampleMenuList();
+  @Select("select * from sys_init_records")
+  List<SysInitRecords> getSysInitRecordsList();
 
-  @SelectProvider(type = SysMenuMapperProvider.class, method = "deleteSampleMenuListByIds")
-  public List<SysMenu> deleteSampleMenuListByIds(@Param("ids") String[] ids);
+  @Select("select * from sys_init_records where id=#{id}")
+  SysInitRecords getSysInitRecordsById(@Param("id") String id);
+
+  @Select("select * from sys_init_records order by init_date desc limit #{limit}")
+  SysInitRecords getSysInitRecordsLastNew(@Param("limit") int limit);
 }

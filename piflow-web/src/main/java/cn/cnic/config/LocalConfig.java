@@ -8,30 +8,27 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class LocalConfig {
-    /**
-     * zn_CN or en.
-     */
-    @Value("{front_end.local:zn_CN}")
-    private String local;
-    /**
-     * dev or prod.
-     */
-    @Value("${front_end.center:dev}")
-    private String center;
+  /** zn_CN or en. */
+  @Value("{front_end.local:zn_CN}")
+  private String local;
 
-    public String getLocal() {
-        return local;
-    }
+  /** dev or prod. */
+  @Value("${front_end.center:dev}")
+  private String center;
 
-    public void setLocal(String local) {
-        this.local = local;
-    }
+  public String getLocal() {
+    return local;
+  }
 
-    public String getCenter() {
-        return center;
-    }
+  public void setLocal(String local) {
+    this.local = local;
+  }
 
-    public void setCenter(String center) {
-        this.center = center;
-    }
+  public String getCenter() {
+    return center;
+  }
+
+  public void setCenter(String center) {
+    this.center = center;
+  }
 }

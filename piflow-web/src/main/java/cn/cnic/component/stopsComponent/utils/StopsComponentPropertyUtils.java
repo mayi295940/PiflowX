@@ -1,8 +1,8 @@
 package cn.cnic.component.stopsComponent.utils;
 
-import cn.cnic.base.util.UUIDUtils;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
+import cn.cnic.base.utils.UUIDUtils;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import cn.cnic.third.vo.stop.ThirdStopsComponentPropertyVo;
 import java.util.ArrayList;
 import java.util.Date;

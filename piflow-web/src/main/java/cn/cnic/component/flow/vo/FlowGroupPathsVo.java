@@ -1,6 +1,6 @@
 package cn.cnic.component.flow.vo;
 
-import cn.piflow.util.DateUtils;
+import cn.cnic.base.utils.DateUtils;
 import cn.cnic.component.flow.entity.Stops;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;

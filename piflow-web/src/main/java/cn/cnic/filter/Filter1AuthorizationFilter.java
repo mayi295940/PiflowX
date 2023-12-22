@@ -40,7 +40,6 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
@@ -158,14 +157,14 @@ public class Filter1AuthorizationFilter implements Filter {
     out.flush();
   }
 
-  /**
-   * Return true if pass permissions, otherwise return false
-   *
-   * @param url
-   * @param method
-   * @param permissions
-   * @return
-   */
+  //  /**
+  //   * Return true if pass permissions, otherwise return false
+  //   *
+  //   * @param url
+  //   * @param method
+  //   * @param permissions
+  //   * @return
+  //   */
   //  private boolean checkPermission(String url, String method, List<Permission> permissions) {
   //    AntPathMatcher matcher = new AntPathMatcher();
   //    List<Permission> left =

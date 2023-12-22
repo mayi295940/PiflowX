@@ -1,18 +1,23 @@
 package cn.cnic.component.flow.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import cn.cnic.component.flow.entity.CustomizedProperty;
-import java.util.*;
-import javax.annotation.Resource;
-import org.junit.Test;
+import java.util.List;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class CustomizedPropertyMapperMapperTest extends ApplicationTests {
 
-  @Resource private CustomizedPropertyMapper customizedPropertyMapper;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final CustomizedPropertyMapper customizedPropertyMapper;
+
+  @Autowired
+  public CustomizedPropertyMapperMapperTest(CustomizedPropertyMapper customizedPropertyMapper) {
+    this.customizedPropertyMapper = customizedPropertyMapper;
+  }
 
   @Test
   public void testGetPropertyListByStopsId() {

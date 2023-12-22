@@ -1,18 +1,23 @@
 package cn.cnic.component.flow.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import cn.cnic.component.flow.entity.Paths;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class PathsMapperTest extends ApplicationTests {
 
-  @Autowired private PathsMapper pathsMapper;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final PathsMapper pathsMapper;
+
+  @Autowired
+  public PathsMapperTest(PathsMapper pathsMapper) {
+    this.pathsMapper = pathsMapper;
+  }
 
   @Test
   public void testGetPathsListByFlowId() {

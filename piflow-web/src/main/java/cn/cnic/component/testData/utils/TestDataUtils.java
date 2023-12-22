@@ -1,6 +1,6 @@
 package cn.cnic.component.testData.utils;
 
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.component.testData.entity.TestData;
 import java.util.Date;
 

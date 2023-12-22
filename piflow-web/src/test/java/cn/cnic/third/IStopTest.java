@@ -1,21 +1,27 @@
 package cn.cnic.third;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.HttpUtils;
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.HttpUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.common.constant.Constants;
 import cn.cnic.third.service.IStop;
 import cn.cnic.third.vo.stop.ThirdStopsComponentVo;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class IStopTest extends ApplicationTests {
 
-  @Autowired private IStop stopImpl;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final IStop stopImpl;
+
+  @Autowired
+  public IStopTest(IStop stopImpl) {
+    this.stopImpl = stopImpl;
+  }
 
   @Test
   public void testGetAllGroup() {
@@ -39,7 +45,8 @@ public class IStopTest extends ApplicationTests {
 
   @Test
   public void testGetStopsListWithGroup() {
-    Map<String, List<String>> stopsListWithGroup = stopImpl.getStopsListWithGroup(null);
+    Map<String, List<String>> stopsListWithGroup =
+        stopImpl.getStopsListWithGroup(Constants.ENGIN_FLINK);
     logger.debug(stopsListWithGroup.toString());
   }
 

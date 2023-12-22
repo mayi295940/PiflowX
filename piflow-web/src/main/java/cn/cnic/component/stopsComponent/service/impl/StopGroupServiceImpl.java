@@ -1,15 +1,17 @@
 package cn.cnic.component.stopsComponent.service.impl;
 
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.ReturnMapUtils;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.base.utils.ReturnMapUtils;
+import cn.cnic.base.utils.UUIDUtils;
+import cn.cnic.common.Eunm.ComponentFileType;
+import cn.cnic.component.dataSource.domain.DataSourceDomain;
 import cn.cnic.component.flow.entity.Flow;
 import cn.cnic.component.flow.mapper.FlowMapper;
 import cn.cnic.component.stopsComponent.domain.StopsComponentDomain;
 import cn.cnic.component.stopsComponent.domain.StopsComponentGroupDomain;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
-import cn.cnic.component.stopsComponent.model.StopsComponentGroup;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentGroup;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import cn.cnic.component.stopsComponent.service.IStopGroupService;
 import cn.cnic.component.stopsComponent.utils.StopsComponentGroupUtils;
 import cn.cnic.component.stopsComponent.utils.StopsComponentUtils;
@@ -20,13 +22,7 @@ import cn.cnic.component.stopsComponent.vo.StopsComponentVo;
 import cn.cnic.component.stopsComponent.vo.StopsTemplateVo;
 import cn.cnic.third.service.IStop;
 import cn.cnic.third.vo.stop.ThirdStopsComponentVo;
-import cn.piflow.Constants;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Resource;
+import java.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -37,15 +33,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class StopGroupServiceImpl implements IStopGroupService {
 
-  Logger logger = LoggerUtil.getLogger();
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private final Logger logger = LoggerUtil.getLogger();
 
-  @Autowired private IStop stopImpl;
+  private final IStop stopImpl;
+  private final StopsComponentDomain stopsComponentDomain;
+  private final StopsComponentGroupDomain stopsComponentGroupDomain;
+  private final DataSourceDomain dataSourceDomain;
+  private final FlowMapper flowMapper;
 
-  @Autowired private StopsComponentGroupDomain stopsComponentGroupDomain;
-
-  @Autowired private StopsComponentDomain stopsComponentDomain;
-
-  @Resource private FlowMapper flowMapper;
+  @Autowired
+  public StopGroupServiceImpl(
+      IStop stopImpl,
+      StopsComponentDomain stopsComponentDomain,
+      StopsComponentGroupDomain stopsComponentGroupDomain,
+      DataSourceDomain dataSourceDomain,
+      FlowMapper flowMapper) {
+    this.stopImpl = stopImpl;
+    this.stopsComponentDomain = stopsComponentDomain;
+    this.stopsComponentGroupDomain = stopsComponentGroupDomain;
+    this.dataSourceDomain = dataSourceDomain;
+    this.flowMapper = flowMapper;
+  }
 
   /**
    * Query all groups and all stops under it
@@ -64,7 +73,7 @@ public class StopGroupServiceImpl implements IStopGroupService {
         continue;
       }
       List<StopsComponent> stopsComponentList = stopGroup.getStopsComponentList();
-      if (null == stopsComponentList || stopsComponentList.size() <= 0) {
+      if (null == stopsComponentList || stopsComponentList.size() == 0) {
         continue;
       }
       StopGroupVo stopGroupVo = new StopGroupVo();
@@ -79,11 +88,8 @@ public class StopGroupServiceImpl implements IStopGroupService {
         BeanUtils.copyProperties(stopsComponent, stopsTemplateVo);
         List<StopsComponentProperty> properties = stopsComponent.getProperties();
         if (null != properties && properties.size() > 0) {
-          List<PropertyTemplateVo> propertiesVo = new ArrayList<PropertyTemplateVo>();
+          List<PropertyTemplateVo> propertiesVo = new ArrayList<>();
           for (StopsComponentProperty stopsComponentProperty : properties) {
-            if (null == propertiesVo) {
-              continue;
-            }
             PropertyTemplateVo propertyTemplateVo = new PropertyTemplateVo();
             BeanUtils.copyProperties(stopsComponentProperty, propertyTemplateVo);
             propertiesVo.add(propertyTemplateVo);
@@ -101,6 +107,7 @@ public class StopGroupServiceImpl implements IStopGroupService {
 
   @Override
   public void updateGroupAndStopsListByServer(String username, String flowId) {
+    // get all default and scala components
 
     String engineType = "";
     Flow flow = flowMapper.getFlowById(flowId);
@@ -117,9 +124,14 @@ public class StopGroupServiceImpl implements IStopGroupService {
       return;
     }
 
-    // The call is successful, empty the "StopsComponentGroup" and "StopsComponent" message and insert
-    stopsComponentDomain.deleteStopsComponentGroup(engineType);
-    stopsComponentDomain.deleteStopsComponent(engineType);
+    /*1.get all default components and delete*/
+    List<StopsComponent> systemDefaultStops =
+        stopsComponentDomain.getSystemDefaultStops(engineType);
+    if (systemDefaultStops != null && systemDefaultStops.size() > 0) {
+      for (StopsComponent systemDefaultStop : systemDefaultStops) {
+        stopsComponentDomain.deleteStopsComponent(systemDefaultStop);
+      }
+    }
 
     int addStopsComponentGroupRows = 0;
 
@@ -127,18 +139,33 @@ public class StopGroupServiceImpl implements IStopGroupService {
     List<String> stopsBundleList = new ArrayList<>();
 
     // Loop stopsListWithGroup
+    // compare server groups and old groups
+    Map<String, StopsComponentGroup> stopsComponentGroupMap = new HashMap<>();
+
+    // get old groups
+    List<StopsComponentGroup> stopsComponentGroupList =
+        stopsComponentDomain.getStopGroupByGroupNameList(
+            new ArrayList<>(stopsListWithGroup.keySet()), engineType);
+
+    for (StopsComponentGroup sGroup : stopsComponentGroupList) {
+      stopsComponentGroupMap.put(sGroup.getGroupName(), sGroup);
+    }
+
     for (String groupName : stopsListWithGroup.keySet()) {
       if (StringUtils.isBlank(groupName)) {
         continue;
       }
+      StopsComponentGroup stopsComponentGroup = stopsComponentGroupMap.get(groupName);
+      // insert new group
+      if (stopsComponentGroup == null) {
+        stopsComponentGroup = StopsComponentGroupUtils.stopsComponentGroupNewNoId(username);
+        stopsComponentGroup.setId(UUIDUtils.getUUID32());
+        stopsComponentGroup.setGroupName(groupName);
+        stopsComponentGroup.setEngineType(engineType);
+        addStopsComponentGroupRows +=
+            stopsComponentDomain.addStopsComponentGroup(stopsComponentGroup);
+      }
       // add group info
-      StopsComponentGroup stopsComponentGroup =
-          StopsComponentGroupUtils.stopsComponentGroupNewNoId(username);
-      stopsComponentGroup.setId(UUIDUtils.getUUID32());
-      stopsComponentGroup.setGroupName(groupName);
-      stopsComponentGroup.setEngineType(engineType);
-      addStopsComponentGroupRows +=
-          stopsComponentDomain.addStopsComponentGroup(stopsComponentGroup);
       // get current group stops bundle list
       List<String> list = stopsListWithGroup.get(groupName);
       stopsBundleList.addAll(list);
@@ -157,7 +184,6 @@ public class StopGroupServiceImpl implements IStopGroupService {
     stopsBundleList.addAll(stopsBundleListDeduplication);
 
     int updateStopsComponentNum = 0;
-
     for (String bundle : stopsBundleList) {
 
       if (StringUtils.isBlank(bundle)) {
@@ -167,31 +193,68 @@ public class StopGroupServiceImpl implements IStopGroupService {
       // 2.First query "stopInfo" according to "bundle"
       logger.info("Now the call is：" + bundle);
 
-      ThirdStopsComponentVo thirdStopsComponentVo = stopImpl.getStopInfo(bundle);
-      if (null == thirdStopsComponentVo) {
-        logger.warn("bundle:" + bundle + " is not data");
-        continue;
+      StopsComponent ifExistStop = stopsComponentDomain.getOnlyStopsComponentByBundle(bundle);
+
+      if (ifExistStop == null) {
+        // new default component,insert
+        ThirdStopsComponentVo thirdStopsComponentVo = stopImpl.getStopInfo(bundle);
+        if (null == thirdStopsComponentVo) {
+          logger.warn("bundle:" + bundle + " is not data");
+          continue;
+        }
+
+        List<String> list = Arrays.asList(thirdStopsComponentVo.getGroups().split(","));
+
+        // Query group information according to groupName in stops
+        List<StopsComponentGroup> stopGroupByName =
+            stopsComponentDomain.getStopGroupByNameList(
+                list, thirdStopsComponentVo.getEngineType());
+
+        StopsComponent stopsComponent =
+            StopsComponentUtils.thirdStopsComponentVoToStopsTemplate(
+                username, thirdStopsComponentVo, stopGroupByName);
+        if (null == stopsComponent) {
+          continue;
+        }
+        stopsComponent.setComponentType(ComponentFileType.DEFAULT);
+        stopsComponentDomain.addStopsComponentAndChildren(stopsComponent);
+        logger.debug(
+            "=============================association_groups_stops_template=====start==================");
+        stopsComponent.getStopGroupList();
+        stopsComponentDomain.stopsComponentLinkStopsComponentGroupList(
+            stopsComponent, stopsComponent.getStopGroupList());
+        updateStopsComponentNum++;
+      } else {
+        logger.info(
+            "==========component exists,just skip,bundle is "
+                + bundle
+                + "method is reload stops==========");
       }
-      List<String> stopGroupNameList = Arrays.asList(thirdStopsComponentVo.getGroups().split(Constants.COMMA()));
-      // Query group information according to groupName in stops
-      List<StopsComponentGroup> stopGroupByName = stopsComponentDomain.getStopGroupByNameList(stopGroupNameList, engineType);
-      StopsComponent stopsComponent =
-          StopsComponentUtils.thirdStopsComponentVoToStopsTemplate(
-              username, thirdStopsComponentVo, stopGroupByName);
-
-      if (null == stopsComponent) {
-        continue;
-      }
-
-      stopsComponentDomain.addStopsComponentAndChildren(stopsComponent);
-
-      logger.debug("=======association_groups_stops_template=====start=======");
-      stopsComponentDomain.stopsComponentLinkStopsComponentGroupList(
-          stopsComponent, stopsComponent.getStopGroupList());
-
-      updateStopsComponentNum++;
     }
-
+    //        //查询出所有dataSource中不为空且去重后的stops_template_bundle
+    //        List<String> dataSourceStopTemplateBundleList =
+    // dataSourceDomain.getAllStopDataSourceBundle();
+    //        if (dataSourceStopTemplateBundleList != null &&
+    // dataSourceStopTemplateBundleList.size() >0 ){
+    //            for (String stopsTemplateBundle:dataSourceStopTemplateBundleList){
+    //                //1.根据stopsTemplateBundle查询stop组件(返回的只有stopsComponent表中字段,无其他任何多余字段)
+    //                StopsComponent stopsComponent =
+    // stopsComponentDomain.getOnlyStopsComponentByBundle(stopsTemplateBundle);
+    //                //2. 如果返回值不为空且为数据源组件,那么把对应stopDataSource全部改为可用
+    //                if (stopsComponent != null && stopsComponent.getIsDataSource()) {
+    //
+    // dataSourceDomain.updateDataSourceIsAvailableByBundle(stopsTemplateBundle,1);
+    //                    //修改一次图片地址：这里之所以没在上面的修改是否可用中修改图片地址,
+    //                    // 单独写个方法,虽然会多一次连接,为了和修改是否可用功能分开
+    //
+    // dataSourceDomain.updateDataSourceImageUrlByBundle(stopsTemplateBundle,stopsComponent.getImageUrl());
+    //                } else {
+    //                    //3.反之,改为不可用
+    //
+    // dataSourceDomain.updateDataSourceIsAvailableByBundle(stopsTemplateBundle,0);
+    //                }
+    //            }
+    //        }
     logger.info("update StopsComponent Num :" + updateStopsComponentNum);
   }
 

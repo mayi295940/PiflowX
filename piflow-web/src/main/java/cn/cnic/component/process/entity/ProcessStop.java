@@ -1,66 +1,39 @@
 package cn.cnic.component.process.entity;
 
-import cn.cnic.base.BaseHibernateModelUUIDNoCorpAgentId;
+import cn.cnic.base.BaseModelUUIDNoCorpAgentId;
+import cn.cnic.common.Eunm.ComponentFileType;
 import cn.cnic.common.Eunm.PortType;
 import cn.cnic.common.Eunm.StopState;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.OrderBy;
-import org.hibernate.annotations.Where;
 
 @Setter
 @Getter
-@Entity
-@Table(name = "FLOW_PROCESS_STOP")
-public class ProcessStop extends BaseHibernateModelUUIDNoCorpAgentId {
+public class ProcessStop extends BaseModelUUIDNoCorpAgentId {
 
   private static final long serialVersionUID = 1L;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "FK_FLOW_PROCESS_ID")
   private Process process;
-
   private String name;
-
   private String bundle;
-
   private String groups;
-
   private String owner;
-
   private String description;
-
   private String inports;
-
-  @Enumerated(EnumType.STRING)
   private PortType inPortType;
-
   private String outports;
-
-  @Enumerated(EnumType.STRING)
   private PortType outPortType;
-
-  @Enumerated(EnumType.STRING)
   private StopState state = StopState.INIT;
-
   private Date startTime;
-
   private Date endTime;
-
-  @Column(name = "page_id")
   private String pageId;
-
-  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "processStop")
-  @Where(clause = "enable_flag=1")
-  @OrderBy(clause = "lastUpdateDttm desc")
-  private List<ProcessStopProperty> processStopPropertyList = new ArrayList<ProcessStopProperty>();
-
-  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "processStop")
-  @Where(clause = "enable_flag=1")
-  @OrderBy(clause = "lastUpdateDttm desc")
+  private List<ProcessStopProperty> processStopPropertyList = new ArrayList<>();
   private List<ProcessStopCustomizedProperty> processStopCustomizedPropertyList = new ArrayList<>();
+  private Boolean isDataSource = false;
+
+  private String dockerImagesName; // docker image name,not save in process_stop
+  private ComponentFileType componentType; // component type,not save in process_stop
 }

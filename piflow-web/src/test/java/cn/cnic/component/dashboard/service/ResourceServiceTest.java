@@ -1,15 +1,20 @@
 package cn.cnic.component.dashboard.service;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.ReturnMapUtils;
-import javax.annotation.Resource;
+import cn.cnic.base.utils.ReturnMapUtils;
 import net.sf.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
 public class ResourceServiceTest extends ApplicationTests {
 
-  @Resource private IResourceService resourceServiceImpl;
+  private final IResourceService resourceServiceImpl;
+
+  @Autowired
+  public ResourceServiceTest(IResourceService resourceServiceImpl) {
+    this.resourceServiceImpl = resourceServiceImpl;
+  }
 
   @Test
   @Rollback(false)

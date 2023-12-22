@@ -23,7 +23,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
   @Value("${jwt.header}")
   private String token_header;
 
-  @Autowired private JwtUtils jwtUtils;
+  private final JwtUtils jwtUtils;
+
+  @Autowired
+  public JwtAuthenticationTokenFilter(JwtUtils jwtUtils) {
+    this.jwtUtils = jwtUtils;
+  }
 
   @Override
   protected void doFilterInternal(
@@ -54,7 +59,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(userVo, null, userVo.getAuthorities());
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        logger.info(String.format("Authenticated user %s, setting security context", username));
+        logger.debug(String.format("Authenticated user %s, setting security context", username));
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
     }

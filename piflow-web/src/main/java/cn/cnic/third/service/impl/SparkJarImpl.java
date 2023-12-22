@@ -1,15 +1,13 @@
 package cn.cnic.third.service.impl;
 
-import cn.cnic.base.util.HttpUtils;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.common.constant.SysParamsCache;
-import cn.cnic.component.stopsComponent.mapper.StopsComponentGroupMapper;
+import cn.cnic.base.utils.HttpUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.common.constant.ApiConfig;
+import cn.cnic.common.constant.MessageConfig;
 import cn.cnic.third.service.ISparkJar;
 import cn.cnic.third.vo.sparkJar.SparkJarVo;
-import com.alibaba.fastjson.JSON;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Resource;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,23 +16,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class SparkJarImpl implements ISparkJar {
 
-  Logger logger = LoggerUtil.getLogger();
-
-  @Resource private StopsComponentGroupMapper stopsComponentGroupMapper;
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private Logger logger = LoggerUtil.getLogger();
 
   @Override
   public String getSparkJarPath() {
 
     Map<String, String> map = new HashMap<>();
     // map.put("bundle", bundleStr);
-    String sendGetData = HttpUtils.doGet(SysParamsCache.getSparkJarPathUrl(), map, 30 * 1000);
+    String sendGetData = HttpUtils.doGet(ApiConfig.getSparkJarPathUrl(), map, 30 * 1000);
     logger.info("return msg：" + sendGetData);
     if (StringUtils.isBlank(sendGetData)) {
       logger.warn("Interface return value is null");
       return null;
     }
-    if (sendGetData.contains("Error")) {
-      logger.warn("return err");
+    if (sendGetData.contains("Error")
+        || sendGetData.contains(MessageConfig.INTERFACE_CALL_ERROR_MSG())) {
+      logger.warn("return err: " + sendGetData);
       return null;
     }
 
@@ -47,16 +45,18 @@ public class SparkJarImpl implements ISparkJar {
 
     Map<String, String> map = new HashMap<>();
     map.put("sparkJar", sparkjarName);
-    String json = JSON.toJSON(map).toString();
-    String doPost = HttpUtils.doPost(SysParamsCache.getSparkJarMountUrl(), json, 5 * 1000);
-    SparkJarVo sparkJarVo = null;
-    if (StringUtils.isNotBlank(doPost) && !doPost.contains("Fail")) {
-      logger.info("Interface return value: " + doPost);
-      sparkJarVo = constructSparkJarVo(JSONObject.fromObject(doPost));
-
-    } else {
-      logger.warn("Interface return exception");
+    String json = JSONObject.fromObject(map).toString();
+    String doPost = HttpUtils.doPost(ApiConfig.getSparkJarMountUrl(), json, 5 * 1000);
+    if (StringUtils.isBlank(doPost)) {
+      logger.warn("Interface return values is null");
+      return null;
     }
+    if (doPost.contains(MessageConfig.INTERFACE_CALL_ERROR_MSG()) || doPost.contains("Fail")) {
+      logger.warn("Interface return exception: " + doPost);
+      return null;
+    }
+    logger.info("Interface return value: " + doPost);
+    SparkJarVo sparkJarVo = constructSparkJarVo(JSONObject.fromObject(doPost));
     return sparkJarVo;
   }
 
@@ -65,16 +65,18 @@ public class SparkJarImpl implements ISparkJar {
 
     Map<String, String> map = new HashMap<>();
     map.put("sparkJarId", sparkJarMountId);
-    String json = JSON.toJSON(map).toString();
-    String doPost = HttpUtils.doPost(SysParamsCache.getSparkJarUNMountUrl(), json, 5 * 1000);
-    SparkJarVo sparkJarVo = null;
-    if (StringUtils.isNotBlank(doPost) && !doPost.contains("Fail")) {
-      logger.info("Interface return value: " + doPost);
-      sparkJarVo = constructSparkJarVo(JSONObject.fromObject(doPost));
-    } else {
-      logger.warn("Interface return exception");
+    String json = JSONObject.fromObject(map).toString();
+    String doPost = HttpUtils.doPost(ApiConfig.getSparkJarUNMountUrl(), json, 5 * 1000);
+    if (StringUtils.isBlank(doPost)) {
+      logger.warn("Interface return values is null");
+      return null;
     }
-
+    if (doPost.contains(MessageConfig.INTERFACE_CALL_ERROR_MSG()) || doPost.contains("Fail")) {
+      logger.warn("Interface return exception : " + doPost);
+      return null;
+    }
+    logger.info("Interface return value: " + doPost);
+    SparkJarVo sparkJarVo = constructSparkJarVo(JSONObject.fromObject(doPost));
     return sparkJarVo;
   }
 

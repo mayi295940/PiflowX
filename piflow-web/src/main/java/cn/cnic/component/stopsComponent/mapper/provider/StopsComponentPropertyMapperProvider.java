@@ -1,7 +1,7 @@
 package cn.cnic.component.stopsComponent.mapper.provider;
 
-import cn.cnic.base.util.SqlUtils;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
+import cn.cnic.base.utils.SqlUtils;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -69,8 +69,7 @@ public class StopsComponentPropertyMapperProvider {
   /**
    * 根据stops模板id查询对应的stops的所有属性
    *
-   * @param stopsId
-   * @return
+   * @param stopsId stopsId
    */
   public String getStopsComponentPropertyByStopsId(String stopsId) {
 

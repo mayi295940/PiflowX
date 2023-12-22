@@ -1,23 +1,28 @@
 package cn.cnic.component.flow.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.common.Eunm.RunModeType;
 import cn.cnic.component.flow.entity.Flow;
 import cn.cnic.component.process.entity.Process;
 import cn.cnic.component.process.utils.ProcessUtils;
 import java.util.Date;
-import javax.annotation.Resource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
 public class FlowMapperTest extends ApplicationTests {
 
-  @Resource private FlowMapper flowMapper;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final FlowMapper flowMapper;
+
+  @Autowired
+  public FlowMapperTest(FlowMapper flowMapper) {
+    this.flowMapper = flowMapper;
+  }
 
   @Test
   public void testGetFlowById() {
@@ -33,7 +38,8 @@ public class FlowMapperTest extends ApplicationTests {
   public void test() {
     Flow flow = flowMapper.getFlowById("0cbda2327bca445c809d5c3b8b14f5a2");
     Process process = ProcessUtils.flowToProcess(flow, "test", true);
-    String s = ProcessUtils.processToJson(process, "", RunModeType.RUN);
+    String s =
+        ProcessUtils.processToJson(process, "", RunModeType.RUN, flow.getFlowGlobalParamsList());
     logger.info(s);
   }
 

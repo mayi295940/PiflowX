@@ -1,7 +1,7 @@
 package cn.cnic.component.process.utils;
 
-import cn.cnic.base.util.JsonUtils;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.JsonUtils;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.common.Eunm.*;
 import cn.cnic.component.dataSource.utils.DataSourceUtils;
 import cn.cnic.component.flow.entity.*;
@@ -125,6 +125,24 @@ public class ProcessUtils {
         }
         processStopVo.setProcessStopPropertyVoList(processStopPropertyVoList);
       }
+      List<ProcessStopCustomizedProperty> processStopCustomizedPropertyList =
+          processStop.getProcessStopCustomizedPropertyList();
+      if (null != processStopCustomizedPropertyList
+          && processStopCustomizedPropertyList.size() > 0) {
+        List<ProcessStopsCustomizedPropertyVo> processStopsCustomizedPropertyVoList =
+            new ArrayList<>();
+        for (ProcessStopCustomizedProperty processStopCustomizedProperty :
+            processStopCustomizedPropertyList) {
+          if (null != processStopCustomizedProperty) {
+            ProcessStopsCustomizedPropertyVo processStopsCustomizedPropertyVo =
+                new ProcessStopsCustomizedPropertyVo();
+            BeanUtils.copyProperties(
+                processStopCustomizedProperty, processStopsCustomizedPropertyVo);
+            processStopsCustomizedPropertyVoList.add(processStopsCustomizedPropertyVo);
+          }
+        }
+        processStopVo.setProcessStopCustomizedPropertyVoList(processStopsCustomizedPropertyVoList);
+      }
     }
     return processStopVo;
   }
@@ -153,89 +171,103 @@ public class ProcessUtils {
   }
 
   public static Process flowToProcess(Flow flow, String username, boolean isAddId) {
-    Process process = null;
-    if (null != flow) {
-      process = new Process();
-      // Copy flow information to process
-      BeanUtils.copyProperties(flow, process);
-      // Set basic information
-      process = initProcessBasicPropertiesNoId(process, username);
-      if (isAddId) {
-        process.setId(UUIDUtils.getUUID32());
-      } else {
-        process.setId(null);
-      }
-      FlowGroup flowGroup = flow.getFlowGroup();
-      // Set default
-      process.setProcessParentType(ProcessParentType.PROCESS);
-      if (null != flowGroup) {
-        process.setProcessParentType(ProcessParentType.GROUP);
-      }
-      // Take out the flow board information of the flow
-      MxGraphModel mxGraphModel = flow.getMxGraphModel();
-      MxGraphModel mxGraphModelProcess =
-          MxGraphModelUtils.copyMxGraphModelAndNewNoIdAndUnlink(mxGraphModel, isAddId);
-      mxGraphModelProcess =
-          MxGraphModelUtils.initMxGraphModelBasicPropertiesNoId(
-              mxGraphModelProcess, username, isAddId);
-      // add link
-      mxGraphModelProcess.setProcess(process);
-      process.setMxGraphModel(mxGraphModelProcess);
-
-      // set flowId
-      process.setFlowId(flow.getId());
-      // Stops to remove flow
-      List<Stops> stopsList = flow.getStopsList();
-      // stopsList isEmpty
-      if (null != stopsList && stopsList.size() > 0) {
-        // List of stop of process
-        List<ProcessStop> processStopList = new ArrayList<ProcessStop>();
-        // Loop stopsList
-        for (Stops stops : stopsList) {
-          ProcessStop processStop = stopsToProcessStop(stops, username, isAddId);
-          if (null == processStop) {
-            continue;
-          }
-          // Associate foreign key
-          processStop.setProcess(process);
-          processStopList.add(processStop);
-        }
-        process.setProcessStopList(processStopList);
-      }
-      // Get the paths information of flow
-      List<Paths> pathsList = flow.getPathsList();
-      // isEmpty
-      if (null != pathsList && pathsList.size() > 0) {
-        List<ProcessPath> processPathList = new ArrayList<>();
-        // Loop paths information
-        for (Paths paths : pathsList) {
-          // isEmpty
-          if (null == paths) {
-            continue;
-          }
-          ProcessPath processPath = new ProcessPath();
-          // Copy paths information into processPath
-          BeanUtils.copyProperties(paths, processPath);
-          // Set basic information
-          processPath = ProcessPathUtils.initProcessPathBasicPropertiesNoId(processPath, username);
-          if (isAddId) {
-            processPath.setId(UUIDUtils.getUUID32());
-          } else {
-            processPath.setId(null);
-          }
-          // Associated foreign key
-          processPath.setProcess(process);
-          processPathList.add(processPath);
-        }
-        process.setProcessPathList(processPathList);
-      }
+    if (null == flow) {
+      return null;
     }
+    Process process = new Process();
+    List<FlowGlobalParams> flowGlobalParamsList = flow.getFlowGlobalParamsList();
+    process.setFlowGlobalParamsList(flowGlobalParamsList);
+    // Copy flow information to process
+    BeanUtils.copyProperties(flow, process);
+    // Set basic information
+    process = initProcessBasicPropertiesNoId(process, username);
+    if (isAddId) {
+      process.setId(UUIDUtils.getUUID32());
+    } else {
+      process.setId(null);
+    }
+    FlowGroup flowGroup = flow.getFlowGroup();
+    // Set default
+    process.setProcessParentType(ProcessParentType.PROCESS);
+    if (null != flowGroup) {
+      process.setProcessParentType(ProcessParentType.GROUP);
+    }
+    // set flowId
+    process.setFlowId(flow.getId());
+    // Stops to remove flow
+    List<Stops> stopsList = flow.getStopsList();
+    // disable stops pageIds
+    List<String> disablePageIds = new ArrayList<>();
+    // stopsList isEmpty
+    if (null != stopsList && stopsList.size() > 0) {
+      // List of stop of process
+      List<ProcessStop> processStopList = new ArrayList<ProcessStop>();
+      // Loop stopsList
+      for (Stops stops : stopsList) {
+        ProcessStop processStop = stopsToProcessStop(stops, username, isAddId);
+        if (null == processStop) {
+          if (null != stops && null != stops.getIsDisabled() && stops.getIsDisabled()) {
+            disablePageIds.add(stops.getPageId());
+          }
+          continue;
+        }
+        // Associate foreign key
+        processStop.setProcess(process);
+        processStopList.add(processStop);
+      }
+      process.setProcessStopList(processStopList);
+    }
+    // Get the paths information of flow
+    List<Paths> pathsList = flow.getPathsList();
+    // isEmpty
+    if (null != pathsList && pathsList.size() > 0) {
+      List<ProcessPath> processPathList = new ArrayList<>();
+      // Loop paths information
+      for (Paths paths : pathsList) {
+        // isEmpty
+        if (null == paths) {
+          continue;
+        }
+        if (disablePageIds.contains(paths.getFrom()) || disablePageIds.contains(paths.getTo())) {
+          continue;
+        }
+        ProcessPath processPath = new ProcessPath();
+        // Copy paths information into processPath
+        BeanUtils.copyProperties(paths, processPath);
+        // Set basic information
+        processPath = ProcessPathUtils.initProcessPathBasicPropertiesNoId(processPath, username);
+        if (isAddId) {
+          processPath.setId(UUIDUtils.getUUID32());
+        } else {
+          processPath.setId(null);
+        }
+        // Associated foreign key
+        processPath.setProcess(process);
+        processPathList.add(processPath);
+      }
+      process.setProcessPathList(processPathList);
+    }
+    // Take out the flow board information of the flow
+    MxGraphModel mxGraphModel = flow.getMxGraphModel();
+    MxGraphModel mxGraphModelProcess =
+        MxGraphModelUtils.copyMxGraphModelAndNewNoIdAndUnlink(
+            username, mxGraphModel, isAddId, disablePageIds);
+    mxGraphModelProcess =
+        MxGraphModelUtils.initMxGraphModelBasicPropertiesNoId(
+            mxGraphModelProcess, username, isAddId);
+    // add link
+    mxGraphModelProcess.setProcess(process);
+    process.setMxGraphModel(mxGraphModelProcess);
     return process;
   }
 
   public static ProcessStop stopsToProcessStop(Stops stops, String username, boolean isAddId) {
     // isEmpty
     if (null == stops) {
+      return null;
+    }
+    // isDisable
+    if (null != stops.getIsDisabled() && stops.getIsDisabled()) {
       return null;
     }
     ProcessStop processStop = new ProcessStop();
@@ -380,7 +412,8 @@ public class ProcessUtils {
     // copy processMxGraphModel
     MxGraphModel processMxGraphModel = process.getMxGraphModel();
     MxGraphModel copyMxGraphModel =
-        MxGraphModelUtils.copyMxGraphModelAndNewNoIdAndUnlink(processMxGraphModel, isAddId);
+        MxGraphModelUtils.copyMxGraphModelAndNewNoIdAndUnlink(
+            username, processMxGraphModel, isAddId, null);
     copyMxGraphModel =
         MxGraphModelUtils.initMxGraphModelBasicPropertiesNoId(copyMxGraphModel, username, isAddId);
     // add link
@@ -461,8 +494,13 @@ public class ProcessUtils {
     return copyProcess;
   }
 
-  public static String processToJson(Process process, String checkpoint, RunModeType runModeType) {
-    Map<String, Object> flowVoMap = processToMap(process, checkpoint, runModeType);
+  public static String processToJson(
+      Process process,
+      String checkpoint,
+      RunModeType runModeType,
+      List<FlowGlobalParams> flowGlobalParamsList) {
+    Map<String, Object> flowVoMap =
+        processToMap(process, checkpoint, runModeType, flowGlobalParamsList);
     return JsonUtils.toFormatJsonNoException(flowVoMap);
   }
 
@@ -472,10 +510,23 @@ public class ProcessUtils {
   }
 
   public static Map<String, Object> processToMap(
-      Process process, String checkpoint, RunModeType runModeType) {
+      Process process,
+      String checkpoint,
+      RunModeType runModeType,
+      List<FlowGlobalParams> flowGlobalParamsList) {
     Map<String, Object> rtnMap = new HashMap<>();
     Map<String, Object> flowVoMap = new HashMap<>();
-
+    if (null != flowGlobalParamsList && flowGlobalParamsList.size() > 0) {
+      Map<String, Object> environmentVariableMap = new HashMap<>();
+      for (FlowGlobalParams flowGlobalParams : flowGlobalParamsList) {
+        if (null == flowGlobalParams || StringUtils.isBlank(flowGlobalParams.getName())) {
+          continue;
+        }
+        environmentVariableMap.put(
+            "${" + flowGlobalParams.getName() + "}", flowGlobalParams.getContent());
+      }
+      flowVoMap.put("environmentVariable", environmentVariableMap);
+    }
     flowVoMap.put("driverMemory", process.getDriverMemory());
     flowVoMap.put("executorMemory", process.getExecutorMemory());
     flowVoMap.put("executorCores", process.getExecutorCores());
@@ -531,9 +582,22 @@ public class ProcessUtils {
       thirdStopVo.put("name", processStop.getName());
       thirdStopVo.put("bundle", processStop.getBundle());
 
+      if (ComponentFileType.PYTHON.equals(processStop.getComponentType())) {
+        Map<String, Object> pythonProperties = new HashMap<String, Object>();
+        String ymlContent = generateYmlContent(processStop);
+        pythonProperties.put("inports", processStop.getInports());
+        pythonProperties.put("outports", processStop.getOutports());
+        pythonProperties.put("ymlContent", ymlContent); // convert yml to server
+        thirdStopVo.put("properties", pythonProperties);
+        thirdStopVo.put("bundle", "cn.piflow.bundle.script.DockerExecute");
+      }
+
       // StopProperty
       List<ProcessStopProperty> processStopPropertyList = processStop.getProcessStopPropertyList();
-      Map<String, Object> properties = new HashMap<String, Object>();
+      Map<String, Object> properties = (Map<String, Object>) thirdStopVo.get("properties");
+      if (null == properties) {
+        properties = new HashMap<String, Object>();
+      }
       if (null != processStopPropertyList && processStopPropertyList.size() > 0) {
         for (ProcessStopProperty processStopProperty : processStopPropertyList) {
           String name = processStopProperty.getName();
@@ -599,7 +663,8 @@ public class ProcessUtils {
       List<Map<String, Object>> processesListMap = new ArrayList<>();
       for (Process process : processList) {
         processesMap.put(process.getPageId(), process);
-        Map<String, Object> processMap = processToMap(process, null, runModeType);
+        Map<String, Object> processMap =
+            processToMap(process, null, runModeType, process.getFlowGlobalParamsList());
         processesListMap.add(processMap);
       }
       flowGroupVoMap.put("flows", processesListMap);
@@ -645,5 +710,47 @@ public class ProcessUtils {
     }
     rtnMap.put("group", flowGroupVoMap);
     return rtnMap;
+  }
+
+  // generate yml for docker execute
+  public static String generateYmlContent(ProcessStop processStop) {
+    long currentTimeMillis = System.currentTimeMillis();
+    StringBuffer ymlContentSb = new StringBuffer();
+    String ymlName = processStop.getName() + "-" + currentTimeMillis;
+    ymlContentSb.append("version: \"3\"" + System.lineSeparator());
+    ymlContentSb.append("services:" + System.lineSeparator());
+    ymlContentSb.append("  docker-python-demo:" + System.lineSeparator());
+    // docker image name,example:10.1.23.456/example:latest   docker url/imageName:tag
+    ymlContentSb.append(
+        "    image: \"" + processStop.getDockerImagesName() + "\"" + System.lineSeparator());
+    //
+    // //2023-01-05:因为想把Python也进行分发,所以这里的参数不能再写本地的,改为可以替换的值,将来在哪个server提交任务,哪个sever去替换bigflow_extra_hosts
+    //        //param that .py needs,used to store procedure data
+    ymlContentSb.append("    extra_hosts:piflow_extra_hosts" + System.lineSeparator());
+    ymlContentSb.append(
+        "    hostname: " + ymlName + System.lineSeparator()); // .py docker compose needs
+    ymlContentSb.append(
+        "    container_name: " + ymlName + System.lineSeparator()); // .py docker compose needs
+    ymlContentSb.append("    environment:" + System.lineSeparator());
+    //        ymlymlContentSb.append(String.format("      - hdfs_url=%s", SysParamsCache.HDFS_URL) +
+    // System.lineSeparator());       //从配置文件中获取
+    ymlContentSb.append(
+        "      - hdfs_url=piflow_hdfs_url"
+            + System.lineSeparator()); // params that .py needs,used to store procedure data
+    ymlContentSb.append("      - TZ=Asia/Shanghai" + System.lineSeparator());
+    ymlContentSb.append("    volumes:" + System.lineSeparator());
+    ymlContentSb.append("      - ../app:/app" + System.lineSeparator());
+    ymlContentSb.append("    command: python3 /pythonDir/" + processStop.getBundle() + " ");
+    // params that .py needs,used to run .py
+    if (processStop.getProcessStopPropertyList() != null
+        && processStop.getProcessStopPropertyList().size() > 0) {
+      Collections.sort(processStop.getProcessStopPropertyList());
+      for (ProcessStopProperty processStopProperty : processStop.getProcessStopPropertyList()) {
+        ymlContentSb.append(processStopProperty.getCustomValue() + " ");
+      }
+    }
+    ymlContentSb.append(System.lineSeparator());
+    ymlContentSb.append("    network_mode: bridge" + System.lineSeparator());
+    return ymlContentSb.toString();
   }
 }

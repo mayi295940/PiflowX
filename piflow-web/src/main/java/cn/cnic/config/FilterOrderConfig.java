@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.filter.CharacterEncodingFilter;
 
 /**
  * @author mayi
@@ -71,16 +70,6 @@ public class FilterOrderConfig {
   }
 
   @Bean
-  public FilterRegistrationBean characterEncodingFilter() {
-    FilterRegistrationBean registration = new FilterRegistrationBean();
-    registration.setName("characterEncodingFilter");
-    registration.setFilter(new CharacterEncodingFilter("UTF-8"));
-    registration.addUrlPatterns("/*");
-    registration.setOrder(1);
-    return registration;
-  }
-
-  @Bean
   public FilterRegistrationBean filterRegistrationBean1() {
     FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
     filterRegistrationBean.setName("filterRegistrationBean1");
@@ -89,5 +78,4 @@ public class FilterOrderConfig {
     filterRegistrationBean.setOrder(-9998);
     return filterRegistrationBean;
   }
-
 }

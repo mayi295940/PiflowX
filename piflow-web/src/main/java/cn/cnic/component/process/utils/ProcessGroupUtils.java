@@ -1,6 +1,6 @@
 package cn.cnic.component.process.utils;
 
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.common.Eunm.ProcessParentType;
 import cn.cnic.common.Eunm.ProcessState;
 import cn.cnic.common.Eunm.RunModeType;
@@ -44,6 +44,7 @@ public class ProcessGroupUtils {
       return processGroupNewNoId(username);
     }
     // basic properties (required when creating)
+    processGroup.setId(null);
     processGroup.setCrtDttm(new Date());
     processGroup.setCrtUser(username);
     // basic properties
@@ -63,11 +64,15 @@ public class ProcessGroupUtils {
     // copy FlowGroup to ProcessGroup
     BeanUtils.copyProperties(flowGroup, processGroupNew);
     processGroupNew = initProcessGroupBasicPropertiesNoId(processGroupNew, username);
+    if (isAddId) {
+      processGroupNew.setId(UUIDUtils.getUUID32());
+    }
 
     // Take out the sketchpad information of 'flowGroup'
     MxGraphModel flowGroupMxGraphModel = flowGroup.getMxGraphModel();
     MxGraphModel mxGraphModelProcessGroup =
-        MxGraphModelUtils.copyMxGraphModelAndNewNoIdAndUnlink(flowGroupMxGraphModel, isAddId);
+        MxGraphModelUtils.copyMxGraphModelAndNewNoIdAndUnlink(
+            username, flowGroupMxGraphModel, isAddId, null);
     mxGraphModelProcessGroup =
         MxGraphModelUtils.initMxGraphModelBasicPropertiesNoId(
             mxGraphModelProcessGroup, username, isAddId);
@@ -97,6 +102,7 @@ public class ProcessGroupUtils {
           // Copy flowGroupPaths information into processGroupPath
           BeanUtils.copyProperties(flowGroupPaths, processGroupPath);
           // Set basic information
+          processGroupPath.setId(null);
           processGroupPath.setCrtDttm(new Date());
           processGroupPath.setCrtUser(username);
           processGroupPath.setLastUpdateDttm(new Date());
@@ -203,7 +209,8 @@ public class ProcessGroupUtils {
     MxGraphModel copyMxGraphModel = copyProcessGroup.getMxGraphModel();
     if (null != copyMxGraphModel) {
       copyMxGraphModel =
-          MxGraphModelUtils.copyMxGraphModelAndNewNoIdAndUnlink(copyMxGraphModel, isAddId);
+          MxGraphModelUtils.copyMxGraphModelAndNewNoIdAndUnlink(
+              username, copyMxGraphModel, isAddId, null);
       copyMxGraphModel =
           MxGraphModelUtils.initMxGraphModelBasicPropertiesNoId(
               copyMxGraphModel, username, isAddId);
@@ -339,6 +346,56 @@ public class ProcessGroupUtils {
           continue;
         }
         processGroupVoList.add(copy_ProcessGroupVo_I);
+      }
+      processGroupVo.setProcessGroupVoList(processGroupVoList);
+    }
+    return processGroupVo;
+  }
+
+  public static ProcessGroupVo processGroupBasePoToVo(ProcessGroup processGroup) {
+    if (null == processGroup) {
+      return null;
+    }
+    ProcessGroupVo processGroupVo = new ProcessGroupVo();
+
+    BeanUtils.copyProperties(processGroup, processGroupVo);
+    processGroupVo.setProgress(
+        StringUtils.isNotBlank(processGroup.getProgress()) ? processGroup.getProgress() : "0.00");
+
+    // Process List Copy
+    List<Process> processList = processGroup.getProcessList();
+    if (null != processList && processList.size() > 0) {
+      List<ProcessVo> processVoList = new ArrayList<>();
+      ProcessVo processVo;
+      for (Process process : processList) {
+        if (null == process) {
+          continue;
+        }
+        processVo = new ProcessVo();
+        processVo.setState(process.getState());
+        processVo.setStartTime(process.getStartTime());
+        processVo.setEndTime(process.getEndTime());
+        processVo.setPageId(process.getPageId());
+        processVoList.add(processVo);
+      }
+      processGroupVo.setProcessVoList(processVoList);
+    }
+
+    // ProcessGroup List Copy
+    List<ProcessGroup> processGroupList = processGroup.getProcessGroupList();
+    if (null != processGroupList && processGroupList.size() > 0) {
+      List<ProcessGroupVo> processGroupVoList = new ArrayList<>();
+      ProcessGroupVo processGroupVo_I;
+      for (ProcessGroup processGroup_i : processGroupList) {
+        if (null == processGroup_i) {
+          continue;
+        }
+        processGroupVo_I = new ProcessGroupVo();
+        processGroupVo_I.setState(processGroup_i.getState());
+        processGroupVo_I.setStartTime(processGroup_i.getStartTime());
+        processGroupVo_I.setEndTime(processGroup_i.getEndTime());
+        processGroupVo_I.setPageId(processGroup_i.getPageId());
+        processGroupVoList.add(processGroupVo_I);
       }
       processGroupVo.setProcessGroupVoList(processGroupVoList);
     }

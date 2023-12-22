@@ -1,7 +1,9 @@
 package cn.cnic.component.stopsComponent.mapper.provider;
 
-import cn.cnic.base.util.SqlUtils;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
+import cn.cnic.base.utils.DateUtils;
+import cn.cnic.base.utils.SqlUtils;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.jdbc.SQL;
 
@@ -19,6 +21,11 @@ public class StopsComponentMapperProvider {
   private String outPortType;
   private int isCustomized;
   private String visualizationType;
+  private int isDataSource;
+  private String imageUrl;
+  private String componentType; // PYTHON/SCALA
+  private String dockerImagesName; // python component
+  private String stopsHubId;
 
   private boolean preventSQLInjectionStops(StopsComponent stopsComponent) {
     if (null == stopsComponent || StringUtils.isBlank(stopsComponent.getLastUpdateUser())) {
@@ -44,6 +51,16 @@ public class StopsComponentMapperProvider {
     this.isCustomized =
         ((null != stopsComponent.getIsCustomized() && stopsComponent.getIsCustomized()) ? 1 : 0);
     this.visualizationType = SqlUtils.preventSQLInjection(stopsComponent.getVisualizationType());
+    this.isDataSource =
+        ((null != stopsComponent.getIsDataSource() && stopsComponent.getIsDataSource()) ? 1 : 0);
+    this.imageUrl = SqlUtils.preventSQLInjection(stopsComponent.getImageUrl());
+    this.componentType =
+        SqlUtils.preventSQLInjection(
+            null != stopsComponent.getComponentType()
+                ? stopsComponent.getComponentType().name()
+                : null);
+    this.dockerImagesName = SqlUtils.preventSQLInjection(stopsComponent.getDockerImagesName());
+    this.stopsHubId = SqlUtils.preventSQLInjection(stopsComponent.getStopsHubId());
     return true;
   }
 
@@ -60,6 +77,11 @@ public class StopsComponentMapperProvider {
     this.owner = null;
     this.isCustomized = 0;
     this.visualizationType = null;
+    this.isDataSource = 0;
+    this.imageUrl = null;
+    this.componentType = null;
+    this.dockerImagesName = null;
+    this.stopsHubId = null;
   }
 
   /**
@@ -172,8 +194,10 @@ public class StopsComponentMapperProvider {
       strBuf.append("( ");
       strBuf.append(SqlUtils.baseFieldName() + ", ");
       strBuf.append(
-          "bundle, engine_type,description, groups, name, owner, inports, in_port_type, "
-              + "outports, out_port_type, is_customized, visualization_type ");
+          "bundle, engine_type, description, `groups`, name, owner, inports, in_port_type, " +
+                  "outports, out_port_type, is_customized, visualization_type, is_data_source,image_url," +
+                  "component_type,docker_images_name,stops_hub_id ");
+
       strBuf.append(") ");
 
       strBuf.append("values ");
@@ -202,11 +226,136 @@ public class StopsComponentMapperProvider {
               + ","
               + isCustomized
               + ","
-              + visualizationType);
+              + visualizationType
+              + ","
+              + isDataSource
+              + ","
+              + imageUrl
+              + ","
+              + componentType
+              + ","
+              + dockerImagesName
+              + ","
+              + stopsHubId);
       strBuf.append(")");
       sqlStr = strBuf + ";";
     }
     this.reset();
+    return sqlStr;
+  }
+
+  /**
+   * Query StopsComponent according to bundle
+   *
+   * @param bundle
+   * @return
+   */
+  public String getStopsComponentByBundle(String bundle) {
+    String sqlStr = "SELECT 0";
+    SQL sql = new SQL();
+    sql.SELECT("*");
+    sql.FROM("flow_stops_template");
+    sql.WHERE("enable_flag = 1 ");
+    sql.WHERE("bundle = " + SqlUtils.addSqlStr(bundle));
+    sqlStr = sql.toString();
+    return sqlStr;
+  }
+
+  public String updateStopsComponent(StopsComponent stopsComponent) {
+    String sqlStr = "SELECT 0";
+    boolean flag = this.preventSQLInjectionStops(stopsComponent);
+    if (flag) {
+      SQL sql = new SQL();
+      sql.UPDATE("flow_stops_template");
+      sql.SET("`groups` = " + groups);
+      sql.SET("description = " + description);
+      sql.SET("image_url = " + imageUrl);
+      sql.SET("owner = " + owner);
+      sql.SET("inports = " + inports);
+      sql.SET("in_port_type = " + inPortType);
+      sql.SET("outports = " + outports);
+      sql.SET("out_port_type = " + outPortType);
+      sql.SET("is_data_source = " + isDataSource);
+      sql.SET("is_customized = " + isCustomized);
+      sql.SET("visualization_type = " + visualizationType);
+      String lastUpdateDttmStr =
+          DateUtils.dateTimesToStr(
+              null != stopsComponent.getLastUpdateDttm()
+                  ? stopsComponent.getLastUpdateDttm()
+                  : new Date());
+      sql.SET("last_update_dttm = " + SqlUtils.preventSQLInjection(lastUpdateDttmStr));
+      sql.SET(
+          "last_update_user = " + SqlUtils.preventSQLInjection(stopsComponent.getLastUpdateUser()));
+      sql.SET("image_url = " + imageUrl);
+      sql.SET("version = " + (stopsComponent.getVersion() + 1));
+      sql.WHERE("id = " + SqlUtils.preventSQLInjection(stopsComponent.getId()));
+      sql.WHERE("version = " + stopsComponent.getVersion());
+      sqlStr = sql.toString();
+    }
+    this.reset();
+    return sqlStr;
+  }
+
+  /**
+   * @Description update component type by id and type @Param stopsComponents @Return
+   * java.lang.String @Author TY @Date 12:57 2023/4/4
+   */
+  //    public String updateComponentTypeByIdAndType(List<StopsComponent> stopsComponents) {
+  //        List<String> stopsIds = new ArrayList<>();
+  //        StringBuilder sql = new StringBuilder("UPDATE flow_stops_template SET component_type =
+  // CASE");
+  //        for (StopsComponent stopsComponent : stopsComponents) {
+  //            stopsIds.add(stopsComponent.getId());
+  //            sql.append(" WHEN id = ").append(stopsComponent.getId()).append(" THEN
+  // ").append(stopsComponent.getComponentType().name());
+  //        }
+  //        sql.append(" END,version = CASE");
+  //        for (StopsComponent stopsComponent : stopsComponents) {
+  //            sql.append(" WHEN id = ").append(stopsComponent.getId()).append(" THEN
+  // ").append(stopsComponent.getVersion() + 1);
+  //        }
+  //        sql.append(" END,last_update_dttm = CASE");
+  //        for (StopsComponent stopsComponent : stopsComponents) {
+  //            sql.append(" WHEN id = ").append(stopsComponent.getId()).append(" THEN
+  // ").append(stopsComponent.getLastUpdateDttm());
+  //        }
+  //        sql.append(" END WHERE id IN (").append(SqlUtils.strListToStr(stopsIds)).append(") and
+  // enable_flag = 1");
+  //        return sql.toString();
+  //    }
+  public String updateComponentTypeByIdAndType(StopsComponent stopsComponent) {
+
+    String sqlStr = "SELECT 0";
+    boolean flag = this.preventSQLInjectionStops(stopsComponent);
+    if (flag) {
+      SQL sql = new SQL();
+      sql.UPDATE("flow_stops_template");
+      sql.SET("component_type = " + componentType);
+      String lastUpdateDttmStr =
+          DateUtils.dateTimesToStr(
+              null != stopsComponent.getLastUpdateDttm()
+                  ? stopsComponent.getLastUpdateDttm()
+                  : new Date());
+      sql.SET("last_update_dttm = " + SqlUtils.preventSQLInjection(lastUpdateDttmStr));
+      sql.SET("version = " + (stopsComponent.getVersion() + 1));
+      sql.WHERE("id = " + SqlUtils.preventSQLInjection(stopsComponent.getId()));
+      sql.WHERE("version = " + stopsComponent.getVersion());
+      sqlStr = sql.toString();
+    }
+    this.reset();
+    return sqlStr;
+  }
+
+  public String getOnlyStopsComponentByBundles(String[] bundles) {
+    if (null == bundles || bundles.length <= 0) {
+      return "SELECT 0";
+    }
+    StringBuffer strBuf = new StringBuffer();
+    strBuf.append("select * ");
+    strBuf.append("from `flow_stops_template` ");
+    strBuf.append("where `enable_flag` = 1 ");
+    strBuf.append("and `bundle` in ( " + SqlUtils.strArrayToStr(bundles) + ") ");
+    String sqlStr = strBuf.toString();
     return sqlStr;
   }
 }

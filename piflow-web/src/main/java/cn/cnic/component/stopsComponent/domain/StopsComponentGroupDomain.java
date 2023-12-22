@@ -1,14 +1,14 @@
 package cn.cnic.component.stopsComponent.domain;
 
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentGroup;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentGroupMapper;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
-import cn.cnic.component.stopsComponent.model.StopsComponentGroup;
 import cn.cnic.component.stopsComponent.vo.StopsComponentGroupVo;
 import java.util.List;
-import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -22,11 +22,19 @@ import org.springframework.transaction.annotation.Transactional;
     rollbackFor = Exception.class)
 public class StopsComponentGroupDomain {
 
-  Logger logger = LoggerUtil.getLogger();
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private final Logger logger = LoggerUtil.getLogger();
 
-  @Resource private StopsComponentGroupMapper stopsComponentGroupMapper;
+  private final StopsComponentGroupMapper stopsComponentGroupMapper;
+  private final StopsComponentDomain stopsComponentDomain;
 
-  @Resource private StopsComponentDomain stopsComponentDomain;
+  @Autowired
+  public StopsComponentGroupDomain(
+      StopsComponentGroupMapper stopsComponentGroupMapper,
+      StopsComponentDomain stopsComponentDomain) {
+    this.stopsComponentGroupMapper = stopsComponentGroupMapper;
+    this.stopsComponentDomain = stopsComponentDomain;
+  }
 
   public int addStopsComponentGroupAndChildren(StopsComponentGroup stopsComponentGroup) {
     if (null == stopsComponentGroup) {
@@ -52,6 +60,11 @@ public class StopsComponentGroupDomain {
       return 0;
     }
     return stopsComponentGroupMapper.insertStopGroup(stopsComponentGroup);
+  }
+
+  public List<StopsComponentGroup> getStopGroupByNameList(
+      List<String> groupNameList, String engineType) {
+    return stopsComponentGroupMapper.getStopGroupByNameList(groupNameList, engineType);
   }
 
   public StopsComponentGroup getStopsComponentGroupByGroupName(String groupName) {

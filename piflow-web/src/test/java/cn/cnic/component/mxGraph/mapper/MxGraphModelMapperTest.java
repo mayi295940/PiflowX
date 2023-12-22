@@ -1,20 +1,25 @@
 package cn.cnic.component.mxGraph.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.component.mxGraph.entity.MxGraphModel;
 import java.util.Date;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
 public class MxGraphModelMapperTest extends ApplicationTests {
 
-  @Autowired private MxGraphModelMapper mxGraphModelMapper;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final MxGraphModelMapper mxGraphModelMapper;
+
+  @Autowired
+  public MxGraphModelMapperTest(MxGraphModelMapper mxGraphModelMapper) {
+    this.mxGraphModelMapper = mxGraphModelMapper;
+  }
 
   @Test
   public void testGetMeCellByMxGraphId() {

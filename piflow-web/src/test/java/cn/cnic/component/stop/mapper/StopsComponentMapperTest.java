@@ -1,37 +1,49 @@
 package cn.cnic.component.stop.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.SessionUserUtil;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.base.utils.SessionUserUtil;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.base.vo.UserVo;
+import cn.cnic.common.constant.Constants;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentGroup;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentGroupMapper;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentMapper;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentPropertyMapper;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
-import cn.cnic.component.stopsComponent.model.StopsComponentGroup;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
 import cn.cnic.component.stopsComponent.utils.StopsComponentUtils;
 import cn.cnic.third.service.IStop;
 import cn.cnic.third.vo.stop.ThirdStopsComponentVo;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.Resource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 public class StopsComponentMapperTest extends ApplicationTests {
 
-  @Resource private StopsComponentMapper stopsComponentMapper;
-  @Resource private StopsComponentGroupMapper stopsComponentGroupMapper;
-  @Resource private StopsComponentPropertyMapper stopsComponentPropertyMapper;
+  private final Logger logger = LoggerUtil.getLogger();
 
-  @Resource private IStop stopImpl;
+  private final IStop stopImpl;
+  private final StopsComponentMapper stopsComponentMapper;
+  private final StopsComponentGroupMapper stopsComponentGroupMapper;
+  private final StopsComponentPropertyMapper stopsComponentPropertyMapper;
 
-  Logger logger = LoggerUtil.getLogger();
+  @Autowired
+  public StopsComponentMapperTest(
+      IStop stopImpl,
+      StopsComponentMapper stopsComponentMapper,
+      StopsComponentGroupMapper stopsComponentGroupMapper,
+      StopsComponentPropertyMapper stopsComponentPropertyMapper) {
+    this.stopImpl = stopImpl;
+    this.stopsComponentMapper = stopsComponentMapper;
+    this.stopsComponentGroupMapper = stopsComponentGroupMapper;
+    this.stopsComponentPropertyMapper = stopsComponentPropertyMapper;
+  }
 
   @Test
   public void testGetStopsTemplateById() {
@@ -76,8 +88,9 @@ public class StopsComponentMapperTest extends ApplicationTests {
     String[] group = stopImpl.getAllGroup();
     if (null != group && group.length > 0) {
       // The call is successful, the group table information is cleared and then inserted.
-      stopsComponentGroupMapper.deleteGroupCorrelation(null);
-      int deleteGroup = stopsComponentGroupMapper.deleteGroup(null);
+      // todo engine to do
+      stopsComponentGroupMapper.deleteGroupCorrelation(Constants.ENGIN_FLINK);
+      int deleteGroup = stopsComponentGroupMapper.deleteGroup(Constants.ENGIN_FLINK);
       logger.debug("Group" + deleteGroup + "data was successfully deleted！！！");
       int a = 0;
       for (String string : group) {
@@ -107,7 +120,7 @@ public class StopsComponentMapperTest extends ApplicationTests {
     if (null != stopNameList && stopNameList.length > 0) {
       // The call is successful and the Stop message is cleared before insertion
       stopsComponentPropertyMapper.deleteStopsComponentProperty();
-      // todo 传参？
+      // todo engine todo
       int deleteStopsInfo = stopsComponentMapper.deleteStopsComponent(null);
       logger.info("Successful deletion StopsInfo" + deleteStopsInfo + "piece of data!!!");
       int num = 0;
@@ -120,10 +133,12 @@ public class StopsComponentMapperTest extends ApplicationTests {
         if (null != thirdStopsComponentVo) {
           list = Arrays.asList(thirdStopsComponentVo.getGroups().split(","));
         }
+
         // Query group information according to groupName in stops
         List<StopsComponentGroup> stopGroupByName =
             stopsComponentGroupMapper.getStopGroupByNameList(
                 list, thirdStopsComponentVo.getEngineType());
+
         StopsComponent stopsComponent =
             StopsComponentUtils.thirdStopsComponentVoToStopsTemplate(
                 "init", thirdStopsComponentVo, stopGroupByName);
@@ -138,7 +153,7 @@ public class StopsComponentMapperTest extends ApplicationTests {
             String stopsTemplateId = stopsComponent.getId();
             int insertAssociationGroupsStopsTemplate =
                 stopsComponentGroupMapper.insertAssociationGroupsStopsTemplate(
-                    stopGroupId, stopsTemplateId);
+                    stopGroupId, stopsTemplateId, stopGroup.getEngineType());
             logger.info(
                 "association_groups_stops_template Association table insertion affects the number of rows : "
                     + insertAssociationGroupsStopsTemplate);

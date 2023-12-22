@@ -62,4 +62,6 @@ public interface IPropertyService {
    * @return
    */
   public String deleteLastReloadDataByStopsId(String stopId);
+
+  String updateStopDisabled(String username, Boolean isAdmin, String id, Boolean enable);
 }

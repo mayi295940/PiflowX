@@ -1,7 +1,7 @@
 package cn.cnic.third;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import cn.cnic.component.flow.entity.Flow;
 import cn.cnic.component.flow.mapper.FlowMapper;
 import cn.cnic.component.process.entity.Process;
@@ -11,18 +11,23 @@ import cn.cnic.component.schedule.utils.ScheduleUtils;
 import cn.cnic.third.service.ISchedule;
 import cn.cnic.third.vo.schedule.ThirdScheduleVo;
 import java.util.Map;
-import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class IScheduleTest extends ApplicationTests {
 
-  Logger logger = LoggerUtil.getLogger();
+  private Logger logger = LoggerUtil.getLogger();
 
-  @Resource ISchedule scheduleImpl;
+  private final ISchedule scheduleImpl;
+  private final FlowMapper flowMapper;
 
-  @Resource FlowMapper flowMapper;
+  @Autowired
+  public IScheduleTest(ISchedule scheduleImpl, FlowMapper flowMapper) {
+    this.scheduleImpl = scheduleImpl;
+    this.flowMapper = flowMapper;
+  }
 
   @Test
   public void scheduleStartTest() {

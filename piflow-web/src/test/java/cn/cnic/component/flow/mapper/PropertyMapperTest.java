@@ -1,26 +1,36 @@
 package cn.cnic.component.flow.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.component.flow.entity.Property;
 import cn.cnic.component.flow.entity.Stops;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentMapper;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
 import java.util.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class PropertyMapperTest extends ApplicationTests {
 
-  @Autowired private PropertyMapper propertyMapper;
-  @Autowired private StopsMapper stopsMapper;
-  @Autowired private StopsComponentMapper stopsComponentMapper;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final StopsMapper stopsMapper;
+  private final PropertyMapper propertyMapper;
+  private final StopsComponentMapper stopsComponentMapper;
+
+  @Autowired
+  public PropertyMapperTest(
+      StopsMapper stopsMapper,
+      PropertyMapper propertyMapper,
+      StopsComponentMapper stopsComponentMapper) {
+    this.stopsMapper = stopsMapper;
+    this.propertyMapper = propertyMapper;
+    this.stopsComponentMapper = stopsComponentMapper;
+  }
 
   @Test
   public void testGetPropertyListByStopsId() {

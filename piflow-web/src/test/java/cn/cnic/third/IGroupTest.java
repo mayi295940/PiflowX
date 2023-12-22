@@ -1,29 +1,32 @@
 package cn.cnic.third;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import cn.cnic.common.Eunm.RunModeType;
+import cn.cnic.component.flow.domain.FlowGroupDomain;
 import cn.cnic.component.flow.entity.FlowGroup;
-import cn.cnic.component.flow.jpa.domain.FlowGroupDomain;
 import cn.cnic.component.process.entity.ProcessGroup;
 import cn.cnic.component.process.utils.ProcessGroupUtils;
 import cn.cnic.third.service.IGroup;
 import java.util.Map;
-import javax.annotation.Resource;
-import javax.transaction.Transactional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class IGroupTest extends ApplicationTests {
 
-  @Resource private IGroup groupImpl;
-
-  @Resource private FlowGroupDomain flowGroupDomain;
-
   private Logger logger = LoggerUtil.getLogger();
 
+  private final FlowGroupDomain flowGroupDomain;
+  private final IGroup groupImpl;
+
+  @Autowired
+  public IGroupTest(FlowGroupDomain flowGroupDomain, IGroup groupImpl) {
+    this.flowGroupDomain = flowGroupDomain;
+    this.groupImpl = groupImpl;
+  }
+
   @Test
-  @Transactional
   public void testStartFlowGroup() {
     String id = "8a80d5d270e0a92d0170e0b86bba0000";
     FlowGroup flowGroup = flowGroupDomain.getFlowGroupById(id);

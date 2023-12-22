@@ -2,13 +2,18 @@ package cn.cnic.component.dashboard.service.impl;
 
 import cn.cnic.component.dashboard.service.IResourceService;
 import cn.cnic.third.service.IResource;
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ResourceServiceImpl implements IResourceService {
 
-  @Resource private IResource resourceImpl;
+  private final IResource resourceImpl;
+
+  @Autowired
+  public ResourceServiceImpl(IResource resourceImpl) {
+    this.resourceImpl = resourceImpl;
+  }
 
   @Override
   public String getResourceInfo() {

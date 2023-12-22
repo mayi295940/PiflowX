@@ -1,6 +1,6 @@
 package cn.cnic.base.config;
 
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,17 +10,18 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * @ClassName: WebAppConfig @Description: TODO(Here is a sentence describing the function of this
- * class.)
- */
 @Configuration
 public class WebAppConfig implements WebMvcConfigurer {
-  /** Introducing logs, note that they are all packaged under "org.slf4j" */
-  Logger logger = LoggerUtil.getLogger();
 
-  /** Inject the first defined interceptor */
-  @Autowired private ConfigInterceptor configInterceptor;
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private Logger logger = LoggerUtil.getLogger();
+
+  private final ConfigInterceptor configInterceptor;
+
+  @Autowired
+  public WebAppConfig(ConfigInterceptor configInterceptor) {
+    this.configInterceptor = configInterceptor;
+  }
 
   // Method of accessing pictures and videos
   @Override
@@ -72,6 +73,13 @@ public class WebAppConfig implements WebMvcConfigurer {
         .excludePathPatterns(
             Arrays.asList("/components/**", "/js/**", "/css/**", "/img/**", "/img/*"));
   }
+
+  /*
+  @Override
+  public void addViewControllers(ViewControllerRegistry registry) {
+
+  }
+  */
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {

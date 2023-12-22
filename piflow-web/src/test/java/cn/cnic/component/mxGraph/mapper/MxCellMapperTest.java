@@ -1,22 +1,27 @@
 package cn.cnic.component.mxGraph.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.component.mxGraph.entity.MxCell;
 import cn.cnic.component.mxGraph.entity.MxGeometry;
 import java.util.Date;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
 public class MxCellMapperTest extends ApplicationTests {
 
-  @Autowired private MxCellMapper mxCellMapper;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final MxCellMapper mxCellMapper;
+
+  @Autowired
+  public MxCellMapperTest(MxCellMapper mxCellMapper) {
+    this.mxCellMapper = mxCellMapper;
+  }
 
   @Test
   public void testGetMeCellByMxGraphId() {

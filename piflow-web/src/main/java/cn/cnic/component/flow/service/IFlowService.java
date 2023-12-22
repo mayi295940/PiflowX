@@ -2,8 +2,9 @@ package cn.cnic.component.flow.service;
 
 import cn.cnic.component.flow.entity.Flow;
 import cn.cnic.component.flow.vo.FlowVo;
+import cn.cnic.controller.requestVo.FlowInfoVoRequestAdd;
+import cn.cnic.controller.requestVo.FlowInfoVoRequestUpdate;
 import java.util.List;
-import javax.transaction.Transactional;
 
 public interface IFlowService {
 
@@ -13,8 +14,7 @@ public interface IFlowService {
    * @param id
    * @return
    */
-  @Transactional
-  Flow getFlowById(String username, boolean isAdmin, String id);
+  public Flow getFlowById(String username, boolean isAdmin, String id);
 
   /**
    * Query flow information based on pageId
@@ -23,8 +23,7 @@ public interface IFlowService {
    * @param pageId
    * @return
    */
-  @Transactional
-  FlowVo getFlowByPageId(String fid, String pageId);
+  public FlowVo getFlowByPageId(String fid, String pageId);
 
   /**
    * Query flow information based on id
@@ -32,27 +31,23 @@ public interface IFlowService {
    * @param id
    * @return
    */
-  @Transactional
-  String getFlowVoById(String id);
+  public String getFlowVoById(String id);
 
   /**
    * add flow(Contains drawing board information)
    *
+   * @param username
    * @param flowVo
    * @return
+   * @throws Exception
    */
-  @Transactional
-  String addFlow(String username, FlowVo flowVo);
+  public String addFlow(String username, FlowInfoVoRequestAdd flowVo) throws Exception;
 
-  @Transactional
-  String updateFlow(String username, Flow flow);
+  public String deleteFLowInfo(String username, boolean isAdmin, String id);
 
-  @Transactional
-  String deleteFLowInfo(String username, boolean isAdmin, String id);
+  public Integer getMaxStopPageId(String flowId);
 
-  Integer getMaxStopPageId(String flowId);
-
-  List<FlowVo> getFlowList();
+  public List<FlowVo> getFlowList();
 
   /**
    * Paging query flow
@@ -64,10 +59,10 @@ public interface IFlowService {
    * @param param search for the keyword
    * @return
    */
-  String getFlowListPage(
+  public String getFlowListPage(
       String username, boolean isAdmin, Integer offset, Integer limit, String param);
 
-  String getFlowExampleList();
+  public String getFlowExampleList();
 
   /**
    * Call the start interface and save the return information
@@ -75,16 +70,29 @@ public interface IFlowService {
    * @param flowId
    * @return
    */
-  String runFlow(String username, boolean isAdmin, String flowId, String runMode);
+  public String runFlow(String username, boolean isAdmin, String flowId, String runMode)
+      throws Exception;
 
-  String updateFlowBaseInfo(String username, String fId, FlowVo flowVo);
+  /**
+   * Call the start interface and save the return information
+   *
+   * @param publishingId
+   * @return
+   */
+  public String runFlowByPublishingId(
+      String username, boolean isAdmin, String publishingId, String runMode) throws Exception;
 
-  String updateFlowNameById(
-      String username, String id, String flowGroupId, String flowName, String pageId);
+  public String updateFlowBaseInfo(String username, String fId, FlowInfoVoRequestUpdate flowVo)
+      throws Exception;
 
-  Boolean updateFlowNameById(String username, String id, String flowName);
+  public String updateFlowNameById(
+      String username, String id, String flowGroupId, String flowName, String pageId)
+      throws Exception;
 
-  Integer getMaxFlowPageIdByFlowGroupId(String flowGroupId);
+  public Boolean updateFlowNameById(String username, String id, String flowName) throws Exception;
 
-  String drawingBoardData(String username, boolean isAdmin, String load, String parentAccessPath);
+  public Integer getMaxFlowPageIdByFlowGroupId(String flowGroupId);
+
+  public String drawingBoardData(
+      String username, boolean isAdmin, String load, String parentAccessPath);
 }

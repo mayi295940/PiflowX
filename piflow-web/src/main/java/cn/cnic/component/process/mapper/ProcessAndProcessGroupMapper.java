@@ -9,19 +9,15 @@ import org.apache.ibatis.annotations.SelectProvider;
 @Mapper
 public interface ProcessAndProcessGroupMapper {
 
-  /**
-   * query all TemplateDataSource
-   *
-   * @return
-   */
+  /** query all TemplateDataSource */
   @SelectProvider(
       type = ProcessAndProcessGroupMapperProvider.class,
       method = "getProcessAndProcessGroupList")
-  public List<ProcessAndProcessGroupVo> getProcessAndProcessGroupList(String param);
+  List<ProcessAndProcessGroupVo> getProcessAndProcessGroupList(String param);
 
   @SelectProvider(
       type = ProcessAndProcessGroupMapperProvider.class,
       method = "getProcessAndProcessGroupListByUser")
-  public List<ProcessAndProcessGroupVo> getProcessAndProcessGroupListByUser(
-      String param, String username);
+  List<ProcessAndProcessGroupVo> getProcessAndProcessGroupListByUser(String param, String username);
+
 }

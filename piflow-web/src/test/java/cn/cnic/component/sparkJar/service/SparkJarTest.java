@@ -1,13 +1,18 @@
 package cn.cnic.component.sparkJar.service;
 
 import cn.cnic.ApplicationTests;
-import javax.annotation.Resource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
 public class SparkJarTest extends ApplicationTests {
 
-  @Resource private ISparkJarService sparkJarServiceImpl;
+  private final ISparkJarService sparkJarServiceImpl;
+
+  @Autowired
+  public SparkJarTest(ISparkJarService sparkJarServiceImpl) {
+    this.sparkJarServiceImpl = sparkJarServiceImpl;
+  }
 
   @Test
   @Rollback(false)

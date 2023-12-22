@@ -1,18 +1,23 @@
 package cn.cnic.component.stop.service;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
 import cn.cnic.component.stopsComponent.service.IStopsComponentService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class StopsComponentServiceTest extends ApplicationTests {
 
-  @Autowired private IStopsComponentService stopsTemplateService;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final IStopsComponentService stopsTemplateService;
+
+  @Autowired
+  public StopsComponentServiceTest(IStopsComponentService stopsTemplateService) {
+    this.stopsTemplateService = stopsTemplateService;
+  }
 
   @Test
   public void testGetStopsTemplateById() {

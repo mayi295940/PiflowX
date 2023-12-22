@@ -25,22 +25,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FrontEndConfig {
 
-    @Value("${front_end.home_page}")
-    private String homePage;
+  @Value("${front_end.home_page}")
+  private String homePage;
 
-    @Value("${front_end.domain_name}")
-    private String domainName;
+  @Value("${front_end.domain_name}")
+  private String domainName;
 
-    public FrontEndConfig() {
-        // 默认构造函数
-    }
+  public FrontEndConfig() {
+    // 默认构造函数
+  }
 
-    public String getDomainName() {
-        return domainName;
-    }
+  public String getDomainName() {
+    return domainName;
+  }
 
-    public String getHomePage() {
-        return homePage;
-    }
-
+  public String getHomePage() {
+    return homePage;
+  }
 }

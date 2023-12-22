@@ -1,6 +1,6 @@
 package cn.cnic.base;
 
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -9,7 +9,9 @@ import java.io.IOException;
 import org.slf4j.Logger;
 
 public class TextureEnumSerializer extends JsonSerializer<Object> {
-  protected static Logger logger = LoggerUtil.getLogger();
+
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private Logger logger = LoggerUtil.getLogger();
 
   @Override
   public void serialize(Object value, JsonGenerator generator, SerializerProvider provider)

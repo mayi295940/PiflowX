@@ -1,29 +1,18 @@
 package cn.cnic.component.flow.entity;
 
-import cn.cnic.base.BaseHibernateModelUUIDNoCorpAgentId;
-import javax.persistence.*;
+import cn.cnic.base.BaseModelUUIDNoCorpAgentId;
 import lombok.Getter;
 import lombok.Setter;
 
 /** stop property */
 @Getter
 @Setter
-@Entity
-@Table(name = "FLOW_STOPS_CUSTOMIZED_PROPERTY")
-public class CustomizedProperty extends BaseHibernateModelUUIDNoCorpAgentId {
+public class CustomizedProperty extends BaseModelUUIDNoCorpAgentId {
 
   private static final long serialVersionUID = 1L;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "FK_STOPS_ID")
   private Stops stops;
-
-  @Column(columnDefinition = "varchar(255) COMMENT 'name'")
   private String name;
-
-  @Column(columnDefinition = "text(0) COMMENT 'custom value'")
   private String customValue;
-
-  @Column(name = "description", columnDefinition = "text(0) COMMENT 'description'")
   private String description;
 }

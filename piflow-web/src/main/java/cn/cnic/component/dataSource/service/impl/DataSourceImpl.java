@@ -1,38 +1,40 @@
 package cn.cnic.component.dataSource.service.impl;
 
-import cn.cnic.base.util.*;
+import cn.cnic.base.utils.*;
+import cn.cnic.common.constant.MessageConfig;
+import cn.cnic.component.dataSource.domain.DataSourceDomain;
 import cn.cnic.component.dataSource.entity.DataSource;
 import cn.cnic.component.dataSource.entity.DataSourceProperty;
 import cn.cnic.component.dataSource.service.IDataSource;
-import cn.cnic.component.dataSource.transactional.DataSourceTransaction;
 import cn.cnic.component.dataSource.utils.DataSourceUtils;
 import cn.cnic.component.dataSource.vo.DataSourcePropertyVo;
 import cn.cnic.component.dataSource.vo.DataSourceVo;
-import cn.cnic.component.flow.domain.StopsDomainU;
-import cn.cnic.component.flow.entity.Property;
-import cn.cnic.component.flow.entity.Stops;
-import cn.piflow.util.DateUtils;
+import cn.cnic.component.flow.domain.StopsDomain;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import java.util.*;
-import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DataSourceImpl implements IDataSource {
 
-  Logger logger = LoggerUtil.getLogger();
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private Logger logger = LoggerUtil.getLogger();
 
-  @Resource private DataSourceTransaction dataSourceTransaction;
+  private final DataSourceDomain dataSourceDomain;
+  private final StopsDomain stopsDomain;
 
-  @Resource private StopsDomainU stopsDomainU;
+  @Autowired
+  public DataSourceImpl(DataSourceDomain dataSourceDomain, StopsDomain stopsDomain) {
+    this.dataSourceDomain = dataSourceDomain;
+    this.stopsDomain = stopsDomain;
+  }
 
   @Override
-  @Transactional
   public String saveOrUpdate(
       String username, boolean isAdmin, DataSourceVo dataSourceVo, boolean isSynchronize) {
     // Determine if the incoming parameter is empty
@@ -51,11 +53,11 @@ public class DataSourceImpl implements IDataSource {
   private String addDataSource(String username, DataSourceVo dataSourceVo) {
     // Determine if current user obtained are empty
     if (StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("user Illegality");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
     // Determine if the incoming parameter obtained are empty
     if (null == dataSourceVo) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("param error");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
     }
 
     // Used for the new "datasource"
@@ -101,11 +103,11 @@ public class DataSourceImpl implements IDataSource {
     }
     // save "datasource"
     try {
-      dataSourceTransaction.insert(dataSource);
-      return ReturnMapUtils.setSucceededMsgRtnJsonStr("add success.");
+      dataSourceDomain.insertDataSource(dataSource);
+      return ReturnMapUtils.setSucceededMsgRtnJsonStr(MessageConfig.ADD_SUCCEEDED_MSG());
     } catch (Exception e) {
-      logger.error("save failed:", e);
-      return ReturnMapUtils.setFailedMsgRtnJsonStr(ReturnMapUtils.ERROR_MSG);
+      logger.error(MessageConfig.ADD_ERROR_MSG() + ":", e);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ERROR_MSG());
     }
   }
 
@@ -113,22 +115,27 @@ public class DataSourceImpl implements IDataSource {
       String username, boolean isAdmin, DataSourceVo dataSourceVo, boolean isSynchronize) {
     // Determine if current user obtained are empty
     if (StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("user Illegality");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
     // Determine if the incoming parameter obtained are empty
     if (null == dataSourceVo) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("param error");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
     }
     String id = dataSourceVo.getId();
     // Determine if the id is empty
     if (StringUtils.isBlank(id)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("Id is empty and cannot be updated");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
     }
     // Query "datasource" by id
-    DataSource dataSourceById = dataSourceTransaction.getDataSourceById(username, isAdmin, id);
+    DataSource dataSourceById = dataSourceDomain.getDataSourceById(username, isAdmin, id);
     // Judge empty
     if (null == dataSourceById) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("Cannot find data with id '" + id + "'");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_BY_ID_XXX_MSG(id));
+    }
+    // update or delete old dataSourceProperty
+    Boolean isDeleteDataSourceProperty = false;
+    if (!dataSourceById.getDataSourceType().equals(dataSourceVo.getDataSourceType())) {
+      isDeleteDataSourceProperty = true;
     }
     // Copy pass the parameter "dataSourceVo" to "dataSource"
     BeanUtils.copyProperties(dataSourceVo, dataSourceById);
@@ -137,47 +144,15 @@ public class DataSourceImpl implements IDataSource {
     // Set last update time
     dataSourceById.setLastUpdateDttm(new Date());
 
-    // Get the attribute of "datasource" in the incoming parameter
-    List<DataSourcePropertyVo> dataSourcePropertyVoList =
-        dataSourceVo.getDataSourcePropertyVoList();
-    // dataSourcePropertyVoList to map
-    Map<String, DataSourcePropertyVo> dataSourcePropertyVoMap = new HashMap<>();
-    if (null != dataSourcePropertyVoList && dataSourcePropertyVoList.size() > 0) {
-      for (DataSourcePropertyVo dataSourcePropertyVo : dataSourcePropertyVoList) {
-        if (null == dataSourcePropertyVo) {
-          continue;
-        }
-        dataSourcePropertyVoMap.put(dataSourcePropertyVo.getId(), dataSourcePropertyVo);
-      }
-    }
-    // dataSourcePropertyList
-    // Get the properties of "datasource" in the database
-    List<DataSourceProperty> dataSourcePropertyList = dataSourceById.getDataSourcePropertyList();
-    if (null != dataSourcePropertyList && dataSourcePropertyList.size() > 0) {
-      for (DataSourceProperty dataSourceProperty : dataSourcePropertyList) {
-        DataSourcePropertyVo dataSourcePropertyVo =
-            dataSourcePropertyVoMap.get(dataSourceProperty.getId());
-        if (null != dataSourcePropertyVo && StringUtils.isNotBlank(dataSourcePropertyVo.getId())) {
-          // update
-          BeanUtils.copyProperties(dataSourcePropertyVo, dataSourceProperty);
-          dataSourceProperty.setLastUpdateDttm(new Date());
-          dataSourceProperty.setLastUpdateUser(username);
+    if (isDeleteDataSourceProperty) {
 
-          dataSourcePropertyVoMap.remove(dataSourceProperty.getId());
-        } else {
-          // delete
-          dataSourceProperty.setEnableFlag(false);
-          dataSourceProperty.setLastUpdateDttm(new Date());
-          dataSourceProperty.setLastUpdateUser(username);
-        }
-      }
-    }
-    List<DataSourcePropertyVo> dataSourcePropertyVos =
-        new ArrayList<>(dataSourcePropertyVoMap.values());
-    if (dataSourcePropertyVoMap.values().size() > 0) {
+      // delete old dataSourceProperty,and insert new dataSourceProperty
+      dataSourceDomain.updateEnableFlagByDatasourceId(username, id);
+      List<DataSourcePropertyVo> dataSourcePropertyVoList =
+          dataSourceVo.getDataSourcePropertyVoList();
       List<DataSourceProperty> dataSourcePropertyListAdd = new ArrayList<>();
       DataSourceProperty dataSourcePropertyAdd;
-      for (DataSourcePropertyVo dataSourcePropertyVo : dataSourcePropertyVos) {
+      for (DataSourcePropertyVo dataSourcePropertyVo : dataSourcePropertyVoList) {
         if (null == dataSourcePropertyVo) {
           continue;
         }
@@ -188,71 +163,129 @@ public class DataSourceImpl implements IDataSource {
         dataSourcePropertyAdd.setLastUpdateDttm(new Date());
         dataSourcePropertyAdd.setLastUpdateUser(username);
         dataSourcePropertyAdd.setDataSource(dataSourceById);
-
         dataSourcePropertyListAdd.add(dataSourcePropertyAdd);
       }
-      if (null == dataSourcePropertyList) {
-        dataSourcePropertyList = new ArrayList<>();
-      }
+      List<DataSourceProperty> dataSourcePropertyList = new ArrayList<>();
       dataSourcePropertyList.addAll(dataSourcePropertyListAdd);
       dataSourceById.setDataSourcePropertyList(dataSourcePropertyList);
-    }
-    try {
-      dataSourceTransaction.update(dataSourceById);
-      if (isSynchronize) {
-        // get stops by datasource Id
-        List<Stops> stopsListByDatasourceId = stopsDomainU.getStopsListByDatasourceId(id);
-        if (null == stopsListByDatasourceId || stopsListByDatasourceId.size() <= 0) {
-          return ReturnMapUtils.setSucceededMsgRtnJsonStr("update success.");
-        }
-        // datasource Property Map(Key is the attribute name)
-        Map<String, String> dataSourcePropertyMap = new HashMap<>();
-        // Get Database all attributes
-        dataSourcePropertyList = dataSourceById.getDataSourcePropertyList();
-        // Loop "datasource" attribute to map
-        for (DataSourceProperty dataSourceProperty : dataSourcePropertyList) {
-          // "datasource" attribute name
-          String dataSourcePropertyName = dataSourceProperty.getName();
-          // Judge empty and lowercase
-          if (StringUtils.isNotBlank(dataSourcePropertyName)) {
-            dataSourcePropertyName = dataSourcePropertyName.toLowerCase();
-          }
-          dataSourcePropertyMap.put(dataSourcePropertyName, dataSourceProperty.getValue());
-        }
-        for (Stops stops : stopsListByDatasourceId) {
-          if (null == stops) {
+    } else {
+      // DataSourceType not change ,only update dataSourceProperty
+      List<DataSourcePropertyVo> dataSourcePropertyVoList =
+          dataSourceVo.getDataSourcePropertyVoList();
+      Map<String, DataSourcePropertyVo> dataSourcePropertyVoMap = new HashMap<>();
+      if (null != dataSourcePropertyVoList && dataSourcePropertyVoList.size() > 0) {
+        for (DataSourcePropertyVo dataSourcePropertyVo : dataSourcePropertyVoList) {
+          if (null == dataSourcePropertyVo || StringUtils.isEmpty(dataSourcePropertyVo.getId())) {
             continue;
           }
-          List<Property> propertyList = stops.getProperties();
-          // Loop fill "stop"
-          for (Property property : propertyList) {
-            // "stop" attribute name
-            String name = property.getName();
-            property.setStops(stops);
-            // Judge empty
-            if (StringUtils.isBlank(name)) {
-              continue;
-            }
-            // Go to the map of the "datasource" attribute
-            String value = dataSourcePropertyMap.get(name.toLowerCase());
-            // Judge empty
-            if (StringUtils.isBlank(value)) {
-              continue;
-            }
-            // Assignment
-            property.setCustomValue(value);
-            property.setIsLocked(true);
-            property.setLastUpdateDttm(new Date());
-            property.setLastUpdateUser(username);
-          }
-          stops.setDataSource(dataSourceById);
-          stopsDomainU.updateStops(stops);
+          dataSourcePropertyVoMap.put(dataSourcePropertyVo.getId(), dataSourcePropertyVo);
         }
       }
-      return ReturnMapUtils.setSucceededMsgRtnJsonStr("update success.");
+      List<DataSourceProperty> dataSourcePropertyList = dataSourceById.getDataSourcePropertyList();
+      for (DataSourceProperty dataSourceProperty : dataSourcePropertyList) {
+        DataSourcePropertyVo dataSourcePropertyVo =
+            dataSourcePropertyVoMap.get(dataSourceProperty.getId());
+        if (null != dataSourcePropertyVo && StringUtils.isNotBlank(dataSourcePropertyVo.getId())) {
+          // update
+          BeanUtils.copyProperties(dataSourcePropertyVo, dataSourceProperty);
+          dataSourceProperty.setLastUpdateDttm(new Date());
+          dataSourceProperty.setLastUpdateUser(username);
+          dataSourcePropertyVoMap.remove(dataSourceProperty.getId());
+        }
+      }
+    }
+    // Get the attribute of "datasource" in the incoming parameter
+    /*List<DataSourcePropertyVo> dataSourcePropertyVoList = dataSourceVo.getDataSourcePropertyVoList();
+    // dataSourcePropertyVoList to map
+    Map<String, DataSourcePropertyVo> dataSourcePropertyVoMap = new HashMap<>();
+    if (null != dataSourcePropertyVoList && dataSourcePropertyVoList.size() > 0) {
+        for (DataSourcePropertyVo dataSourcePropertyVo : dataSourcePropertyVoList) {
+            if (null == dataSourcePropertyVo) {
+                continue;
+            }
+            dataSourcePropertyVoMap.put(dataSourcePropertyVo.getId(), dataSourcePropertyVo);
+        }
+    }
+    // dataSourcePropertyList
+    // Get the properties of "datasource" in the database
+    List<DataSourceProperty> dataSourcePropertyList = dataSourceById.getDataSourcePropertyList();
+    if (null != dataSourcePropertyList && dataSourcePropertyList.size() > 0) {
+        for (DataSourceProperty dataSourceProperty : dataSourcePropertyList) {
+            DataSourcePropertyVo dataSourcePropertyVo = dataSourcePropertyVoMap.get(dataSourceProperty.getId());
+            if (null != dataSourcePropertyVo && StringUtils.isNotBlank(dataSourcePropertyVo.getId())) {
+                //update
+                BeanUtils.copyProperties(dataSourcePropertyVo, dataSourceProperty);
+                dataSourceProperty.setLastUpdateDttm(new Date());
+                dataSourceProperty.setLastUpdateUser(username);
+
+                dataSourcePropertyVoMap.remove(dataSourceProperty.getId());
+            } else {
+                // delete
+                dataSourceProperty.setEnableFlag(false);
+                dataSourceProperty.setLastUpdateDttm(new Date());
+                dataSourceProperty.setLastUpdateUser(username);
+            }
+        }
+    }
+    List<DataSourcePropertyVo> dataSourcePropertyVos = new ArrayList<>(dataSourcePropertyVoMap.values());
+    if (dataSourcePropertyVoMap.values().size() > 0) {
+        List<DataSourceProperty> dataSourcePropertyListAdd = new ArrayList<>();
+        DataSourceProperty dataSourcePropertyAdd;
+        for (DataSourcePropertyVo dataSourcePropertyVo : dataSourcePropertyVos) {
+            if (null == dataSourcePropertyVo) {
+                continue;
+            }
+            dataSourcePropertyAdd = new DataSourceProperty();
+            BeanUtils.copyProperties(dataSourcePropertyVo, dataSourcePropertyAdd);
+            dataSourcePropertyAdd.setCrtDttm(new Date());
+            dataSourcePropertyAdd.setCrtUser(username);
+            dataSourcePropertyAdd.setLastUpdateDttm(new Date());
+            dataSourcePropertyAdd.setLastUpdateUser(username);
+            dataSourcePropertyAdd.setDataSource(dataSourceById);
+
+            dataSourcePropertyListAdd.add(dataSourcePropertyAdd);
+        }
+        if (null == dataSourcePropertyList) {
+            dataSourcePropertyList = new ArrayList<>();
+        }
+        dataSourcePropertyList.addAll(dataSourcePropertyListAdd);
+        dataSourceById.setDataSourcePropertyList(dataSourcePropertyList);
+    }*/
+    try {
+      dataSourceDomain.updateDataSource(dataSourceById);
+      /*if (isSynchronize) {
+          // get stops by datasource Id
+          List<Stops> stopsListByDatasourceId = stopsDomain.getStopsListByDatasourceId(id);
+          if (null == stopsListByDatasourceId || stopsListByDatasourceId.size() <= 0) {
+              return ReturnMapUtils.setSucceededMsgRtnJsonStr(MessageConfig.UPDATE_SUCCEEDED_MSG());
+          }
+          // datasource Property Map(Key is the attribute name)
+          Map<String, String> dataSourcePropertyMap = new HashMap<>();
+          // Get Database all attributes
+          List<DataSourceProperty> dataSourcePropertyList = dataSourceById.getDataSourcePropertyList();
+          // Loop "datasource" attribute to map
+          for (DataSourceProperty dataSourceProperty : dataSourcePropertyList) {
+              // "datasource" attribute name
+              String dataSourcePropertyName = dataSourceProperty.getName();
+              // Judge empty and lowercase
+              if (StringUtils.isNotBlank(dataSourcePropertyName)) {
+                  dataSourcePropertyName = dataSourcePropertyName.toLowerCase();
+              }
+              dataSourcePropertyMap.put(dataSourcePropertyName, dataSourceProperty.getValue());
+          }
+          for (Stops stops : stopsListByDatasourceId) {
+              if (null == stops) {
+                  continue;
+              }
+              // Loop fill "stop"
+              stops = StopsUtils.fillStopsPropertiesByDatasource(stops, dataSourceById, username);
+              stopsDomain.updateStops(stops);
+          }
+      }*/
+      return ReturnMapUtils.setSucceededMsgRtnJsonStr(MessageConfig.UPDATE_SUCCEEDED_MSG());
     } catch (Exception e) {
-      logger.error("save failed:", e);
-      return ReturnMapUtils.setFailedMsgRtnJsonStr(ReturnMapUtils.ERROR_MSG);
+      logger.error(MessageConfig.UPDATE_ERROR_MSG() + ":", e);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ERROR_MSG());
     }
   }
 
@@ -264,7 +297,7 @@ public class DataSourceImpl implements IDataSource {
     if (StringUtils.isNotBlank(id)) {
       return null;
     }
-    DataSource dataSourceById = dataSourceTransaction.getDataSourceById(username, isAdmin, id);
+    DataSource dataSourceById = dataSourceDomain.getDataSourceById(username, isAdmin, id);
     DataSourceVo dataSourceVo = null;
     if (null != dataSourceById) {
       dataSourceVo = DataSourceUtils.dataSourcePoToVo(dataSourceById, true);
@@ -275,12 +308,12 @@ public class DataSourceImpl implements IDataSource {
   @Override
   public String getDataSourceVoById(String username, boolean isAdmin, String id) {
     if (!isAdmin && StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("illegal user");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
-    if (StringUtils.isNotBlank(id)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("No data was queried");
+    if (StringUtils.isBlank(id)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_IS_NULL_MSG("id"));
     }
-    DataSource dataSourceById = dataSourceTransaction.getDataSourceById(username, isAdmin, id);
+    DataSource dataSourceById = dataSourceDomain.getDataSourceById(username, isAdmin, id);
     DataSourceVo dataSourceVo = null;
     if (null != dataSourceById) {
       dataSourceVo = DataSourceUtils.dataSourcePoToVo(dataSourceById, true);
@@ -288,16 +321,16 @@ public class DataSourceImpl implements IDataSource {
     if (null != dataSourceVo) {
       return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("data", dataSourceVo);
     } else {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("No data was queried");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_BY_ID_XXX_MSG(id));
     }
   }
 
   @Override
   public String getDataSourceVoList(String username, boolean isAdmin) {
     if (!isAdmin && StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("illegal user");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
-    List<DataSource> dataSourceList = dataSourceTransaction.getDataSourceList(username, isAdmin);
+    List<DataSource> dataSourceList = dataSourceDomain.getDataSourceList(username, isAdmin);
     List<DataSourceVo> dataSourceVoList =
         DataSourceUtils.dataSourceListPoToVo(dataSourceList, false);
     return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("data", dataSourceVoList);
@@ -305,52 +338,49 @@ public class DataSourceImpl implements IDataSource {
 
   @Override
   public List<DataSourceVo> getDataSourceTemplateList() {
-    return DataSourceUtils.dataSourceListPoToVo(
-        dataSourceTransaction.getDataSourceTemplateList(), true);
+    return DataSourceUtils.dataSourceListPoToVo(dataSourceDomain.getDataSourceTemplateList(), true);
   }
 
   @Override
   public String getDataSourceVoListPage(
       String username, boolean isAdmin, Integer offset, Integer limit, String param) {
     if (!isAdmin && StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("illegal user");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
     if (null == offset || null == limit) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("param is error");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
     }
     Page<DataSourceVo> page = PageHelper.startPage(offset, limit);
-    dataSourceTransaction.getDataSourceVoListParam(username, isAdmin, param);
-    Map<String, Object> rtnMap = PageHelperUtils.setLayTableParam(page, null);
-    rtnMap.put(ReturnMapUtils.KEY_CODE, ReturnMapUtils.SUCCEEDED_CODE);
-    return JsonUtils.toJsonNoException(rtnMap);
+    dataSourceDomain.getDataSourceVoListParam(username, isAdmin, param);
+    Map<String, Object> rtnMap = ReturnMapUtils.setSucceededMsg(MessageConfig.SUCCEEDED_MSG());
+    return PageHelperUtils.setLayTableParamRtnStr(page, rtnMap);
   }
 
   @Override
-  @Transactional
   public String deleteDataSourceById(String username, boolean isAdmin, String id) {
     // Determine if current user obtained are empty
     if (StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("user Illegality");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
     // Determine if the user is empty id is empty
     if (StringUtils.isBlank(id)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("delete failed,param error");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_IS_NULL_MSG("id"));
     }
-    DataSource dataSource = dataSourceTransaction.getDataSourceById(username, isAdmin, id);
+    DataSource dataSource = dataSourceDomain.getDataSourceById(username, isAdmin, id);
     if (isAdmin) {
       username = StringUtils.isNotBlank(username) ? username : "admin";
     }
     if (null == dataSource) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("delete failed, no data");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_BY_ID_XXX_MSG(id));
     }
     dataSource.setEnableFlag(false);
     dataSource.setLastUpdateDttm(new Date());
     dataSource.setLastUpdateUser(username);
     try {
-      dataSourceTransaction.saveOrUpdate(dataSource);
+      dataSourceDomain.saveOrUpdate(dataSource);
     } catch (Exception e) {
       logger.error("error: ", e);
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("save failed");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.DELETE_ERROR_MSG());
     }
     return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("counts", 1);
   }
@@ -360,14 +390,13 @@ public class DataSourceImpl implements IDataSource {
     DataSourceVo dataSourceVo = null;
     if (StringUtils.isNotBlank(dataSourceId)) {
       DataSource dataSourceById =
-          dataSourceTransaction.getDataSourceById(username, isAdmin, dataSourceId);
+          dataSourceDomain.getDataSourceById(username, isAdmin, dataSourceId);
       if (null != dataSourceById) {
         dataSourceVo = DataSourceUtils.dataSourcePoToVo(dataSourceById, true);
       }
     }
     List<DataSourceVo> dataSourceTemplateList =
-        DataSourceUtils.dataSourceListPoToVo(
-            dataSourceTransaction.getDataSourceTemplateList(), true);
+        DataSourceUtils.dataSourceListPoToVo(dataSourceDomain.getDataSourceTemplateList(), true);
     Map<String, Object> rtnMap =
         ReturnMapUtils.setSucceededCustomParam("templateList", dataSourceTemplateList);
     if (null != dataSourceVo) {
@@ -379,9 +408,9 @@ public class DataSourceImpl implements IDataSource {
   @Override
   public String checkLinked(String datasourceId) {
     if (StringUtils.isBlank(datasourceId)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("datasourceId is null");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_IS_NULL_MSG(datasourceId));
     }
-    List<String> stopsNamesByDatasourceId = stopsDomainU.getStopsNamesByDatasourceId(datasourceId);
+    List<String> stopsNamesByDatasourceId = stopsDomain.getStopsNamesByDatasourceId(datasourceId);
     if (null == stopsNamesByDatasourceId || stopsNamesByDatasourceId.size() <= 0) {
       return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("isLinked", false);
     }

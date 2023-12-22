@@ -1,9 +1,9 @@
 package cn.cnic.interceptor;
 
 import cn.cnic.base.config.jwt.common.JwtUtils;
+import cn.cnic.base.utils.HttpServletUtils;
 import cn.cnic.component.system.entity.SysUser;
 import cn.cnic.component.system.service.ISysUserService;
-import cn.cnic.utils.HttpUtils;
 import com.webank.wedatasphere.dss.standard.app.sso.plugin.filter.HttpSessionUserInterceptor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,19 +79,18 @@ public class CustomHttpSessionUserInterceptor implements HttpSessionUserIntercep
     request = (HttpServletRequest) requestWrapper.getRequest();
 
     // 修改cookie
-    ModifyHttpServletRequestWrapper mParametersWrapper = new ModifyHttpServletRequestWrapper(request);
+    ModifyHttpServletRequestWrapper mParametersWrapper =
+        new ModifyHttpServletRequestWrapper(request);
     mParametersWrapper.putCookie("token222", jwtTokenUtil.getToken(userName));
     mParametersWrapper.putCookie("state", "jwtok");
 
     HttpSession session = request.getSession();
-
   }
-
 
   private class ModifyHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private Map<String, String> mapCookies;
-    //将request对象中的参数修改后，放在这个集合里，随后项目取的所有Parameter都是从这个集合中取数
+    // 将request对象中的参数修改后，放在这个集合里，随后项目取的所有Parameter都是从这个集合中取数
     private Map<String, String[]> params;
     private Map<String, String> headerMap;
 
@@ -117,9 +116,7 @@ public class CustomHttpSessionUserInterceptor implements HttpSessionUserIntercep
       return headerValue;
     }
 
-    /**
-     * get the Header names
-     */
+    /** get the Header names */
     @Override
     public Enumeration<String> getHeaderNames() {
       List<String> names = Collections.list(super.getHeaderNames());
@@ -157,7 +154,7 @@ public class CustomHttpSessionUserInterceptor implements HttpSessionUserIntercep
       RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
       if (requestAttributes != null) {
         HttpServletRequest requestTmp = ((ServletRequestAttributes) requestAttributes).getRequest();
-       // CookieUtils.getCookieValue(requestTmp, "");
+        // CookieUtils.getCookieValue(requestTmp, "");
       }
       System.out.println("getParameterValues >>> " + name);
       return params.get(name);
@@ -168,9 +165,9 @@ public class CustomHttpSessionUserInterceptor implements HttpSessionUserIntercep
         if (value instanceof String[]) {
           params.put(name, (String[]) value);
         } else if (value instanceof String) {
-          params.put(name, new String[]{(String) value});
+          params.put(name, new String[] {(String) value});
         } else {
-          params.put(name, new String[]{String.valueOf(value)});
+          params.put(name, new String[] {String.valueOf(value)});
         }
       }
     }
@@ -216,7 +213,6 @@ public class CustomHttpSessionUserInterceptor implements HttpSessionUserIntercep
     }
   }
 
-
   @Override
   public boolean isUserExistInSession(HttpServletRequest httpServletRequest) {
     HttpSession session = httpServletRequest.getSession();
@@ -227,6 +223,6 @@ public class CustomHttpSessionUserInterceptor implements HttpSessionUserIntercep
 
   @Override
   public String getUser(HttpServletRequest httpServletRequest) {
-    return HttpUtils.getUserName(httpServletRequest);
+    return HttpServletUtils.getUserName(httpServletRequest);
   }
 }

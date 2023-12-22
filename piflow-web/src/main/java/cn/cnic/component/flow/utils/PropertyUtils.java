@@ -1,6 +1,7 @@
 package cn.cnic.component.flow.utils;
 
 import cn.cnic.component.flow.entity.Property;
+
 import java.util.Date;
 
 public class PropertyUtils {

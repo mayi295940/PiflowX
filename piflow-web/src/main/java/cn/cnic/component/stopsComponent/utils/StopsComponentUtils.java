@@ -1,14 +1,14 @@
 package cn.cnic.component.stopsComponent.utils;
 
-import cn.cnic.base.util.ImageUtils;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.ImageUtils;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.common.Eunm.PortType;
+import cn.cnic.common.constant.Constants;
 import cn.cnic.common.constant.SysParamsCache;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
-import cn.cnic.component.stopsComponent.model.StopsComponentGroup;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentGroup;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import cn.cnic.third.vo.stop.ThirdStopsComponentVo;
-import cn.piflow.Constants;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +49,7 @@ public class StopsComponentUtils {
       String username,
       ThirdStopsComponentVo thirdStopsComponentVo,
       List<StopsComponentGroup> stopGroupByName) {
+
     if (null == thirdStopsComponentVo) {
       return null;
     }
@@ -86,26 +87,19 @@ public class StopsComponentUtils {
 
     String icon = thirdStopsComponentVo.getIcon();
     if (StringUtils.isNotBlank(icon)) {
-      String engineType = thirdStopsComponentVo.getEngineType();
-      if (Constants.ENGIN_FLINK().equalsIgnoreCase(engineType)) {
-        ImageUtils.generateImage(
-            icon,
-            thirdStopsComponentVo.getName() + "_128x128",
-            "png",
-            SysParamsCache.ENGINE_FLINK_IMAGES_PATH);
-      } else {
-        ImageUtils.generateImage(
-            icon,
-            thirdStopsComponentVo.getName() + "_128x128",
-            "png",
-            SysParamsCache.ENGINE_SPARK_IMAGES_PATH);
-      }
+
+      String imagePath =
+          Constants.ENGIN_FLINK.equalsIgnoreCase(thirdStopsComponentVo.getEngineType())
+              ? SysParamsCache.ENGINE_FLINK_IMAGES_PATH
+              : SysParamsCache.ENGINE_SPARK_IMAGES_PATH;
+
+      ImageUtils.generateImage(
+          icon, thirdStopsComponentVo.getName() + "_128x128", "png", imagePath);
     }
 
     StopsComponent stopsComponent = stopsComponentNewNoId(username);
     stopsComponent.setId(UUIDUtils.getUUID32());
     stopsComponent.setBundle(thirdStopsComponentVo.getBundle());
-    stopsComponent.setEngineType(thirdStopsComponentVo.getEngineType());
     stopsComponent.setDescription(thirdStopsComponentVo.getDescription());
     stopsComponent.setGroups(thirdStopsComponentVo.getGroups());
     stopsComponent.setName(thirdStopsComponentVo.getName());
@@ -116,8 +110,16 @@ public class StopsComponentUtils {
     stopsComponent.setOutPortType(outPortType);
     stopsComponent.setOwner(thirdStopsComponentVo.getOwner());
     stopsComponent.setIsCustomized(thirdStopsComponentVo.isCustomized());
+    stopsComponent.setIsDataSource(thirdStopsComponentVo.isDataSource());
     stopsComponent.setStopGroupList(stopGroupByName);
     stopsComponent.setVisualizationType(thirdStopsComponentVo.getVisualizationType());
+
+    // todo  图片地址
+    String imageUrl =
+        // SysParamsCache.SYS_CONTEXT_PATH
+        "/piflow-web/images/" + thirdStopsComponentVo.getName() + "_128x128.png";
+      stopsComponent.setImageUrl(imageUrl);
+
     List<StopsComponentProperty> listStopsComponentProperty =
         StopsComponentPropertyUtils.thirdStopsComponentPropertyVoListToStopsComponentProperty(
             username, thirdStopsComponentVo.getProperties(), stopsComponent);

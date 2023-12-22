@@ -1,12 +1,10 @@
 package cn.cnic.component.stopsComponent.domain;
 
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.UUIDUtils;
+import cn.cnic.component.stopsComponent.entity.StopsComponentManage;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentManageMapper;
-import cn.cnic.component.stopsComponent.model.StopsComponentManage;
-import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,9 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
     rollbackFor = Exception.class)
 public class StopsComponentManageDomain {
 
-  Logger logger = LoggerUtil.getLogger();
+  private final StopsComponentManageMapper stopsComponentManageMapper;
 
-  @Resource private StopsComponentManageMapper stopsComponentManageMapper;
+  @Autowired
+  public StopsComponentManageDomain(StopsComponentManageMapper stopsComponentManageMapper) {
+    this.stopsComponentManageMapper = stopsComponentManageMapper;
+  }
 
   public int saveOrUpdeate(StopsComponentManage stopsComponentManage) throws Exception {
     if (null == stopsComponentManage) {

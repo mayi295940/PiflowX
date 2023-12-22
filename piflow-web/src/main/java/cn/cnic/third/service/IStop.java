@@ -6,19 +6,22 @@ import java.util.List;
 import java.util.Map;
 
 public interface IStop {
+  /**
+   * Call the group interface
+   *
+   * @return
+   */
+  public String[] getAllGroup();
 
-  /** Call the group interface */
-  String[] getAllGroup();
+  public String[] getAllStops();
 
-  String[] getAllStops();
+  public Map<String, List<String>> getStopsListWithGroup(String engineType);
 
-  Map<String, List<String>> getStopsListWithGroup(String engineType);
+  public ThirdStopsComponentVo getStopInfo(String bundleStr);
 
-  ThirdStopsComponentVo getStopInfo(String bundleStr);
+  public String getStopsHubPath();
 
-  String getStopsHubPath();
+  public StopsHubVo mountStopsHub(String stopsHubName);
 
-  StopsHubVo mountStopsHub(String stopsHubName);
-
-  StopsHubVo unmountStopsHub(String stopsHubMountId);
+  public StopsHubVo unmountStopsHub(String stopsHubMountId);
 }

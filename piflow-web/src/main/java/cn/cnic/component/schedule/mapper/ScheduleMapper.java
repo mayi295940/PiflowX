@@ -4,7 +4,11 @@ import cn.cnic.component.schedule.entity.Schedule;
 import cn.cnic.component.schedule.mapper.provider.ScheduleMapperProvider;
 import cn.cnic.component.schedule.vo.ScheduleVo;
 import java.util.List;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.DeleteProvider;
+import org.apache.ibatis.annotations.InsertProvider;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.UpdateProvider;
 
 @Mapper
 public interface ScheduleMapper {
@@ -15,8 +19,7 @@ public interface ScheduleMapper {
   /**
    * update schedule
    *
-   * @param schedule
-   * @return
+   * @param schedule schedule
    */
   @UpdateProvider(type = ScheduleMapperProvider.class, method = "update")
   int update(Schedule schedule);

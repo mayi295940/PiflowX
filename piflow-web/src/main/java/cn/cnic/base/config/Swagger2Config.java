@@ -1,44 +1,61 @@
 package cn.cnic.base.config;
 
 import io.swagger.annotations.ApiOperation;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.Parameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
+// @Profile({"dev", "test"})// Set the "dev", "test" environment to open the "prod" environment and
+// close it
 public class Swagger2Config {
-
-  /** 创建API */
   @Bean
   public Docket createRestApi() {
 
-    return new Docket(DocumentationType.SWAGGER_2)
-        // 是否启用Swagger
-        // 用来创建该API的基本信息，展示在文档的页面中（自定义展示的信息）
-        .apiInfo(apiInfo())
-        // 设置哪些接口暴露给Swagger展示
-        .select()
-        // 扫描所有有注解的api，用这种方式更灵活
-        .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
-        // 扫描指定包中的swagger注解
-        // 扫描所有 .apis(RequestHandlerSelectors.any())
-        .paths(PathSelectors.any())
+    ParameterBuilder pb = new ParameterBuilder();
+    pb.name("Authorization")
+        .description("Token")
+        .modelRef(new ModelRef("string"))
+        .parameterType("header")
+        .required(true)
+        .defaultValue("Bearer ")
         .build();
+    List<Parameter> par = new ArrayList<>();
+    par.add(pb.build()); //
+    return new Docket(DocumentationType.SWAGGER_2)
+        .enable(true)
+        .apiInfo(apiInfo())
+        .groupName("piflow-web")
+        .select()
+        // Scan all annotated apis, which is more flexible
+        .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
+        // Scan the "swagger" annotation in the specified package
+        // .apis(RequestHandlerSelectors.basePackage("cn.cnic.controller.api"))
+        // Scan All
+        // .apis(RequestHandlerSelectors.any())
+        .paths(PathSelectors.any())
+        .build()
+        .globalOperationParameters(par);
   }
 
-  /** 添加摘要信息 */
   private ApiInfo apiInfo() {
     return new ApiInfoBuilder()
-        .title("接口文档")
-        .description("PiflowX-web接口文档")
-        .version("版本号:1.0")
+        .title("web-api")
+        .description("web-api")
+        // .termsOfServiceUrl("http:/xxx/xxx")
+        .version("1.0")
         .build();
   }
 }

@@ -1,33 +1,30 @@
 package cn.cnic.component.flow.service.impl;
 
-import cn.cnic.base.util.HdfsUtils;
-import cn.cnic.base.util.JsonUtils;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.MxGraphUtils;
-import cn.cnic.base.util.ReturnMapUtils;
+import cn.cnic.base.utils.*;
 import cn.cnic.common.Eunm.PortType;
 import cn.cnic.common.Eunm.ProcessState;
 import cn.cnic.common.Eunm.RunModeType;
+import cn.cnic.common.constant.MessageConfig;
+import cn.cnic.component.dataSource.domain.DataSourceDomain;
 import cn.cnic.component.dataSource.entity.DataSource;
 import cn.cnic.component.dataSource.entity.DataSourceProperty;
-import cn.cnic.component.dataSource.jpa.domain.DataSourceDomain;
-import cn.cnic.component.flow.domain.StopsDomainU;
+import cn.cnic.component.flow.domain.FlowDomain;
+import cn.cnic.component.flow.domain.FlowStopsPublishingDomain;
 import cn.cnic.component.flow.entity.CustomizedProperty;
 import cn.cnic.component.flow.entity.Flow;
 import cn.cnic.component.flow.entity.Paths;
 import cn.cnic.component.flow.entity.Property;
 import cn.cnic.component.flow.entity.Stops;
-import cn.cnic.component.flow.mapper.FlowMapper;
-import cn.cnic.component.flow.mapper.PathsMapper;
 import cn.cnic.component.flow.service.IStopsService;
 import cn.cnic.component.flow.utils.StopsUtils;
-import cn.cnic.component.flow.vo.StopsVo;
+import cn.cnic.component.flow.vo.PathsVo;
+import cn.cnic.component.flow.vo.StopsCustomizedPropertyVo;
 import cn.cnic.component.mxGraph.entity.MxCell;
 import cn.cnic.component.mxGraph.entity.MxGraphModel;
-import cn.cnic.component.mxGraph.mapper.MxCellMapper;
 import cn.cnic.component.mxGraph.utils.MxCellUtils;
 import cn.cnic.component.mxGraph.utils.MxGraphModelUtils;
-import cn.cnic.component.process.domain.ProcessDomainU;
+import cn.cnic.component.mxGraph.utils.MxGraphUtils;
+import cn.cnic.component.process.domain.ProcessDomain;
 import cn.cnic.component.process.entity.Process;
 import cn.cnic.component.process.entity.ProcessPath;
 import cn.cnic.component.process.entity.ProcessStop;
@@ -36,87 +33,41 @@ import cn.cnic.component.process.utils.ProcessPathUtils;
 import cn.cnic.component.process.utils.ProcessStopUtils;
 import cn.cnic.component.process.utils.ProcessUtils;
 import cn.cnic.component.stopsComponent.domain.StopsComponentDomain;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
+import cn.cnic.component.stopsComponent.domain.StopsHubFileRecordDomain;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
+import cn.cnic.component.stopsComponent.entity.StopsHubFileRecord;
+import cn.cnic.component.stopsComponent.vo.StopsComponentPropertyVo;
+import cn.cnic.component.stopsComponent.vo.StopsHubInfoVo;
 import cn.cnic.component.testData.domain.TestDataDomain;
 import cn.cnic.controller.requestVo.RunStopsVo;
 import cn.cnic.third.service.IFlow;
-import cn.cnic.third.vo.flow.ThirdFlowInfoStopVo;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StopsServiceImpl implements IStopsService {
 
-  Logger logger = LoggerUtil.getLogger();
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private Logger logger = LoggerUtil.getLogger();
 
-  @Resource private StopsDomainU stopsDomainU;
-
-  @Resource private MxCellMapper mxCellMapper;
-
-  @Resource private PathsMapper pathsMapper;
-
-  @Resource private DataSourceDomain dataSourceDomain;
-
-  @Resource private FlowMapper flowMapper;
-
-  @Resource private TestDataDomain testDataDomain;
-
-  @Resource private StopsComponentDomain stopsComponentDomain;
-
-  @Resource private IFlow flowImpl;
-
-  @Resource private ProcessDomainU processDomainU;
-
-  @Override
-  public int deleteStopsByFlowId(String id) {
-    return stopsDomainU.updateEnableFlagByFlowId(id, id);
-  }
-
-  /**
-   * Query stops based on flowId and pagesId
-   *
-   * @param flowId Required
-   * @param pageIds Can be empty
-   * @return
-   */
-  @Override
-  public List<StopsVo> getStopsByFlowIdAndPageIds(String flowId, String[] pageIds) {
-    List<Stops> stopsList = stopsDomainU.getStopsListByFlowIdAndPageIds(flowId, pageIds);
-    List<StopsVo> stopsVoList = StopsUtils.stopsListPoToVo(stopsList);
-    return stopsVoList;
-  }
-
-  @Override
-  public Integer stopsUpdate(String username, StopsVo stopsVo) throws Exception {
-    if (StringUtils.isBlank(username)) {
-      return 0;
-    }
-    if (null == stopsVo) {
-      return 0;
-    }
-    Stops stopsById = stopsDomainU.getStopsById(stopsVo.getId());
-    if (null == stopsById) {
-      return 0;
-    }
-    BeanUtils.copyProperties(stopsVo, stopsById);
-    stopsById.setLastUpdateDttm(new Date());
-    stopsById.setLastUpdateUser(username);
-    return stopsDomainU.updateStops(stopsById);
-  }
-
-  @Override
-  public int updateStopsByFlowIdAndName(ThirdFlowInfoStopVo stopVo) {
-    return stopsDomainU.updateStopsByFlowIdAndName(stopVo);
-  }
+  @Autowired private FlowDomain flowDomain;
+  @Autowired private DataSourceDomain dataSourceDomain;
+  @Autowired private TestDataDomain testDataDomain;
+  @Autowired private StopsComponentDomain stopsComponentDomain;
+  @Autowired private ProcessDomain processDomain;
+  @Autowired private FlowStopsPublishingDomain flowStopsPublishingDomain;
+  @Autowired private IFlow flowImpl;
+  @Autowired private StopsHubFileRecordDomain stopsHubFileRecordDomain;
 
   /**
    * Modify the isCheckpoint field
@@ -132,9 +83,9 @@ public class StopsServiceImpl implements IStopsService {
     if (StringUtils.isAnyEmpty(stopId, isCheckpointStr)) {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("Partial incoming parameters are empty");
     }
-    Stops stopsById = stopsDomainU.getStopsById(stopId);
+    Stops stopsById = flowDomain.getStopsById(stopId);
     if (null == stopsById) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("Data is null");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_MSG());
     }
     boolean isCheckpoint = false;
     if ("1".equals(isCheckpointStr)) {
@@ -143,7 +94,7 @@ public class StopsServiceImpl implements IStopsService {
     stopsById.setLastUpdateUser(username);
     stopsById.setLastUpdateDttm(new Date());
     stopsById.setIsCheckpoint(isCheckpoint);
-    int updateStopsCheckpoint = stopsDomainU.updateStops(stopsById);
+    int updateStopsCheckpoint = flowDomain.updateStops(stopsById);
     if (updateStopsCheckpoint > 0) {
       return ReturnMapUtils.setSucceededMsgRtnJsonStr("Saved successfully");
     } else {
@@ -167,19 +118,19 @@ public class StopsServiceImpl implements IStopsService {
     if (StringUtils.isBlank(id) || StringUtils.isBlank(stopName)) {
       return 0;
     }
-    Stops stopsById = stopsDomainU.getStopsById(id);
+    Stops stopsById = flowDomain.getStopsById(id);
     if (null == stopsById) {
       return 0;
     }
     stopsById.setLastUpdateUser(username);
     stopsById.setLastUpdateDttm(new Date());
     stopsById.setName(stopName);
-    return stopsDomainU.updateStops(stopsById);
+    return flowDomain.updateStops(stopsById);
   }
 
   @Override
   public String getStopByNameAndFlowId(String flowId, String stopName) {
-    return stopsDomainU.getStopByNameAndFlowId(flowId, stopName);
+    return flowDomain.getStopByNameAndFlowId(flowId, stopName);
   }
 
   /**
@@ -204,15 +155,15 @@ public class StopsServiceImpl implements IStopsService {
       String pageId)
       throws Exception {
     if (StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("Illegal users");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
     if (StringUtils.isAnyEmpty(stopId, stopName, flowId, pageId)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("The incoming parameter is empty");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
     }
     // find flow
-    Flow flowById = flowMapper.getFlowById(flowId);
+    Flow flowById = flowDomain.getFlowById(flowId);
     if (null == flowById) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("flow information is empty");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_BY_ID_XXX_MSG(flowId));
     }
     // Judge whether it is an example
     boolean isExample = flowById.getIsExample();
@@ -267,87 +218,71 @@ public class StopsServiceImpl implements IStopsService {
     // modify Stops
     int updateStopsNameById = this.updateStopsNameById(username, stopId, stopName);
     if (updateStopsNameById <= 0) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("update failed");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.UPDATE_ERROR_MSG());
     }
     // modify MxCell
     mxCellUpdate.setValue(stopName);
     mxCellUpdate.setLastUpdateDttm(new Date());
     mxCellUpdate.setLastUpdateUser(username);
-    int updateMxCell = mxCellMapper.updateMxCell(mxCellUpdate);
+    int updateMxCell = flowDomain.updateMxCell(mxCellUpdate);
     if (updateMxCell <= 0) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("update failed");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.UPDATE_ERROR_MSG());
     }
-    Map<String, Object> rtnMap = new HashMap<>();
-    if (null != mxGraphModel) {
-      // Convert the mxGraphModel from the query to XML
-      String loadXml = MxGraphUtils.mxGraphModelToMxGraph(false, mxGraphModel);
-      loadXml = StringUtils.isNotBlank(loadXml) ? loadXml : "";
-      rtnMap.put("XmlData", loadXml);
+
+    if (null == mxGraphModel) {
+      return ReturnMapUtils.setSucceededMsgRtnJsonStr(MessageConfig.SUCCEEDED_MSG());
     }
-    rtnMap.put("code", 200);
-    rtnMap.put("errorMsg", "Successfully modified");
-    return JsonUtils.toJsonNoException(rtnMap);
+    // Convert the mxGraphModel from the query to XML
+    String loadXml = MxGraphUtils.mxGraphModelToMxGraph(false, mxGraphModel);
+    loadXml = StringUtils.isNotBlank(loadXml) ? loadXml : "";
+    return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("XmlData", loadXml);
   }
 
   @SuppressWarnings("unchecked")
+  @Override
   public String getStopsPort(String flowId, String sourceId, String targetId, String pathLineId) {
-    Map<String, Object> rtnMap = new HashMap<>();
-    rtnMap.put("code", 500);
     // The parameter is judged empty, and it is judged whether each parameter is available. If there
     // is, it returns directly.
     // ('isAnyEmpty' returns true whenever there is a null value)
     if (StringUtils.isAnyEmpty(flowId, sourceId, targetId, pathLineId)) {
-      logger.warn("The part of the parameter passed in is empty");
-      rtnMap.put("errorMsg", "The part of the parameter passed in is empty");
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr("The part of the parameter passed in is empty");
     }
     // Find the 'stop' of 'input' and 'output'
     List<Stops> queryInfoList =
-        stopsDomainU.getStopsListByFlowIdAndPageIds(flowId, new String[] {sourceId, targetId});
+        flowDomain.getStopsListByFlowIdAndPageIds(flowId, new String[] {sourceId, targetId});
     // If 'queryInfoList' is empty, or the size of 'queryInfoList' is less than 2, return directly
     if (null == queryInfoList || queryInfoList.size() < 2) {
-      logger.warn("Can't find 'source' or 'target'");
-      rtnMap.put("errorMsg", "Can't find 'source' or 'target'");
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr("Can't find 'source' or 'target'");
     }
     Stops sourceStop = null;
     Stops targetStop = null;
     // Loop out 'sourceStop' and 'targetStop'
     for (Stops stop : queryInfoList) {
-      if (null != stop) {
-        String pageId = stop.getPageId();
-        if (sourceId.equals(pageId)) {
-          sourceStop = stop;
-        } else if (targetId.equals(pageId)) {
-          targetStop = stop;
-        }
+      if (null == stop) {
+        continue;
+      }
+      String pageId = stop.getPageId();
+      if (sourceId.equals(pageId)) {
+        sourceStop = stop;
+      } else if (targetId.equals(pageId)) {
+        targetStop = stop;
       }
     }
     // Return directly if 'source' or 'target' is empty
     if (null == sourceStop || null == targetStop) {
-      logger.warn("Could not find 'source' or 'target'");
-      rtnMap.put("errorMsg", "Could not find 'source' or 'target'");
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr("Could not find 'source' or 'target'");
     }
     // Handling query port usage and encapsulating maps
     // Get the port type of "sourceStop" and "targetStop"
     PortType sourcePortType = sourceStop.getOutPortType();
     PortType targetPortType = targetStop.getInPortType();
     if (null == sourcePortType || null == targetPortType) {
-      logger.warn(
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(
           "'sourceStopOutports' of 'sourceStop' or 'targetStopInports' of 'targetStop' are Null and cannot be output.");
-      rtnMap.put(
-          "errorMsg",
-          "'sourceStopOutports' of 'sourceStop' or 'targetStopInports' of 'targetStop' are Null and cannot be output.");
-      return JsonUtils.toJsonNoException(rtnMap);
     }
     if (PortType.NONE == sourcePortType || PortType.NONE == targetPortType) {
-      logger.warn(
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(
           "‘sourceStopOutports’ of ‘sourceStop’ or ‘targetStopInports’ of ‘targetStop’ is ‘None’ and cannot be output");
-      rtnMap.put(
-          "errorMsg",
-          "‘sourceStopOutports’ of ‘sourceStop’ or ‘targetStopInports’ of ‘targetStop’ is ‘None’ and cannot be output");
-      return JsonUtils.toJsonNoException(rtnMap);
     }
     // Call 'stopPortUsage' to query the available interfaces. The keys of the returned Map are as
     // follows:
@@ -359,34 +294,28 @@ public class StopsServiceImpl implements IStopsService {
     // Query the occupancy of the ‘sourceStop’ interface
     Map<String, Object> sourcePortUsageMap = stopPortUsage(true, flowId, sourceStop, pathLineId);
     if (null == sourcePortUsageMap) {
-      logger.warn("Query the occupation of the sourceStop interface.");
-      rtnMap.put("errorMsg", "Query the occupation of the sourceStop interface.");
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(
+          "Query the occupation of the sourceStop interface.");
     }
     // Take out the number of available ports
     Integer sourceCounts = (Integer) sourcePortUsageMap.get(sourcePortType.getText());
     // Determine if the number of available ports is greater than 0
     if (null == sourceCounts || sourceCounts <= 0) {
-      logger.warn("Query sourceStop no available port");
-      rtnMap.put("errorMsg", "Query sourceStop no available port");
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr("Query sourceStop no available port");
     }
     // Query the occupancy of the targetStop interface
     Map<String, Object> targetPortUsageMap = stopPortUsage(false, flowId, targetStop, pathLineId);
     if (null == targetPortUsageMap) {
-      logger.warn("Query the occupancy of the targetStop interface.");
-      rtnMap.put("errorMsg", "Query the occupancy of the targetStop interface.");
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(
+          "Query the occupancy of the targetStop interface.");
     }
     // Take out the number of available ports
     Integer targetCounts = (Integer) targetPortUsageMap.get(targetPortType.getText());
     // Determine if the number of available ports is greater than 0
     if (null == targetCounts || targetCounts <= 0) {
-      logger.warn("Query targetStop no available port");
-      rtnMap.put("errorMsg", "Query targetStop no available port");
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr("Query targetStop no available port");
     }
-    rtnMap.put("code", 200);
+    Map<String, Object> rtnMap = ReturnMapUtils.setSucceededMsg(MessageConfig.SUCCEEDED_MSG());
     // Put the number of available ports into the returned map
     rtnMap.put("sourceCounts", sourceCounts);
     rtnMap.put("targetCounts", targetCounts);
@@ -402,7 +331,7 @@ public class StopsServiceImpl implements IStopsService {
     // stop route filter rule put 'rtnMap'
     rtnMap.put("sourceFilter", sourcePortUsageMap.get("sourceFilter"));
     rtnMap.put("targetFilter", targetPortUsageMap.get("targetFilter"));
-    return JsonUtils.toJsonNoException(rtnMap);
+    return ReturnMapUtils.toJson(rtnMap);
   }
 
   /**
@@ -493,7 +422,7 @@ public class StopsServiceImpl implements IStopsService {
       stopPortUsageMap.put("isSourceStop", true);
 
       // Query the occupancy of the stopVo interface
-      usedPathsList = pathsMapper.getPaths(flowId, null, stop.getPageId(), null);
+      usedPathsList = flowDomain.getPaths(flowId, null, stop.getPageId(), null);
 
       // Put the used port into the portUsageMap
       portUsageMap = this.portStrToMap(portUsageMap, true, usedPathsList, null);
@@ -505,7 +434,7 @@ public class StopsServiceImpl implements IStopsService {
       stopPortUsageMap.put("isSourceStop", false);
 
       // Query the occupancy of the stopVo interface
-      usedPathsList = pathsMapper.getPaths(flowId, null, null, stop.getPageId());
+      usedPathsList = flowDomain.getPaths(flowId, null, null, stop.getPageId());
 
       // Put the used port into the portUsageMap
       portUsageMap = this.portStrToMap(portUsageMap, false, usedPathsList, null);
@@ -564,7 +493,7 @@ public class StopsServiceImpl implements IStopsService {
       stopPortUsageMap.put("isSourceStop", true);
 
       // Query the occupancy of the stopVo interface
-      usedPathsList = pathsMapper.getPaths(flowId, null, stop.getPageId(), null);
+      usedPathsList = flowDomain.getPaths(flowId, null, stop.getPageId(), null);
 
       // Put the used port into the portUsageMap
       portUsageMap = this.portStrToMap(portUsageMap, true, usedPathsList, null);
@@ -576,7 +505,7 @@ public class StopsServiceImpl implements IStopsService {
       stopPortUsageMap.put("isSourceStop", false);
 
       // Query the occupancy of the stopVo interface
-      usedPathsList = pathsMapper.getPaths(flowId, null, null, stop.getPageId());
+      usedPathsList = flowDomain.getPaths(flowId, null, null, stop.getPageId());
 
       // Put the used port into the portUsageMap
       portUsageMap = this.portStrToMap(portUsageMap, false, usedPathsList, null);
@@ -645,20 +574,20 @@ public class StopsServiceImpl implements IStopsService {
       // put isSourceStop
       stopPortUsageMap.put("isSourceStop", true);
       // Query 'stopVo' port usage
-      pathsMapper.getPaths(flowId, null, stop.getPageId(), null);
+      flowDomain.getPaths(flowId, null, stop.getPageId(), null);
     } else {
       // put isSourceStop
       stopPortUsageMap.put("isSourceStop", false);
 
       // Query 'stopVo' port usage
-      usedPathsList = pathsMapper.getPaths(flowId, null, null, stop.getPageId());
+      usedPathsList = flowDomain.getPaths(flowId, null, null, stop.getPageId());
     }
 
     // Determine whether the occupancy of the stopVo interface is empty.
     if (null != usedPathsList) {
       String currentPathsId = "";
       Paths currentPaths = null;
-      List<Paths> pathsList = pathsMapper.getPaths(flowId, pathLineId, null, null);
+      List<Paths> pathsList = flowDomain.getPaths(flowId, pathLineId, null, null);
       if (null != pathsList && pathsList.size() == 1) {
         currentPaths = pathsList.get(0);
       }
@@ -711,7 +640,7 @@ public class StopsServiceImpl implements IStopsService {
       stopPortUsageMap.put("isSourceStop", true);
 
       // Query the occupancy of the stopVo interface
-      usedPathsList = pathsMapper.getPaths(flowId, null, stop.getPageId(), null);
+      usedPathsList = flowDomain.getPaths(flowId, null, stop.getPageId(), null);
 
       // Put the used port into the portUsageMap
       portUsageMap = this.portStrToMap(portUsageMap, true, usedPathsList, null);
@@ -724,7 +653,7 @@ public class StopsServiceImpl implements IStopsService {
       stopPortUsageMap.put("isSourceStop", false);
 
       // Query the occupancy of the stopVo interface
-      usedPathsList = pathsMapper.getPaths(flowId, null, null, stop.getPageId());
+      usedPathsList = flowDomain.getPaths(flowId, null, null, stop.getPageId());
 
       // Put the used port into the portUsageMap
       portUsageMap = this.portStrToMap(portUsageMap, false, usedPathsList, null);
@@ -827,22 +756,26 @@ public class StopsServiceImpl implements IStopsService {
    * @throws Exception
    */
   @Override
-  public String fillDatasource(String username, String dataSourceId, String stopId)
+  public String fillDatasource(String username, boolean isAdmin, String dataSourceId, String stopId)
       throws Exception {
 
     // Get current user
     if (StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("Illegal users");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
     // Determine if StopId is empty, if it is, then return, otherwise continue
     if (StringUtils.isBlank(stopId)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("fill failed,stopId is null");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_IS_NULL_MSG("stopId"));
+    }
+    List<String> publishingNames = flowStopsPublishingDomain.getPublishingNamesByStopsId(stopId);
+    if (null != publishingNames && publishingNames.size() > 0) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(
+          MessageConfig.STOP_PUBLISHED_CANNOT_BIND_MSG(publishingNames.toString()));
     }
     // Query Stops by "stopId"
-    Stops stopsById = stopsDomainU.getStopsById(stopId);
+    Stops stopsById = flowDomain.getStopsById(stopId);
     if (null == stopsById) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr(
-          "fill failed,Cannot find Stops with id " + stopId);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_BY_ID_XXX_MSG(stopId));
     }
     // Get Stops all attributes
     List<Property> propertyList = stopsById.getProperties();
@@ -851,10 +784,9 @@ public class StopsServiceImpl implements IStopsService {
     if (null == propertyList || propertyList.size() <= 0) {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("fill failed,stop property is null");
     }
-    // datasource Property Map(Key is the attribute name)
-    Map<String, String> dataSourcePropertyMap = new HashMap<>();
     if (StringUtils.isNotBlank(dataSourceId)) {
-      DataSource dataSourceById = dataSourceDomain.getDataSourceById(dataSourceId);
+      DataSource dataSourceById =
+          dataSourceDomain.getDataSourceById(username, isAdmin, dataSourceId);
       if (null == dataSourceById) {
         return ReturnMapUtils.setFailedMsgRtnJsonStr(
             "fill failed,Cannot find Datasource with id " + dataSourceId);
@@ -866,38 +798,7 @@ public class StopsServiceImpl implements IStopsService {
       if (null == dataSourcePropertyList || dataSourcePropertyList.size() <= 0) {
         return ReturnMapUtils.setFailedMsgRtnJsonStr("fill failed,dataSource property is null");
       }
-      stopsById.setDataSource(dataSourceById);
-      // Loop "datasource" attribute to map
-      for (DataSourceProperty dataSourceProperty : dataSourcePropertyList) {
-        // "datasource" attribute name
-        String dataSourcePropertyName = dataSourceProperty.getName();
-        // Judge empty and lowercase
-        if (StringUtils.isNotBlank(dataSourcePropertyName)) {
-          dataSourcePropertyName = dataSourcePropertyName.toLowerCase();
-        }
-        dataSourcePropertyMap.put(dataSourcePropertyName, dataSourceProperty.getValue());
-      }
-      // Loop fill "stop"
-      for (Property property : propertyList) {
-        // "stop" attribute name
-        String name = property.getName();
-        property.setStops(stopsById);
-        // Judge empty
-        if (StringUtils.isBlank(name)) {
-          continue;
-        }
-        // Go to the map of the "datasource" attribute
-        String value = dataSourcePropertyMap.get(name.toLowerCase());
-        // Judge empty
-        if (StringUtils.isBlank(value)) {
-          continue;
-        }
-        // Assignment
-        property.setCustomValue(value);
-        property.setIsLocked(true);
-        property.setLastUpdateDttm(new Date());
-        property.setLastUpdateUser(username);
-      }
+      stopsById = StopsUtils.fillStopsPropertiesByDatasource(stopsById, dataSourceById, username);
     } else {
       // Loop fill "stop"
       for (Property property : propertyList) {
@@ -914,15 +815,10 @@ public class StopsServiceImpl implements IStopsService {
         }
       }
       stopsById.setDataSource(null);
+      stopsById.setProperties(propertyList);
     }
-    stopsById.setProperties(propertyList);
-    stopsDomainU.saveOrUpdate(stopsById);
-    Map<String, Object> rtnMap = new HashMap<String, Object>();
-    rtnMap.put("code", 500);
-    rtnMap.put("code", 200);
-    rtnMap.put("errorMsg", "fill success");
-
-    return JsonUtils.toJsonNoException(rtnMap);
+    flowDomain.saveOrUpdate(stopsById);
+    return ReturnMapUtils.setSucceededMsgRtnJsonStr(MessageConfig.SUCCEEDED_MSG());
   }
 
   /**
@@ -937,27 +833,26 @@ public class StopsServiceImpl implements IStopsService {
   public String isNeedSource(String username, boolean isAdmin, String stopsId) {
     // Get current user
     if (StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("Illegal users");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
     // Determine if StopId is empty, if it is, then return, otherwise continue
     if (StringUtils.isBlank(stopsId)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("fill failed, stopId is null");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_IS_NULL_MSG("stopsId"));
     }
     // Query Stops by "stopId"
-    Stops stopsById = stopsDomainU.getStopsById(stopsId);
+    Stops stopsById = flowDomain.getStopsById(stopsId);
     if (null == stopsById) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr(
-          "fill failed,Cannot find Stops with id " + stopsId);
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_BY_ID_XXX_MSG(stopsId));
     }
     Map<String, Object> rtnMap = ReturnMapUtils.setSucceededCustomParam("isNeedSource", false);
     if (PortType.NONE == stopsById.getInPortType()) {
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.toJson(rtnMap);
     }
     rtnMap.put("isNeedSource", true);
     String[] portsArr = stopsById.getInports().split(",");
     if (PortType.ANY != stopsById.getInPortType()) {
       rtnMap.put("ports", portsArr);
-      return JsonUtils.toJsonNoException(rtnMap);
+      return ReturnMapUtils.toJson(rtnMap);
     }
     List<Property> properties = stopsById.getProperties();
     for (Property property : properties) {
@@ -971,7 +866,7 @@ public class StopsServiceImpl implements IStopsService {
       break;
     }
     rtnMap.put("ports", portsArr);
-    return JsonUtils.toJsonNoException(rtnMap);
+    return ReturnMapUtils.toJson(rtnMap);
   }
 
   /**
@@ -987,18 +882,19 @@ public class StopsServiceImpl implements IStopsService {
   public String runStops(String username, boolean isAdmin, RunStopsVo runStopsVo) throws Exception {
     // Get current user
     if (StringUtils.isBlank(username)) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("Illegal users");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
     }
     if (null == runStopsVo) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("runStopsVo is null");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
     }
     if (null == runStopsVo.getStopsId()) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("stopsId is null");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_IS_NULL_MSG("stopsId"));
     }
     // Get stops information according to stopsId
-    Stops stopsById = stopsDomainU.getStopsById(runStopsVo.getStopsId());
+    Stops stopsById = flowDomain.getStopsById(runStopsVo.getStopsId());
     if (null == stopsById) {
-      return ReturnMapUtils.setFailedMsgRtnJsonStr("stops no data");
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(
+          MessageConfig.NO_DATA_BY_ID_XXX_MSG(runStopsVo.getStopsId()));
     }
     Flow flowDB = stopsById.getFlow();
     if (null == flowDB) {
@@ -1098,7 +994,7 @@ public class StopsServiceImpl implements IStopsService {
     // Basic page information of monitoring elements
     List<MxCell> rootMxCell = MxCellUtils.initMxCell(username, mxGraphModel);
     MxCell mxCellDB =
-        mxCellMapper.getMxCellByMxGraphIdAndPageId(flowMxGraphModel.getId(), stopsById.getPageId());
+        flowDomain.getMxCellByMxGraphIdAndPageId(flowMxGraphModel.getId(), stopsById.getPageId());
     MxCell processMxCell = new MxCell();
     BeanUtils.copyProperties(mxCellDB, processMxCell);
     processMxCell = MxCellUtils.initMxCellBasicPropertiesNoId(processMxCell, username);
@@ -1205,7 +1101,7 @@ public class StopsServiceImpl implements IStopsService {
     if (hdfsUrlArray.size() > 0) {
       StopsComponent stopsComponentByBundle =
           stopsComponentDomain.getStopsComponentByBundle("cn.piflow.bundle.csv.CsvParser");
-      Integer maxStopPageIdByFlowId = stopsDomainU.getMaxStopPageIdByFlowId(flowDB.getId());
+      Integer maxStopPageIdByFlowId = flowDomain.getMaxStopPageIdByFlowId(flowDB.getId());
       for (int i = 0; i < hdfsUrlArray.size(); i++) {
         // Get the corresponding url data information
         Map<String, String> hdfsUrlObj = hdfsUrlArray.get(i);
@@ -1268,25 +1164,25 @@ public class StopsServiceImpl implements IStopsService {
     process.setLastUpdateUser(username);
     process.setLastUpdateDttm(new Date());
 
-    processDomainU.addProcess(process);
-    process = processDomainU.getProcessById(username, isAdmin, process.getId());
+    processDomain.addProcess(process);
+    process = processDomain.getProcessById(username, isAdmin, process.getId());
 
     Map<String, Object> stringObjectMap = flowImpl.startFlow(process, null, RunModeType.RUN);
     if (null == stringObjectMap || 200 != ((Integer) stringObjectMap.get("code"))) {
       process.setEnableFlag(false);
       process.setLastUpdateDttm(new Date());
       process.setLastUpdateUser(username);
-      processDomainU.updateProcess(process);
+      processDomain.updateProcess(process);
       return ReturnMapUtils.setFailedMsgRtnJsonStr((String) stringObjectMap.get("errorMsg"));
     }
     process.setAppId((String) stringObjectMap.get("appId"));
     process.setProcessId((String) stringObjectMap.get("appId"));
     process.setState(ProcessState.STARTED);
-    processDomainU.updateProcess(process);
+    processDomain.updateProcess(process);
     Map<String, Object> rtnMap =
         ReturnMapUtils.setSucceededMsg("save process success,update success");
     rtnMap.put("processId", process.getId());
-    return JsonUtils.toJsonNoException(rtnMap);
+    return ReturnMapUtils.toJson(rtnMap);
   }
 
   @Override
@@ -1294,7 +1190,7 @@ public class StopsServiceImpl implements IStopsService {
     if (StringUtils.isBlank(datasourceId)) {
       return ReturnMapUtils.setFailedMsgRtnJsonStr("datasourceId is null");
     }
-    List<String> stopsNamesByDatasourceId = stopsDomainU.getStopsNamesByDatasourceId(datasourceId);
+    List<String> stopsNamesByDatasourceId = flowDomain.getStopsNamesByDatasourceId(datasourceId);
     if (null == stopsNamesByDatasourceId || stopsNamesByDatasourceId.size() <= 0) {
       return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("isLinked", false);
     }
@@ -1302,6 +1198,129 @@ public class StopsServiceImpl implements IStopsService {
         ReturnMapUtils.setSucceededCustomParam("isLinked", true);
     return ReturnMapUtils.appendValuesToJson(
         setSucceededCustomParam, "stopsNameList", stopsNamesByDatasourceId);
+  }
+
+  @Override
+  public String addStopCustomizedProperty(
+      String username, StopsCustomizedPropertyVo stopsCustomizedPropertyVo) throws Exception {
+    if (StringUtils.isBlank(username)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_OPERATION_MSG());
+    }
+    if (null == stopsCustomizedPropertyVo) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
+    }
+    String stopId = stopsCustomizedPropertyVo.getStopId();
+    if (StringUtils.isBlank(stopId)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_IS_NULL_MSG("stopId"));
+    }
+    List<CustomizedProperty> customizedPropertyListByStopsIdAndName =
+        flowDomain.getCustomizedPropertyListByStopsIdAndName(
+            stopId, stopsCustomizedPropertyVo.getName());
+    if (null != customizedPropertyListByStopsIdAndName
+        && customizedPropertyListByStopsIdAndName.size() > 0) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(
+          MessageConfig.DUPLICATE_NAME_PLEASE_MODIFY_MSG("StopsCustomizedPropertyName"));
+    }
+    Stops stopsById = flowDomain.getStopsById(stopId);
+    if (null == stopsById) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_BY_ID_XXX_MSG(stopId));
+    }
+    CustomizedProperty customizedProperty = new CustomizedProperty();
+    BeanUtils.copyProperties(stopsCustomizedPropertyVo, customizedProperty);
+    String id = UUIDUtils.getUUID32();
+    customizedProperty.setId(id);
+    customizedProperty.setCrtDttm(new Date());
+    customizedProperty.setCrtUser(username);
+    customizedProperty.setLastUpdateDttm(new Date());
+    customizedProperty.setLastUpdateUser(username);
+    customizedProperty.setEnableFlag(true);
+
+    customizedProperty.setStops(stopsById);
+    int optDataCount = flowDomain.addCustomizedProperty(customizedProperty);
+    if (optDataCount > 0) {
+      return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("stopPageId", stopsById.getPageId());
+    } else {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ADD_ERROR_MSG());
+    }
+  }
+
+  @Override
+  public String updateStopsCustomizedProperty(
+      String username, StopsCustomizedPropertyVo stopsCustomizedPropertyVo) {
+    if (StringUtils.isBlank(username)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.ILLEGAL_USER_MSG());
+    }
+    if (null == stopsCustomizedPropertyVo) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
+    }
+    String id = stopsCustomizedPropertyVo.getId();
+    if (StringUtils.isBlank(id)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_IS_NULL_MSG("stopId"));
+    }
+    int optDataCount =
+        flowDomain.updateCustomizedPropertyCustomValue(
+            username, stopsCustomizedPropertyVo.getCustomValue(), id);
+    if (optDataCount > 0) {
+      return ReturnMapUtils.setSucceededCustomParamRtnJsonStr(
+          "value", stopsCustomizedPropertyVo.getCustomValue());
+    } else {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.UPDATE_ERROR_MSG());
+    }
+  }
+
+  @Override
+  public String deleteStopsCustomizedProperty(String username, String customPropertyId) {
+    int optDataCount = 0;
+    optDataCount = flowDomain.updateEnableFlagByStopId(username, customPropertyId);
+    if (optDataCount <= 0) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.DELETE_ERROR_MSG());
+    }
+    return ReturnMapUtils.setSucceededMsgRtnJsonStr(MessageConfig.SUCCEEDED_MSG());
+  }
+
+  @Override
+  public String deleteRouterStopsCustomizedProperty(String username, String customPropertyId) {
+    return this.deleteStopsCustomizedProperty(username, customPropertyId);
+  }
+
+  @Override
+  public String getRouterStopsCustomizedProperty(String customPropertyId) {
+    if (StringUtils.isBlank(customPropertyId)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
+    }
+    CustomizedProperty customizedPropertyById =
+        flowDomain.getCustomizedPropertyById(customPropertyId);
+    if (null == customizedPropertyById) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(
+          MessageConfig.NO_DATA_BY_ID_XXX_MSG(customPropertyId));
+    }
+    Stops stops = customizedPropertyById.getStops();
+    if (null == stops || null == stops.getFlow()) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.NO_DATA_MSG());
+    }
+    String flowId = stops.getFlow().getId();
+    String stopsPageId = stops.getPageId();
+    if (StringUtils.isBlank(flowId)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr("remove failed , stopID or flowID data error");
+    }
+    List<PathsVo> pathsVoList = new ArrayList<>();
+    List<Paths> pathsList = flowDomain.getPaths(flowId, null, stopsPageId, null);
+    if (null == pathsList || pathsList.size() <= 0) {
+      return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("pathsVoList", pathsVoList);
+    }
+    for (Paths paths : pathsList) {
+      Stops stopByFlowIdAndStopPageId =
+          flowDomain.getStopByFlowIdAndStopPageId(flowId, paths.getTo());
+      if (null == stopByFlowIdAndStopPageId) {
+        continue;
+      }
+      PathsVo pathsVo = new PathsVo();
+      BeanUtils.copyProperties(paths, pathsVo);
+      pathsVo.setFrom(stops.getName());
+      pathsVo.setTo(stopByFlowIdAndStopPageId.getName());
+      pathsVoList.add(pathsVo);
+    }
+    return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("pathsVoList", pathsVoList);
   }
 
   private List<Paths> extractPaths(Map<String, List<Paths>> pathsMap, List<Paths> pathsList) {
@@ -1322,5 +1341,93 @@ public class StopsServiceImpl implements IStopsService {
       all.addAll(extractPaths);
     }
     return all;
+  }
+
+  @Override
+  public String getStopsNameByFlowId(String flowId) {
+    if (StringUtils.isBlank(flowId)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PARAM_ERROR_MSG());
+    }
+    List<Map<String, String>> stopsIdAndNameList = flowDomain.getStopsIdAndNameListByFlowId(flowId);
+    return ReturnMapUtils.setSucceededCustomParamRtnJsonStr(
+        "stopsIdAndNameList", stopsIdAndNameList);
+  }
+
+  @Override
+  public String getStopsInfoById(String id, String type) {
+    if (StringUtils.isBlank(type)) {
+      return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PLEASE_SPECIFY_STOP_TYPE_MSG());
+    }
+    switch (type) {
+      case "PYTHON":
+        StopsHubFileRecord stopsHubFileRecord =
+            stopsHubFileRecordDomain.getStopsHubFileRecordById(id);
+        if (stopsHubFileRecord == null) {
+          logger.error("The specific file record data is lost");
+          return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.DATA_ERROR_MSG());
+        }
+        StopsComponent stopsComponent =
+            stopsComponentDomain.getStopsComponentByBundle(stopsHubFileRecord.getFilePath());
+        if (stopsComponent == null) {
+          StopsHubInfoVo stopsHubInfoVo = new StopsHubInfoVo();
+          stopsHubInfoVo.setId(id);
+          stopsHubInfoVo.setStopBundle(
+              stopsHubFileRecord.getFilePath()); // file path is bundle value
+          return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("data", stopsHubInfoVo);
+        } else {
+          StopsHubInfoVo stopsHubInfoVo = new StopsHubInfoVo();
+          stopsHubInfoVo.setId(id);
+          stopsHubInfoVo.setStopBundle(stopsComponent.getBundle());
+          // modifiable parameters
+          stopsHubInfoVo.setGroups(stopsComponent.getGroups());
+          stopsHubInfoVo.setBundleDescription(stopsComponent.getDescription());
+          stopsHubInfoVo.setInports(stopsComponent.getInports());
+          stopsHubInfoVo.setOutports(stopsComponent.getOutports());
+          stopsHubInfoVo.setOwner(stopsComponent.getOwner());
+          stopsHubInfoVo.setImageUrl(stopsComponent.getImageUrl());
+          stopsHubInfoVo.setIsPythonComponent(true);
+
+          if (!(stopsComponent.getProperties().isEmpty())) {
+            List<StopsComponentPropertyVo> propertiesVoList = new ArrayList<>();
+            for (StopsComponentProperty property : stopsComponent.getProperties()) {
+              StopsComponentPropertyVo stopsComponentPropertyVo = new StopsComponentPropertyVo();
+              BeanUtils.copyProperties(property, stopsComponentPropertyVo);
+              propertiesVoList.add(stopsComponentPropertyVo);
+            }
+            stopsHubInfoVo.setProperties(propertiesVoList);
+            stopsHubInfoVo.setIsHaveParams(true);
+          }
+          return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("data", stopsHubInfoVo);
+        }
+      case "SCALA":
+        // Get component info with properties
+        StopsComponent stops = stopsComponentDomain.getStopsComponentAndPropertyById(id);
+        StopsHubInfoVo stopsHubInfoVo = new StopsHubInfoVo();
+        stopsHubInfoVo.setId(id);
+        stopsHubInfoVo.setStopBundle(stops.getBundle());
+        // modifiable parameters
+        stopsHubInfoVo.setGroups(stops.getGroups());
+        stopsHubInfoVo.setBundleDescription(stops.getDescription());
+        stopsHubInfoVo.setInports(stops.getInports());
+        stopsHubInfoVo.setOutports(stops.getOutports());
+        stopsHubInfoVo.setOwner(stops.getOwner());
+        stopsHubInfoVo.setImageUrl(stops.getImageUrl());
+        stopsHubInfoVo.setIsPythonComponent(false);
+
+        if (!(stops.getProperties().isEmpty())) {
+          List<StopsComponentPropertyVo> propertiesVoList = new ArrayList<>();
+          for (StopsComponentProperty property : stops.getProperties()) {
+            StopsComponentPropertyVo stopsComponentPropertyVo = new StopsComponentPropertyVo();
+            BeanUtils.copyProperties(property, stopsComponentPropertyVo);
+            propertiesVoList.add(stopsComponentPropertyVo);
+          }
+          stopsHubInfoVo.setProperties(propertiesVoList);
+          stopsHubInfoVo.setIsHaveParams(true);
+        }
+        return ReturnMapUtils.setSucceededCustomParamRtnJsonStr("data", stopsHubInfoVo);
+
+      default:
+        return ReturnMapUtils.setFailedMsgRtnJsonStr(MessageConfig.PLEASE_SPECIFY_STOP_TYPE_MSG());
+    }
   }
 }

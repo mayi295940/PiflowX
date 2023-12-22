@@ -23,4 +23,5 @@ public class StopsComponentVo {
   private Boolean isCustomized = false;
   private String visualizationType;
   private Boolean isShow = true;
+  private Boolean isDataSource = false;
 }

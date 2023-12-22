@@ -1,20 +1,19 @@
 package cn.cnic.component.stopsComponent.domain;
 
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.component.dataSource.mapper.DataSourceMapper;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentGroup;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentGroupMapper;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentMapper;
 import cn.cnic.component.stopsComponent.mapper.StopsComponentPropertyMapper;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
-import cn.cnic.component.stopsComponent.model.StopsComponentGroup;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
 import cn.cnic.component.stopsComponent.vo.StopsComponentVo;
 import java.util.Arrays;
 import java.util.List;
-import javax.annotation.Resource;
-
-import cn.piflow.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,13 +27,25 @@ import org.springframework.transaction.annotation.Transactional;
     rollbackFor = Exception.class)
 public class StopsComponentDomain {
 
-  Logger logger = LoggerUtil.getLogger();
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private final Logger logger = LoggerUtil.getLogger();
 
-  @Resource private StopsComponentMapper stopsComponentMapper;
+  private final StopsComponentPropertyMapper stopsComponentPropertyMapper;
+  private final StopsComponentGroupMapper stopsComponentGroupMapper;
+  private final StopsComponentMapper stopsComponentMapper;
+  private final DataSourceMapper dataSourceMapper;
 
-  @Resource private StopsComponentPropertyMapper stopsComponentPropertyMapper;
-
-  @Resource private StopsComponentGroupMapper stopsComponentGroupMapper;
+  @Autowired
+  public StopsComponentDomain(
+      StopsComponentPropertyMapper stopsComponentPropertyMapper,
+      StopsComponentGroupMapper stopsComponentGroupMapper,
+      StopsComponentMapper stopsComponentMapper,
+      DataSourceMapper dataSourceMapper) {
+    this.stopsComponentPropertyMapper = stopsComponentPropertyMapper;
+    this.stopsComponentGroupMapper = stopsComponentGroupMapper;
+    this.stopsComponentMapper = stopsComponentMapper;
+    this.dataSourceMapper = dataSourceMapper;
+  }
 
   public int addListStopsComponentAndChildren(List<StopsComponent> stopsComponentList) {
     if (null == stopsComponentList || stopsComponentList.size() <= 0) {
@@ -62,6 +73,15 @@ public class StopsComponentDomain {
           stopsComponentPropertyMapper.insertStopsComponentProperty(properties);
       insertRows += insertStopsTemplateRows;
     }
+    // Change the corresponding "datasource" data source to available
+    if (stopsComponent.getIsDataSource()) {
+      dataSourceMapper.updateDataSourceIsAvailableByBundle(1, stopsComponent.getBundle());
+      // Modify image url of "datasource"
+      dataSourceMapper.updateDataSourceImageUrlByBundle(
+          stopsComponent.getBundle(), stopsComponent.getImageUrl());
+    } else {
+      dataSourceMapper.updateDataSourceIsAvailableByBundle(0, stopsComponent.getBundle());
+    }
     return insertRows;
   }
 
@@ -69,17 +89,19 @@ public class StopsComponentDomain {
     if (null == stopsComponent) {
       return 0;
     }
-    List<StopsComponentProperty> properties = stopsComponent.getProperties();
-    if (null == properties || properties.size() <= 0) {
-      return 0;
-    }
-    int deleteStopsComponentPropertyCount =
+    //        int affectedRows = 0;
+    //        List<StopsComponentProperty> properties = stopsComponent.getProperties();
+    //        if (null != properties && properties.size() > 0) {
+    //            affectedRows =
+    // stopsComponentPropertyMapper.deleteStopsComponentPropertyByStopId(stopsComponent.getId());
+    //        }
+    int affectedRows =
         stopsComponentPropertyMapper.deleteStopsComponentPropertyByStopId(stopsComponent.getId());
 
     int deleteStopsComponentRows =
         stopsComponentMapper.deleteStopsComponentById(stopsComponent.getId());
-
-    return deleteStopsComponentRows + deleteStopsComponentPropertyCount;
+    affectedRows += deleteStopsComponentRows;
+    return affectedRows;
   }
 
   public int addListStopsComponent(List<StopsComponent> stopsComponentList) {
@@ -98,11 +120,6 @@ public class StopsComponentDomain {
       return 0;
     }
     return stopsComponentMapper.insertStopsComponent(stopsComponent);
-  }
-
-  public int deleteStopsComponent(String engineType) {
-    stopsComponentPropertyMapper.deleteStopsComponentProperty();
-    return stopsComponentMapper.deleteStopsComponent(engineType);
   }
 
   public StopsComponent getStopsComponentById(String id) {
@@ -125,9 +142,11 @@ public class StopsComponentDomain {
     for (StopsComponentGroup stopGroup : stopsComponentGroupList) {
       String stopGroupId = stopGroup.getId();
       String stopsTemplateId = stopsComponent.getId();
+      String engineType = stopsComponent.getEngineType();
+
       int insertAssociationGroupsStopsTemplate =
           stopsComponentGroupMapper.insertAssociationGroupsStopsTemplate(
-              stopGroupId, stopsTemplateId);
+              stopGroupId, stopsTemplateId, engineType);
       affectedRows += insertAssociationGroupsStopsTemplate;
       logger.info(
           "association_groups_stops_template Association table insertion affects the number of rows : "
@@ -136,37 +155,46 @@ public class StopsComponentDomain {
     return affectedRows;
   }
 
+  public int deleteStopsComponentByEngineType(String engineType) {
+    stopsComponentPropertyMapper.deleteStopsComponentProperty();
+    return stopsComponentMapper.deleteStopsComponent(engineType);
+  }
+
   public int deleteStopsComponent(StopsComponent stopsComponent) {
+    if (null == stopsComponent) {
+      return 0;
+    }
     // delete relationship
     stopsComponentGroupMapper.deleteGroupCorrelationByStopId(stopsComponent.getId());
     logger.debug("Successful delete " + stopsComponent.getName() + " 's association!!!");
 
     // delete stop
-    int stopCount = deleteStopsComponentAndChildren(stopsComponent);
+    int affectedRows = deleteStopsComponentAndChildren(stopsComponent);
     logger.debug("Successful delete " + stopsComponent.getName() + " !!!");
 
     // delete group
-    String[] stopsComponentGroup = stopsComponent.getGroups().split(Constants.COMMA());
+    String[] stopsComponentGroup = stopsComponent.getGroups().split(",");
     List<StopsComponentGroup> stopsComponentGroupList =
         stopsComponentGroupMapper.getStopGroupByNameList(
             Arrays.asList(stopsComponentGroup), stopsComponent.getEngineType());
 
     for (StopsComponentGroup sGroup : stopsComponentGroupList) {
+
       int count = stopsComponentGroupMapper.getGroupStopCount(sGroup.getId());
       if (count == 0) {
         stopsComponentGroupMapper.deleteGroupById(sGroup.getId());
         logger.debug("Successful delete " + stopsComponent.getName() + " group!!!");
       }
     }
-
-    return stopCount;
+    // Change the corresponding "datasource" data source to unavailable
+    dataSourceMapper.updateDataSourceIsAvailableByBundle(0, stopsComponent.getBundle());
+    return affectedRows;
   }
 
   /**
    * getStopsComponentByBundle
    *
-   * @param bundle
-   * @return
+   * @param bundle bundle
    */
   public StopsComponent getStopsComponentByBundle(String bundle) {
     return stopsComponentMapper.getStopsComponentByBundle(bundle);
@@ -228,12 +256,14 @@ public class StopsComponentDomain {
     return stopsComponentGroupMapper.getStopGroupList(engineType);
   }
 
-  public int insertAssociationGroupsStopsTemplate(String stopGroupId, String stopsTemplateId) {
+  public int insertAssociationGroupsStopsTemplate(
+      String stopGroupId, String stopsTemplateId, String engineType) {
     return stopsComponentGroupMapper.insertAssociationGroupsStopsTemplate(
-        stopGroupId, stopsTemplateId);
+        stopGroupId, stopsTemplateId, engineType);
   }
 
-  public List<StopsComponentGroup> getStopGroupByGroupNameList(List<String> groupName, String engineType) {
+  public List<StopsComponentGroup> getStopGroupByGroupNameList(
+      List<String> groupName, String engineType) {
     return stopsComponentGroupMapper.getStopGroupByGroupNameList(groupName, engineType);
   }
 
@@ -244,5 +274,61 @@ public class StopsComponentDomain {
 
   public List<StopsComponentVo> getManageStopsComponentListByGroupId(String stopGroupId) {
     return stopsComponentMapper.getManageStopsComponentListByGroupId(stopGroupId);
+  }
+
+  public List<StopsComponent> getStopsComponentByName(String stopsName) {
+    return stopsComponentMapper.getStopsComponentByName(stopsName);
+  }
+
+  public List<StopsComponent> getDataSourceStopList() {
+    return stopsComponentMapper.getDataSourceStopList();
+  }
+
+  public List<StopsComponentProperty> getDataSourceStopsComponentByBundle(
+      String stopsTemplateBundle) {
+    StopsComponent stopsComponent =
+        stopsComponentMapper.getDataSourceStopsComponentByBundle(stopsTemplateBundle);
+    return stopsComponent.getProperties();
+  }
+
+  public List<StopsComponent> getStopsComponentByStopsHubId(String stopsHubId) {
+    return stopsComponentMapper.getStopsComponentByStopsHubId(stopsHubId);
+  }
+
+  /**
+   * @Description update flow+stops_template @Param stopsComponent @Return int @Author TY @Date
+   * 16:32 2023/4/3
+   */
+  public int updateStopsComponent(StopsComponent stopsComponent) {
+    return stopsComponentMapper.updateStopsComponent(stopsComponent);
+  }
+
+  /**
+   * @Description delete properties @Param stopsId flow_stops_template id @Return int @Author
+   * TY @Date 16:36 2023/4/3
+   */
+  public int deleteStopsComponentProperty(String stopsId) {
+    return stopsComponentPropertyMapper.deleteStopsComponentPropertyByStopId(stopsId);
+  }
+
+  /**
+   * add properties
+   *
+   * @param stopsComponentPropertyList stopsComponentPropertyList
+   */
+  public int insertStopsComponentProperty(List<StopsComponentProperty> stopsComponentPropertyList) {
+    return stopsComponentPropertyMapper.insertStopsComponentProperty(stopsComponentPropertyList);
+  }
+
+  public List<StopsComponent> getSystemDefaultStops(String engineType) {
+    return stopsComponentMapper.getSystemDefaultStops(engineType);
+  }
+
+  public StopsComponent getOnlyStopsComponentByBundle(String bundle) {
+    return stopsComponentMapper.getOnlyStopsComponentByBundle(bundle);
+  }
+
+  public List<StopsComponent> getOnlyStopsComponentByBundles(String[] bundles) {
+    return stopsComponentMapper.getOnlyStopsComponentByBundles(bundles);
   }
 }

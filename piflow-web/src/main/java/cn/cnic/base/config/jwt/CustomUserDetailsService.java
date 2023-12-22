@@ -22,8 +22,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomUserDetailsService implements UserDetailsService {
 
-  @Autowired private SysUserMapper sysUserMapper;
-  @Autowired private SysMenuMapper sysMenuMapper;
+  private final SysUserMapper sysUserMapper;
+  private final SysMenuMapper sysMenuMapper;
+
+  @Autowired
+  public CustomUserDetailsService(SysUserMapper sysUserMapper, SysMenuMapper sysMenuMapper) {
+    this.sysUserMapper = sysUserMapper;
+    this.sysMenuMapper = sysMenuMapper;
+  }
 
   @Override
   public UserVo loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -61,8 +67,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             sysRoleHighest = SysRoleType.USER;
           }
         }
-        String role = sysRoleHighest.getValue();
-        List<SysMenu> sysMenuList = sysMenuMapper.getSysMenuList(role);
+        List<SysMenu> sysMenuList = sysMenuMapper.getSysMenuList(sysRoleHighest.getValue());
         if (CollectionUtils.isNotEmpty(sysMenuList)) {
           List<SysMenuVo> sysMenuVoList = new ArrayList<>();
           SysMenuVo sysMenuVo;

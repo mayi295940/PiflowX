@@ -1,11 +1,11 @@
 package cn.cnic.component.process.utils;
 
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.component.process.entity.ProcessStop;
 import cn.cnic.component.process.entity.ProcessStopCustomizedProperty;
 import cn.cnic.component.process.entity.ProcessStopProperty;
-import cn.cnic.component.stopsComponent.model.StopsComponent;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
+import cn.cnic.component.stopsComponent.entity.StopsComponent;
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

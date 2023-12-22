@@ -1,7 +1,7 @@
 package cn.cnic.component.dataSource.mapper.provider;
 
-import cn.piflow.util.DateUtils;
-import cn.cnic.base.util.SqlUtils;
+import cn.cnic.base.utils.DateUtils;
+import cn.cnic.base.utils.SqlUtils;
 import cn.cnic.component.dataSource.entity.DataSource;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
@@ -10,8 +10,6 @@ import org.apache.ibatis.jdbc.SQL;
 public class DataSourceMapperProvider {
 
   private String id;
-  private String crtUser;
-  private String crtDttmStr;
   private String lastUpdateDttmStr;
   private String lastUpdateUser;
   private int enableFlag;
@@ -20,42 +18,42 @@ public class DataSourceMapperProvider {
   private String dataSourceName;
   private String dataSourceDescription;
   private Integer isTemplate;
+  private String stopsTemplateBundle;
+  private int isAvailable;
+  private String imageUrl;
 
-  private void preventSQLInjectionDataSource(DataSource dataSource) {
-    if (null != dataSource && StringUtils.isNotBlank(dataSource.getLastUpdateUser())) {
-      // Mandatory Field
-      String id = dataSource.getId();
-      String crtUser = dataSource.getCrtUser();
-      String lastUpdateUser = dataSource.getLastUpdateUser();
-      Boolean enableFlag = dataSource.getEnableFlag();
-      Long version = dataSource.getVersion();
-      Date crtDttm = dataSource.getCrtDttm();
-      Date lastUpdateDttm = dataSource.getLastUpdateDttm();
-      this.id = SqlUtils.preventSQLInjection(id);
-      this.crtUser = (null != crtUser ? SqlUtils.preventSQLInjection(crtUser) : null);
-      this.lastUpdateUser = SqlUtils.preventSQLInjection(lastUpdateUser);
-      this.enableFlag = ((null != enableFlag && enableFlag) ? 1 : 0);
-      this.version = (null != version ? version : 0L);
-      String crtDttmStr = DateUtils.dateTimesToStr(crtDttm);
-      String lastUpdateDttmStr =
-          DateUtils.dateTimesToStr(null != lastUpdateDttm ? lastUpdateDttm : new Date());
-      this.crtDttmStr = (null != crtDttm ? SqlUtils.preventSQLInjection(crtDttmStr) : null);
-      this.lastUpdateDttmStr = SqlUtils.preventSQLInjection(lastUpdateDttmStr);
-
-      // Selection field
-      this.dataSourceType = SqlUtils.preventSQLInjection(dataSource.getDataSourceType());
-      this.dataSourceName = SqlUtils.preventSQLInjection(dataSource.getDataSourceName());
-      this.dataSourceDescription =
-          SqlUtils.preventSQLInjection(dataSource.getDataSourceDescription());
-      this.isTemplate =
-          (null == dataSource.getIsTemplate() ? 0 : (dataSource.getIsTemplate() ? 1 : 0));
+  private boolean preventSQLInjectionDataSource(DataSource dataSource) {
+    if (null == dataSource || StringUtils.isBlank(dataSource.getLastUpdateUser())) {
+      return false;
     }
+    // Mandatory Field
+    Long version = dataSource.getVersion();
+    Boolean enableFlag = dataSource.getEnableFlag();
+    Date lastUpdateDttm = dataSource.getLastUpdateDttm();
+    String lastUpdateDttmStr =
+        DateUtils.dateTimesToStr(null != lastUpdateDttm ? lastUpdateDttm : new Date());
+    this.id = SqlUtils.preventSQLInjection(dataSource.getId());
+    this.lastUpdateUser = SqlUtils.preventSQLInjection(dataSource.getLastUpdateUser());
+    this.enableFlag = ((null != enableFlag && enableFlag) ? 1 : 0);
+    this.version = (null != version ? version : 0L);
+    this.lastUpdateDttmStr = SqlUtils.preventSQLInjection(lastUpdateDttmStr);
+
+    // Selection field
+    this.dataSourceType = SqlUtils.preventSQLInjection(dataSource.getDataSourceType());
+    this.dataSourceName = SqlUtils.preventSQLInjection(dataSource.getDataSourceName());
+    this.dataSourceDescription =
+        SqlUtils.preventSQLInjection(dataSource.getDataSourceDescription());
+    this.isTemplate =
+        (null == dataSource.getIsTemplate() ? 0 : (dataSource.getIsTemplate() ? 1 : 0));
+    this.stopsTemplateBundle = SqlUtils.preventSQLInjection(dataSource.getStopsTemplateBundle());
+    this.isAvailable =
+        (null == dataSource.getIsAvailable() ? 0 : (dataSource.getIsAvailable() ? 1 : 0));
+    this.imageUrl = SqlUtils.preventSQLInjection(dataSource.getImageUrl());
+    return true;
   }
 
   private void reset() {
     this.id = null;
-    this.crtUser = null;
-    this.crtDttmStr = null;
     this.lastUpdateDttmStr = null;
     this.lastUpdateUser = null;
     this.enableFlag = 1;
@@ -64,6 +62,8 @@ public class DataSourceMapperProvider {
     this.dataSourceName = null;
     this.dataSourceDescription = null;
     this.isTemplate = null;
+    this.stopsTemplateBundle = null;
+    this.imageUrl = null;
   }
 
   /**
@@ -73,38 +73,33 @@ public class DataSourceMapperProvider {
    * @return
    */
   public String addDataSource(DataSource dataSource) {
-    String sqlStr = "";
-    this.preventSQLInjectionDataSource(dataSource);
-    if (null != dataSource) {
-      SQL sql = new SQL();
-
-      // INSERT_INTO brackets is table name
-      sql.INSERT_INTO("data_source");
-      // The first string in the value is the field name corresponding to the table in the database.
-      // all types except numeric fields must be enclosed in single quotes
-
-      // Process the required fields firsts
-      if (null == crtDttmStr) {
-        String crtDttm = DateUtils.dateTimesToStr(new Date());
-        crtDttmStr = SqlUtils.preventSQLInjection(crtDttm);
-      }
-      if (StringUtils.isBlank(crtUser)) {
-        crtUser = SqlUtils.preventSQLInjection("-1");
-      }
-      sql.VALUES("id", id);
-      sql.VALUES("crt_dttm", crtDttmStr);
-      sql.VALUES("crt_user", crtUser);
-      sql.VALUES("last_update_dttm", lastUpdateDttmStr);
-      sql.VALUES("last_update_user", lastUpdateUser);
-      sql.VALUES("version", version + "");
-      sql.VALUES("enable_flag", enableFlag + "");
-      sql.VALUES("is_template", isTemplate + "");
-
-      // handle other fields
-      sql.VALUES("data_source_type", dataSourceType);
-      sql.VALUES("data_source_name", dataSourceName);
-      sql.VALUES("data_source_description", dataSourceDescription);
-      sqlStr = sql.toString();
+    String sqlStr = "SELECT 0";
+    boolean flag = this.preventSQLInjectionDataSource(dataSource);
+    if (flag) {
+      StringBuffer stringBuffer = new StringBuffer();
+      stringBuffer.append("INSERT INTO data_source ");
+      stringBuffer.append("( ");
+      stringBuffer.append(SqlUtils.baseFieldName() + ", ");
+      stringBuffer.append("is_template, ");
+      stringBuffer.append("data_source_type, ");
+      stringBuffer.append("data_source_name, ");
+      stringBuffer.append("data_source_description, ");
+      stringBuffer.append("stops_template_bundle, ");
+      stringBuffer.append("is_available, ");
+      stringBuffer.append("image_url ");
+      stringBuffer.append(") ");
+      stringBuffer.append("VALUES ");
+      stringBuffer.append("( ");
+      stringBuffer.append(SqlUtils.baseFieldValues(dataSource) + ", ");
+      stringBuffer.append(isTemplate + ", ");
+      stringBuffer.append(dataSourceType + ", ");
+      stringBuffer.append(dataSourceName + ", ");
+      stringBuffer.append(dataSourceDescription + ", ");
+      stringBuffer.append(stopsTemplateBundle + ", ");
+      stringBuffer.append(isAvailable + ", ");
+      stringBuffer.append(imageUrl + " ");
+      stringBuffer.append(") ");
+      sqlStr = stringBuffer.toString();
     }
     this.reset();
     return sqlStr;
@@ -119,8 +114,8 @@ public class DataSourceMapperProvider {
   public String updateDataSource(DataSource dataSource) {
 
     String sqlStr = "";
-    this.preventSQLInjectionDataSource(dataSource);
-    if (null != dataSource) {
+    boolean flag = this.preventSQLInjectionDataSource(dataSource);
+    if (flag) {
       SQL sql = new SQL();
 
       // INSERT_INTO brackets is table name
@@ -136,6 +131,7 @@ public class DataSourceMapperProvider {
       sql.SET("data_source_type = " + dataSourceType);
       sql.SET("data_source_name = " + dataSourceName);
       sql.SET("data_source_description = " + dataSourceDescription);
+      sql.SET("stops_template_bundle = " + stopsTemplateBundle);
       sql.WHERE("version = " + version);
       sql.WHERE("id = " + id);
       sqlStr = sql.toString();
@@ -158,7 +154,7 @@ public class DataSourceMapperProvider {
     strBuf.append("select * ");
     strBuf.append("from data_source ");
     strBuf.append("where enable_flag = 1 ");
-    strBuf.append("and is_template = 0 ");
+    strBuf.append("and is_template = 0 and stops_template_bundle is null ");
     if (!isAdmin) {
       strBuf.append("and crt_user = " + SqlUtils.preventSQLInjection(username));
     }
@@ -253,6 +249,7 @@ public class DataSourceMapperProvider {
     }
     return sqlStr;
   }
+
   /**
    * Query the data source according to the workflow Id
    *
@@ -296,5 +293,22 @@ public class DataSourceMapperProvider {
     sql.WHERE("id = " + SqlUtils.preventSQLInjection(id));
 
     return sql.toString();
+  }
+
+  public String getStopDataSourceForFlowPage(String username, Boolean isAdmin) {
+    String sqlStr = "SELECT 0";
+    StringBuffer strBuf = new StringBuffer();
+    strBuf.append("select ds.*,st.name ");
+    strBuf.append("from data_source ds ");
+    strBuf.append("join flow_stops_template st on ds.stops_template_bundle = st.bundle ");
+    strBuf.append("where ds.enable_flag = 1 ");
+    strBuf.append("and ds.is_template = 0 ");
+    strBuf.append("and ds.stops_template_bundle is not null ");
+    if (!isAdmin) {
+      strBuf.append("and ds.crt_user = " + SqlUtils.preventSQLInjection(username));
+    }
+    strBuf.append(" order by ds.crt_dttm desc ");
+    sqlStr = strBuf.toString();
+    return sqlStr;
   }
 }

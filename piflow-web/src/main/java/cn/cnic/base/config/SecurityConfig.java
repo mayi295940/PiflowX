@@ -3,10 +3,7 @@ package cn.cnic.base.config;
 import cn.cnic.base.config.jwt.CustomUserDetailsService;
 import cn.cnic.base.config.jwt.JwtAuthenticationEntryPoint;
 import cn.cnic.base.config.jwt.JwtAuthenticationTokenFilter;
-import cn.cnic.base.util.LoggerUtil;
 import cn.cnic.common.constant.SysParamsCache;
-import cn.piflow.Constants;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.context.annotation.Bean;
@@ -27,16 +24,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true) // Pre-Method Check for Allowing Page Entry
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-  /** Introducing logs, note that they are all packaged under "org.slf4j" */
-  Logger logger = LoggerUtil.getLogger();
+  private final JwtAuthenticationEntryPoint unauthorizedHandler;
+  private final AccessDeniedHandler accessDeniedHandler;
+  private final CustomUserDetailsService customUserDetailsService;
+  private final JwtAuthenticationTokenFilter authenticationTokenFilter;
 
-  @Autowired private JwtAuthenticationEntryPoint unauthorizedHandler;
-
-  @Autowired private AccessDeniedHandler accessDeniedHandler;
-
-  @Autowired private CustomUserDetailsService customUserDetailsService;
-
-  @Autowired private JwtAuthenticationTokenFilter authenticationTokenFilter;
+  @Autowired
+  public SecurityConfig(
+      JwtAuthenticationEntryPoint unauthorizedHandler,
+      AccessDeniedHandler accessDeniedHandler,
+      CustomUserDetailsService customUserDetailsService,
+      JwtAuthenticationTokenFilter authenticationTokenFilter) {
+    this.unauthorizedHandler = unauthorizedHandler;
+    this.accessDeniedHandler = accessDeniedHandler;
+    this.customUserDetailsService = customUserDetailsService;
+    this.authenticationTokenFilter = authenticationTokenFilter;
+  }
 
   @Override
   public void configure(WebSecurity web) {
@@ -74,7 +77,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.userDetailsService(customUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
+    auth.userDetailsService(customUserDetailsService)
+        .passwordEncoder(
+            new BCryptPasswordEncoder()); // Add a custom userDetailsService certificate
     auth.eraseCredentials(false);
   }
 
@@ -96,17 +101,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .authorizeRequests()
 
         // 对于获取token的rest api要允许匿名访问
-        // .antMatchers("/api/v1/auth", "/api/v1/signout", "/error/**", "/api/**").permitAll()
+        .antMatchers("/api/v1/auth", "/api/v1/signout", "/error/**", "/api/**")
+        .permitAll()
         .antMatchers("/register", "/checkUserName", "/jwtLogin", "/error", "/login")
         .permitAll()
-        .antMatchers(Constants.SINGLE_SLASH())
+        .antMatchers("/process/showViewStopData/**")
+        .permitAll()
+        .antMatchers("/")
         .permitAll()
         .antMatchers()
         .permitAll()
         // 除上面外的所有请求全部需要鉴权认证
         .anyRequest()
         .authenticated();
-
     // 禁用缓存
     http.headers().cacheControl();
 

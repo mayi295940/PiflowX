@@ -1,7 +1,7 @@
 package cn.cnic.base.config.jwt.exception;
 
 import cn.cnic.base.config.jwt.common.ResultJson;
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import cn.cnic.common.Eunm.ResultCode;
 import org.slf4j.Logger;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @SuppressWarnings("rawtypes")
 public class DefaultExceptionHandler {
 
-  Logger logger = LoggerUtil.getLogger();
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private Logger logger = LoggerUtil.getLogger();
 
   /**
    * 处理所有自定义异常
@@ -26,6 +27,7 @@ public class DefaultExceptionHandler {
     logger.error(e.getResultJson().getMsg().toString());
     return e.getResultJson();
   }
+
   /**
    * 处理参数校验异常
    *

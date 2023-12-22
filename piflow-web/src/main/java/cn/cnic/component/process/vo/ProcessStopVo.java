@@ -1,6 +1,6 @@
 package cn.cnic.component.process.vo;
 
-import cn.piflow.util.DateUtils;
+import cn.cnic.base.utils.DateUtils;
 import cn.cnic.common.Eunm.PortType;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ public class ProcessStopVo implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private ProcessVo processVo;
+  private String id;
   private String name;
   private String bundle;
   private String groups;
@@ -32,6 +33,9 @@ public class ProcessStopVo implements Serializable {
   private String visualizationType;
   private List<ProcessStopPropertyVo> processStopPropertyVoList =
       new ArrayList<ProcessStopPropertyVo>();
+  private List<ProcessStopsCustomizedPropertyVo> processStopCustomizedPropertyVoList =
+      new ArrayList<>();
+  private Boolean isDataSource;
 
   public String getStartTimeStr() {
     return DateUtils.dateTimesToStr(this.startTime);

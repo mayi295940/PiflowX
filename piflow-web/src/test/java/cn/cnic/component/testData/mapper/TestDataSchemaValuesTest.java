@@ -1,18 +1,23 @@
 package cn.cnic.component.testData.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import cn.cnic.component.testData.entity.TestDataSchemaValues;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class TestDataSchemaValuesTest extends ApplicationTests {
 
-  @Autowired private TestDataSchemaValuesMapper testDataSchemaValuesMapper;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final TestDataSchemaValuesMapper testDataSchemaValuesMapper;
+
+  @Autowired
+  public TestDataSchemaValuesTest(TestDataSchemaValuesMapper testDataSchemaValuesMapper) {
+    this.testDataSchemaValuesMapper = testDataSchemaValuesMapper;
+  }
 
   @Test
   public void testGetTestDataSchemaValuesList() {

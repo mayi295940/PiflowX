@@ -1,34 +1,19 @@
 package cn.cnic.component.process.entity;
 
-import cn.cnic.base.BaseHibernateModelUUIDNoCorpAgentId;
-import javax.persistence.*;
+import cn.cnic.base.BaseModelUUIDNoCorpAgentId;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
-@Entity
-@Table(name = "FLOW_PROCESS_PATH")
-public class ProcessPath extends BaseHibernateModelUUIDNoCorpAgentId {
+public class ProcessPath extends BaseModelUUIDNoCorpAgentId {
 
   private static final long serialVersionUID = 1L;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "FK_FLOW_PROCESS_ID")
   private Process process;
-
-  @Column(name = "LINE_FROM")
   private String from;
-
-  @Column(name = "LINE_OUTPORT")
   private String outport;
-
-  @Column(name = "LINE_INPORT")
   private String inport;
-
-  @Column(name = "LINE_TO")
   private String to;
-
-  @Column(name = "page_id")
   private String pageId;
 }

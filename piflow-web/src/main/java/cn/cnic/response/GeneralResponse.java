@@ -22,40 +22,39 @@ import java.io.Serializable;
  * @author howeye
  */
 public class GeneralResponse<T> implements Serializable {
-    private String code;
-    private String message;
-    private T data;
+  private String code;
+  private String message;
+  private T data;
 
-    public GeneralResponse() {
-    }
+  public GeneralResponse() {}
 
-    public GeneralResponse(String code, String message, T data) {
-        this.code = code;
-        this.message = message;
-        this.data = data;
-    }
+  public GeneralResponse(String code, String message, T data) {
+    this.code = code;
+    this.message = message;
+    this.data = data;
+  }
 
-    public String getCode() {
-        return code;
-    }
+  public String getCode() {
+    return code;
+  }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
+  public void setCode(String code) {
+    this.code = code;
+  }
 
-    public String getMessage() {
-        return message;
-    }
+  public String getMessage() {
+    return message;
+  }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+  public void setMessage(String message) {
+    this.message = message;
+  }
 
-    public T getData() {
-        return data;
-    }
+  public T getData() {
+    return data;
+  }
 
-    public void setData(T data) {
-        this.data = data;
-    }
+  public void setData(T data) {
+    this.data = data;
+  }
 }

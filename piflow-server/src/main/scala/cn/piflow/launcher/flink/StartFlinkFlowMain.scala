@@ -2,7 +2,7 @@ package cn.piflow.launcher.flink
 
 import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
-import cn.piflow.util.{ConfigureUtil, FlowFileUtil, JsonUtil}
+import cn.piflow.util.{FlowFileUtil, JsonUtil}
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -38,8 +38,8 @@ object StartFlinkFlowMain {
     val process = Runner.create[Table]()
       .bind(classOf[StreamExecutionEnvironment].getName, env)
       .bind(classOf[StreamTableEnvironment].getName, tableEnv)
-      .bind("checkpoint.path", ConfigureUtil.getCheckpointPath())
-      .bind("debug.path", ConfigureUtil.getDebugPath())
+      //.bind("checkpoint.path", ConfigureUtil.getCheckpointPath())
+      //.bind("debug.path", ConfigureUtil.getDebugPath())
       .bind("environmentVariable", flowBean.environmentVariable)
       .start(flow);
 

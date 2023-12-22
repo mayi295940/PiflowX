@@ -1,6 +1,6 @@
 package cn.cnic.component.system.vo;
 
-import cn.piflow.util.DateUtils;
+import cn.cnic.base.utils.DateUtils;
 import cn.cnic.common.Eunm.ScheduleRunResultType;
 import cn.cnic.common.Eunm.ScheduleState;
 import java.io.Serializable;

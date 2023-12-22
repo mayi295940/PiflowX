@@ -1,19 +1,24 @@
 package cn.cnic.component.flow.service;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.LoggerUtil;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.component.flow.entity.Flow;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
 public class FlowServiceTest extends ApplicationTests {
 
-  @Autowired private IFlowService flowService;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final IFlowService flowService;
+
+  @Autowired
+  public FlowServiceTest(IFlowService flowService) {
+    this.flowService = flowService;
+  }
 
   @Test
   @Rollback(false)

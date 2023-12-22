@@ -1,22 +1,24 @@
 package cn.cnic.component.stopsComponent.service.impl;
 
-import cn.cnic.base.util.LoggerUtil;
-import cn.cnic.base.util.ReturnMapUtils;
+import cn.cnic.base.utils.ReturnMapUtils;
+import cn.cnic.common.constant.MessageConfig;
 import cn.cnic.component.stopsComponent.domain.StopsComponentManageDomain;
-import cn.cnic.component.stopsComponent.model.StopsComponentManage;
+import cn.cnic.component.stopsComponent.entity.StopsComponentManage;
 import cn.cnic.component.stopsComponent.service.IStopsComponentManageService;
 import cn.cnic.component.stopsComponent.utils.StopsComponentManageUtils;
 import cn.cnic.controller.requestVo.UpdatestopsComponentIsShow;
-import javax.annotation.Resource;
-import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StopsComponentManageServiceImpl implements IStopsComponentManageService {
 
-  Logger logger = LoggerUtil.getLogger();
+  private final StopsComponentManageDomain stopsComponentManageDomain;
 
-  @Resource private StopsComponentManageDomain stopsComponentManageDomain;
+  @Autowired
+  public StopsComponentManageServiceImpl(StopsComponentManageDomain stopsComponentManageDomain) {
+    this.stopsComponentManageDomain = stopsComponentManageDomain;
+  }
 
   /**
    * updateStopsComponentsIsShow
@@ -61,6 +63,6 @@ public class StopsComponentManageServiceImpl implements IStopsComponentManageSer
       stopsComponentManage.setIsShow(stopsManage.getIsShow());
       stopsComponentManageDomain.saveOrUpdeate(stopsComponentManage);
     }
-    return ReturnMapUtils.setSucceededMsgRtnJsonStr(ReturnMapUtils.SUCCEEDED_MSG);
+    return ReturnMapUtils.setSucceededMsgRtnJsonStr(MessageConfig.SUCCEEDED_MSG());
   }
 }

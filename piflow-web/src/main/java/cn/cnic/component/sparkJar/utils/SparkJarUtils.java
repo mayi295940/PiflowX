@@ -1,6 +1,6 @@
 package cn.cnic.component.sparkJar.utils;
 
-import cn.cnic.component.sparkJar.model.SparkJarComponent;
+import cn.cnic.component.sparkJar.entity.SparkJarComponent;
 import java.util.Date;
 
 public class SparkJarUtils {

@@ -1,6 +1,6 @@
 package cn.cnic.component.flow.vo;
 
-import cn.piflow.util.DateUtils;
+import cn.cnic.base.utils.DateUtils;
 import cn.cnic.component.mxGraph.vo.MxGraphModelVo;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -10,8 +10,8 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
+@Setter
 public class FlowGroupVo implements Serializable {
 
   private static final long serialVersionUID = 1L;

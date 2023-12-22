@@ -1,6 +1,6 @@
 package cn.cnic.component.testData.domain;
 
-import cn.cnic.base.util.UUIDUtils;
+import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.component.testData.entity.TestData;
 import cn.cnic.component.testData.entity.TestDataSchema;
 import cn.cnic.component.testData.entity.TestDataSchemaValues;
@@ -27,11 +27,19 @@ import org.springframework.transaction.annotation.Transactional;
     rollbackFor = Exception.class)
 public class TestDataDomain {
 
-  @Autowired private TestDataMapper testDataMapper;
+  private final TestDataMapper testDataMapper;
+  private final TestDataSchemaMapper testDataSchemaMapper;
+  private final TestDataSchemaValuesMapper testDataSchemaValuesMapper;
 
-  @Autowired private TestDataSchemaMapper testDataSchemaMapper;
-
-  @Autowired private TestDataSchemaValuesMapper testDataSchemaValuesMapper;
+  @Autowired
+  public TestDataDomain(
+      TestDataMapper testDataMapper,
+      TestDataSchemaMapper testDataSchemaMapper,
+      TestDataSchemaValuesMapper testDataSchemaValuesMapper) {
+    this.testDataMapper = testDataMapper;
+    this.testDataSchemaMapper = testDataSchemaMapper;
+    this.testDataSchemaValuesMapper = testDataSchemaValuesMapper;
+  }
 
   /**
    * save or update TestData

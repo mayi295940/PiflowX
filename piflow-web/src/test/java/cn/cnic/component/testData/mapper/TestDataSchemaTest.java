@@ -1,18 +1,23 @@
 package cn.cnic.component.testData.mapper;
 
 import cn.cnic.ApplicationTests;
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import java.util.LinkedHashMap;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class TestDataSchemaTest extends ApplicationTests {
 
-  @Autowired private TestDataSchemaMapper testDataSchemaMapper;
+  private Logger logger = LoggerUtil.getLogger();
 
-  Logger logger = LoggerUtil.getLogger();
+  private final TestDataSchemaMapper testDataSchemaMapper;
+
+  @Autowired
+  public TestDataSchemaTest(TestDataSchemaMapper testDataSchemaMapper) {
+    this.testDataSchemaMapper = testDataSchemaMapper;
+  }
 
   @Test
   public void testGetTestDataSchemaIdList() {

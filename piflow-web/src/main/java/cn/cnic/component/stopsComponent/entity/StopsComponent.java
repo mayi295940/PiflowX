@@ -1,0 +1,41 @@
+package cn.cnic.component.stopsComponent.entity;
+
+import cn.cnic.base.BaseModelUUIDNoCorpAgentId;
+import cn.cnic.common.Eunm.ComponentFileType;
+import cn.cnic.common.Eunm.PortType;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+
+/** Stop component table */
+@Setter
+@Getter
+public class StopsComponent extends BaseModelUUIDNoCorpAgentId {
+
+  private static final long serialVersionUID = 1L;
+
+  private String name;
+  private String engineType;
+  private String bundle;
+  private String groups;
+  private String owner;
+  private String description;
+  private String inports;
+  private PortType inPortType;
+  private String outports;
+  private PortType outPortType;
+  private String stopGroup;
+  private Boolean isCustomized = false;
+  private String visualizationType;
+  private Boolean isDataSource = false;
+  private List<StopsComponentProperty> properties = new ArrayList<StopsComponentProperty>();
+
+  private List<StopsComponentGroup> stopGroupList = new ArrayList<>();
+
+  private String imageUrl;
+
+  private ComponentFileType componentType; // PYTHON/SCALA/DEFAULT
+  private String dockerImagesName; // python component image
+  private String stopsHubId;
+}

@@ -1,6 +1,6 @@
 package cn.cnic.component.system.mapper.provider;
 
-import cn.cnic.base.util.SqlUtils;
+import cn.cnic.base.utils.SqlUtils;
 import cn.cnic.component.system.entity.SysRole;
 import java.util.List;
 import java.util.Map;
@@ -11,8 +11,7 @@ public class SysRoleMapperProvider {
   /**
    * getSysRoleListBySysUserId
    *
-   * @param sysUserId
-   * @return
+   * @param sysUserId sysUserId
    */
   public String getSysRoleListBySysUserId(String sysUserId) {
     String strSql = "SELECT 0";
@@ -21,7 +20,7 @@ public class SysRoleMapperProvider {
       strBuf.append("select * ");
       strBuf.append("from sys_role ");
       strBuf.append("where ");
-      strBuf.append("fk_sys_user_id = '" + sysUserId + "'");
+      strBuf.append("fk_sys_user_id = '").append(sysUserId).append("'");
       strSql = strBuf.toString();
     }
     return strSql;
@@ -55,5 +54,23 @@ public class SysRoleMapperProvider {
       strBuf.append(")");
     }
     return strBuf.toString();
+  }
+
+  /**
+   * getSysRoleBySysUserId
+   *
+   * @param sysUserId sysUserId
+   */
+  public String getSysRoleBySysUserId(String sysUserId) {
+    String strSql = "SELECT 0";
+    if (StringUtils.isNotBlank(sysUserId)) {
+      StringBuffer buffer = new StringBuffer();
+      buffer.append("SELECT * ");
+      buffer.append("FROM sys_role ");
+      buffer.append("WHERE ");
+      buffer.append("fk_sys_user_id = '").append(sysUserId).append("' ORDER BY role ASC LIMIT 1");
+      strSql = buffer.toString();
+    }
+    return strSql;
   }
 }

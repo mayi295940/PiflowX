@@ -13,8 +13,7 @@ public class StopComponentSync extends QuartzJobBean {
   @Override
   protected void executeInternal(JobExecutionContext jobExecutionContext)
       throws JobExecutionException {
-
+    // todo
     stopGroupServiceImpl.updateGroupAndStopsListByServer("systemSync", null);
-
   }
 }

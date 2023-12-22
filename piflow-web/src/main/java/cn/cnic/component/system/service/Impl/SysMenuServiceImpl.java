@@ -1,26 +1,27 @@
 package cn.cnic.component.system.service.Impl;
 
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
 import cn.cnic.base.vo.UserVo;
 import cn.cnic.common.Eunm.SysRoleType;
+import cn.cnic.component.system.domain.SysMenuDomain;
 import cn.cnic.component.system.entity.SysMenu;
 import cn.cnic.component.system.entity.SysRole;
-import cn.cnic.component.system.mapper.SysMenuMapper;
 import cn.cnic.component.system.service.ISysMenuService;
 import cn.cnic.component.system.vo.SysMenuVo;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SysMenuServiceImpl implements ISysMenuService {
 
-  Logger logger = LoggerUtil.getLogger();
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
+  private Logger logger = LoggerUtil.getLogger();
 
-  @Resource private SysMenuMapper sysMenuMapper;
+  @Autowired private SysMenuDomain sysMenuDomain;
 
   @Override
   public List<SysMenuVo> getSysMenuList(UserVo currentUser) {
@@ -35,7 +36,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
           break;
         }
       }
-      List<SysMenu> sysMenuList = sysMenuMapper.getSysMenuList(role);
+      List<SysMenu> sysMenuList = sysMenuDomain.getSysMenuList(role);
       if (null != sysMenuList && sysMenuList.size() > 0) {
         sysMenuVoList = new ArrayList<>();
         SysMenuVo sysMenuVo = null;

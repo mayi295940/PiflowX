@@ -1,6 +1,6 @@
 package cn.cnic.component.stopsComponent.mapper.provider;
 
-import cn.cnic.base.util.SqlUtils;
+import cn.cnic.base.utils.SqlUtils;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.jdbc.SQL;
@@ -13,7 +13,7 @@ public class StopsComponentGroupProvider {
     SQL sql = new SQL();
     sql.SELECT("*");
     sql.FROM("flow_stops_groups");
-    sql.WHERE("enable_flag = 1 and engine_type = '" + engineType + "'");
+    sql.WHERE("enable_flag = 1 and engine_type = '" + engineType + "' ");
     sql.ORDER_BY(" group_name ");
     sqlStr = sql.toString();
     return sqlStr;

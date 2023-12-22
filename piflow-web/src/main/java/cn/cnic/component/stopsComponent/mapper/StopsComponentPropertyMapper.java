@@ -1,9 +1,15 @@
 package cn.cnic.component.stopsComponent.mapper;
 
+import cn.cnic.component.stopsComponent.entity.StopsComponentProperty;
 import cn.cnic.component.stopsComponent.mapper.provider.StopsComponentPropertyMapperProvider;
-import cn.cnic.component.stopsComponent.model.StopsComponentProperty;
 import java.util.List;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.InsertProvider;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.SelectProvider;
 
 @Mapper
 public interface StopsComponentPropertyMapper {
@@ -11,8 +17,7 @@ public interface StopsComponentPropertyMapper {
   /**
    * Query all the attributes of the corresponding stops according to the stopsId
    *
-   * @param stopsId
-   * @return
+   * @param stopsId stopsId
    */
   @SelectProvider(
       type = StopsComponentPropertyMapperProvider.class,
@@ -27,13 +32,12 @@ public interface StopsComponentPropertyMapper {
   /**
    * Add more than one FLOW_STOPS_PROPERTY_TEMPLATE List.
    *
-   * @param stopsComponentPropertyList
-   * @return
+   * @param stopsComponentPropertyList stopsComponentPropertyList
    */
   @InsertProvider(
       type = StopsComponentPropertyMapperProvider.class,
       method = "insertStopsComponentProperty")
-  public int insertStopsComponentProperty(
+  int insertStopsComponentProperty(
       @Param("stopsComponentPropertyList") List<StopsComponentProperty> stopsComponentPropertyList);
 
   @Delete("delete from flow_stops_property_template")

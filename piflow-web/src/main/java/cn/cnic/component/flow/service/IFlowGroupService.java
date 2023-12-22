@@ -2,7 +2,8 @@ package cn.cnic.component.flow.service;
 
 import cn.cnic.component.flow.entity.FlowGroup;
 import cn.cnic.component.flow.vo.FlowGroupVo;
-import javax.transaction.Transactional;
+import cn.cnic.controller.requestVo.FlowGroupInfoVoRequest;
+import cn.cnic.controller.requestVo.FlowGroupInfoVoRequestUpDate;
 
 public interface IFlowGroupService {
 
@@ -49,18 +50,20 @@ public interface IFlowGroupService {
    * @param username
    * @param flowGroupVo
    * @return
+   * @throws Exception
    */
-  public String saveOrUpdate(String username, FlowGroupVo flowGroupVo);
+  public String saveOrUpdate(String username, FlowGroupInfoVoRequest flowGroupVo) throws Exception;
 
   /**
    * run flow group
    *
-   * @param username
    * @param flowGroupId
    * @param runMode
    * @return
+   * @throws Exception
    */
-  public String runFlowGroup(String username, String flowGroupId, String runMode);
+  public String runFlowGroup(boolean isAdmin, String username, String flowGroupId, String runMode)
+      throws Exception;
 
   /**
    * delete FLowGroup info
@@ -77,8 +80,10 @@ public interface IFlowGroupService {
    * @param flowId
    * @param flowGroupId
    * @return
+   * @throws Exception
    */
-  public String copyFlowToGroup(String username, String flowId, String flowGroupId);
+  public String copyFlowToGroup(String username, String flowId, String flowGroupId)
+      throws Exception;
 
   /**
    * Query FlowGroupVo information based on pageId
@@ -87,7 +92,6 @@ public interface IFlowGroupService {
    * @param pageId
    * @return
    */
-  @Transactional
   public FlowGroupVo getFlowGroupByPageId(String fid, String pageId);
 
   /**
@@ -101,7 +105,8 @@ public interface IFlowGroupService {
    * @return
    */
   public String updateFlowGroupNameById(
-      String username, String id, String parentsId, String flowGroupName, String pageId);
+      String username, String id, String parentsId, String flowGroupName, String pageId)
+      throws Exception;
 
   /**
    * updateFlowGroupNameById
@@ -109,17 +114,22 @@ public interface IFlowGroupService {
    * @param id
    * @param flowGroupName
    * @return
+   * @throws Exception
    */
-  public Boolean updateFlowGroupNameById(String username, String id, String flowGroupName);
+  public Boolean updateFlowGroupNameById(String username, String id, String flowGroupName)
+      throws Exception;
 
   /**
    * updateFlowGroupBaseInfo
    *
    * @param username
+   * @param fId
    * @param flowGroupVo
    * @return
+   * @throws Exception
    */
-  public String updateFlowGroupBaseInfo(String username, String fId, FlowGroupVo flowGroupVo);
+  public String updateFlowGroupBaseInfo(
+      String username, String fId, FlowGroupInfoVoRequestUpDate flowGroupVo) throws Exception;
 
   /**
    * Right click to run
@@ -130,9 +140,11 @@ public interface IFlowGroupService {
    * @param nodeId
    * @param nodeType
    * @return
+   * @throws Exception
    */
   public String rightRun(
-      String username, boolean isAdmin, String pId, String nodeId, String nodeType);
+      String username, boolean isAdmin, String pId, String nodeId, String nodeType)
+      throws Exception;
 
   /**
    * Query FlowGroupVo or FlowVo information based on pageId

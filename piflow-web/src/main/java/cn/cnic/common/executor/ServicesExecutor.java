@@ -1,13 +1,17 @@
 package cn.cnic.common.executor;
 
-import cn.cnic.base.util.LoggerUtil;
+import cn.cnic.base.utils.LoggerUtil;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import org.slf4j.Logger;
 
 public class ServicesExecutor {
 
+  /** Introducing logs, note that they are all packaged under "org.slf4j" */
   private static Logger logger = LoggerUtil.getLogger();
 
   /* Define an executor of the execution thread for the service */
@@ -17,6 +21,8 @@ public class ServicesExecutor {
   private static ExecutorService logExecutorService;
 
   private static ScheduledExecutorService scheduledThreadPool;
+
+  public static Map<String, Future<?>> TASK_FUTURE = new HashMap<>();
 
   /* Initialize the thread pool */
   static {

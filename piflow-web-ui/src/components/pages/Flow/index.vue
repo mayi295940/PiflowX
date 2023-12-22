@@ -161,6 +161,7 @@ export default {
       row: null,
       id: "",
       name: "",
+      engineType: "",
       description: "",
       driverMemory: "1g",
       executorNumber: 1,

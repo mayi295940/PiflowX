@@ -1,6 +1,6 @@
 package cn.cnic.component.flow.vo;
 
-import cn.piflow.util.DateUtils;
+import cn.cnic.base.utils.DateUtils;
 import cn.cnic.common.Eunm.PortType;
 import cn.cnic.component.dataSource.vo.DataSourceVo;
 import java.io.Serializable;
@@ -59,6 +59,10 @@ public class StopsVo implements Serializable {
   private List<StopsPropertyVo> oldPropertiesVo = new ArrayList<>();
 
   private List<StopsCustomizedPropertyVo> stopsCustomizedPropertyVoList = new ArrayList<>();
+
+  private Boolean isDataSource = false;
+
+  private Boolean isDisabled = false;
 
   public String getCrtDttmString() {
     SimpleDateFormat sdf = new SimpleDateFormat(DateUtils.DATE_PATTERN_yyyy_MM_dd_HH_MM_ss);

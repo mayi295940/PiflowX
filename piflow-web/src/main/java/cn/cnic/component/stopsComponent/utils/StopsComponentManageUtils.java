@@ -1,6 +1,6 @@
 package cn.cnic.component.stopsComponent.utils;
 
-import cn.cnic.component.stopsComponent.model.StopsComponentManage;
+import cn.cnic.component.stopsComponent.entity.StopsComponentManage;
 import java.util.Date;
 
 public class StopsComponentManageUtils {

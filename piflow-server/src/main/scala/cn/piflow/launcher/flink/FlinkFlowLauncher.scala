@@ -7,7 +7,7 @@ import org.apache.flink.client.deployment.StandaloneClusterId
 import org.apache.flink.client.program.rest.RestClusterClient
 import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration.{Configuration, JobManagerOptions, RestOptions}
-import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
+import org.apache.flink.runtime.jobgraph.{JobGraph, SavepointRestoreSettings}
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpPut}
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClients
@@ -117,7 +117,15 @@ object FlinkFlowLauncher {
       .build()
 
     val parallelism = 1
-    val jobGraph = PackagedProgramUtils.createJobGraph(program, configuration, parallelism, false)
+
+    var jobGraph: JobGraph = null
+    try jobGraph = PackagedProgramUtils.createJobGraph(program, configuration, parallelism, false)
+    catch {
+      case e: Throwable =>
+        e.printStackTrace()
+        throw new Exception("Flink jobGraph create failed")
+    }
+
     val client = new RestClusterClient[StandaloneClusterId](configuration, StandaloneClusterId.getInstance())
     val result = client.submitJob(jobGraph)
 
