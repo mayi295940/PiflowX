@@ -93,7 +93,8 @@ public interface StopsComponentGroupMapper {
       @Param("groupNameList") List<String> groupNameList, @Param("engineType") String engineType);
 
   @SelectProvider(type = StopsComponentGroupProvider.class, method = "getStopGroupByGroupNameList")
-  List<StopsComponentGroup> getStopGroupByGroupNameList(List<String> groupName, String engineType);
+  List<StopsComponentGroup> getStopGroupByGroupNameList(
+      @Param("groupName") List<String> groupName, @Param("engineType") String engineType);
 
   /**
    * Query flow_stops_groups based on groupName

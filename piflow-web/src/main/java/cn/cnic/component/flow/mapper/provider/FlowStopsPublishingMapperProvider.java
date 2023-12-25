@@ -6,7 +6,10 @@ import cn.cnic.base.utils.UUIDUtils;
 import cn.cnic.component.flow.entity.FlowStopsPublishing;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.jdbc.SQL;
 
 public class FlowStopsPublishingMapperProvider {
@@ -325,12 +328,10 @@ public class FlowStopsPublishingMapperProvider {
 
   /**
    * Query PublishingName list by StopsIds
-   *
-   * @param stopsIds
-   * @return
    */
-  public String getPublishingNameListByStopsIds(List<String> stopsIds) {
-    if (null == stopsIds || stopsIds.size() <= 0) {
+  public String getPublishingNameListByStopsIds(Map<String, Object> map) {
+    List<String> stopsIds = (List<String>)map.get("stopsIds");
+    if (null == stopsIds || stopsIds.size() == 0) {
       return "SELECT 0";
     }
     String sqlStr = "";

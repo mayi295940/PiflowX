@@ -4,6 +4,8 @@ import cn.cnic.base.utils.DateUtils;
 import cn.cnic.base.utils.SqlUtils;
 import cn.cnic.component.dataSource.entity.DataSource;
 import java.util.Date;
+import java.util.Map;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.jdbc.SQL;
 
@@ -234,18 +236,38 @@ public class DataSourceMapperProvider {
   /**
    * Query the data source according to the workflow Id
    *
-   * @param id
-   * @return
+   * @param param param
+   */
+  public String getDataSourceByMap(Map<String, Object> param) {
+    String id = MapUtils.getString(param, "id");
+    String sqlStr = "";
+    if (StringUtils.isNotBlank(id)) {
+      sqlStr =
+          "select * "
+              + "from data_source "
+              + "where enable_flag = 1 "
+              + "and id = "
+              + SqlUtils.preventSQLInjection(id)
+              + " ";
+    }
+    return sqlStr;
+  }
+
+  /**
+   * Query the data source according to the workflow Id
+   *
+   * @param id id
    */
   public String getDataSourceById(String id) {
     String sqlStr = "";
     if (StringUtils.isNotBlank(id)) {
-      StringBuffer strBuf = new StringBuffer();
-      strBuf.append("select * ");
-      strBuf.append("from data_source ");
-      strBuf.append("where enable_flag = 1 ");
-      strBuf.append("and id = " + SqlUtils.preventSQLInjection(id) + " ");
-      sqlStr = strBuf.toString();
+      sqlStr =
+          "select * "
+              + "from data_source "
+              + "where enable_flag = 1 "
+              + "and id = "
+              + SqlUtils.preventSQLInjection(id)
+              + " ";
     }
     return sqlStr;
   }

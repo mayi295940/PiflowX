@@ -18,6 +18,7 @@ public class ProcessMapperProvider {
   private int enableFlag;
   private long version;
   private String name;
+  private String engineType;
   private String driverMemory;
   private String executorNumber;
   private String executorMemory;
@@ -55,6 +56,7 @@ public class ProcessMapperProvider {
 
     // Selection field
     this.name = SqlUtils.preventSQLInjection(process.getName());
+    this.engineType = SqlUtils.preventSQLInjection(process.getEngineType());
     this.driverMemory = SqlUtils.preventSQLInjection(process.getDriverMemory());
     this.executorNumber = SqlUtils.preventSQLInjection(process.getExecutorNumber());
     this.executorMemory = SqlUtils.preventSQLInjection(process.getExecutorMemory());
@@ -97,6 +99,7 @@ public class ProcessMapperProvider {
     this.enableFlag = 1;
     this.version = 0L;
     this.name = null;
+    this.engineType = null;
     this.driverMemory = null;
     this.executorNumber = null;
     this.executorMemory = null;
@@ -126,58 +129,83 @@ public class ProcessMapperProvider {
   public String addProcess(Process process) {
     String sqlStr = "SELECT 0";
     if (this.preventSQLInjectionProcess(process)) {
-      StringBuffer strBuf = new StringBuffer();
-      strBuf.append("INSERT INTO flow_process ");
-      strBuf.append("( ");
-      strBuf.append(SqlUtils.baseFieldName() + ", ");
-      strBuf.append("name, ");
-      strBuf.append("driver_memory, ");
-      strBuf.append("executor_number, ");
-      strBuf.append("executor_memory, ");
-      strBuf.append("executor_cores, ");
-      strBuf.append("description, ");
-      strBuf.append("app_id, ");
-      strBuf.append("page_id, ");
-      strBuf.append("process_id, ");
-      strBuf.append("state, ");
-      strBuf.append("start_time, ");
-      strBuf.append("end_time, ");
-      strBuf.append("progress, ");
-      strBuf.append("flow_id, ");
-      strBuf.append("run_mode_type, ");
-      strBuf.append("parent_process_id, ");
-      strBuf.append("process_parent_type, ");
-      strBuf.append("fk_group_schedule_id, ");
-      strBuf.append("fk_flow_process_group_id, ");
-      strBuf.append("view_xml ");
-      strBuf.append(") ");
 
-      strBuf.append("VALUES ");
-      strBuf.append("(");
-      strBuf.append(SqlUtils.baseFieldValues(process) + ", ");
-      strBuf.append(name + ", ");
-      strBuf.append(driverMemory + ", ");
-      strBuf.append(executorNumber + ", ");
-      strBuf.append(executorMemory + ", ");
-      strBuf.append(executorCores + ", ");
-      strBuf.append(description + ", ");
-      strBuf.append(appId + ", ");
-      strBuf.append(pageId + ", ");
-      strBuf.append(processId + ", ");
-      strBuf.append(stateName + ", ");
-      strBuf.append(startTimeStr + ", ");
-      strBuf.append(endTimeStr + ", ");
-      strBuf.append(progress + ", ");
-      strBuf.append(flowId + ", ");
-      strBuf.append(runModeTypeStr + ", ");
-      strBuf.append(parentProcessId + ", ");
-      strBuf.append(processParentType + ", ");
-      strBuf.append(schedule_id + ", ");
-      strBuf.append(processGroup_id + ", ");
-      strBuf.append(viewXml + " ");
-      strBuf.append(") ");
+      String strBuf =
+          "INSERT INTO flow_process "
+              + "( "
+              + SqlUtils.baseFieldName()
+              + ", "
+              + "name, "
+              + "engine_type, "
+              + "driver_memory, "
+              + "executor_number, "
+              + "executor_memory, "
+              + "executor_cores, "
+              + "description, "
+              + "app_id, "
+              + "page_id, "
+              + "process_id, "
+              + "state, "
+              + "start_time, "
+              + "end_time, "
+              + "progress, "
+              + "flow_id, "
+              + "run_mode_type, "
+              + "parent_process_id, "
+              + "process_parent_type, "
+              + "fk_group_schedule_id, "
+              + "fk_flow_process_group_id, "
+              + "view_xml "
+              + ") "
+              + "VALUES "
+              + "("
+              + SqlUtils.baseFieldValues(process)
+              + ", "
+              + name
+              + ", "
+              + engineType
+              + ", "
+              + driverMemory
+              + ", "
+              + executorNumber
+              + ", "
+              + executorMemory
+              + ", "
+              + executorCores
+              + ", "
+              + description
+              + ", "
+              + appId
+              + ", "
+              + pageId
+              + ", "
+              + processId
+              + ", "
+              + stateName
+              + ", "
+              + startTimeStr
+              + ", "
+              + endTimeStr
+              + ", "
+              + progress
+              + ", "
+              + flowId
+              + ", "
+              + runModeTypeStr
+              + ", "
+              + parentProcessId
+              + ", "
+              + processParentType
+              + ", "
+              + schedule_id
+              + ", "
+              + processGroup_id
+              + ", "
+              + viewXml
+              + " "
+              + ") ";
       this.reset();
-      return strBuf.toString() + ";";
+      return strBuf + ";";
     }
     this.reset();
     return sqlStr;
@@ -281,27 +309,38 @@ public class ProcessMapperProvider {
    * @param param param
    */
   public String getProcessListByParam(String username, boolean isAdmin, String param) {
-    StringBuffer strBuf = new StringBuffer();
+    StringBuilder strBuf = new StringBuilder();
     strBuf.append("SELECT * ");
     strBuf.append("FROM flow_process ");
     strBuf.append("WHERE ");
     strBuf.append("enable_flag = 1 ");
     strBuf.append("AND app_id IS NOT NULL ");
-    strBuf.append(
-        "AND process_parent_type = "
-            + SqlUtils.addSqlStrAndReplace(ProcessParentType.PROCESS.name()));
+    strBuf
+        .append("AND process_parent_type = ")
+        .append(SqlUtils.addSqlStrAndReplace(ProcessParentType.PROCESS.name()));
     strBuf.append("AND fk_flow_process_group_id IS NULL ");
     if (StringUtils.isNotBlank(param)) {
       strBuf.append("and ( ");
-      strBuf.append("app_id LIKE CONCAT('%'," + SqlUtils.preventSQLInjection(param) + ",'%') ");
-      strBuf.append("OR name LIKE CONCAT('%'," + SqlUtils.preventSQLInjection(param) + ",'%') ");
-      strBuf.append("OR state LIKE CONCAT('%'," + SqlUtils.preventSQLInjection(param) + ",'%') ");
-      strBuf.append(
-          "OR description LIKE CONCAT('%'," + SqlUtils.preventSQLInjection(param) + ",'%') ");
+      strBuf
+          .append("app_id LIKE CONCAT('%',")
+          .append(SqlUtils.preventSQLInjection(param))
+          .append(",'%') ");
+      strBuf
+          .append("OR name LIKE CONCAT('%',")
+          .append(SqlUtils.preventSQLInjection(param))
+          .append(",'%') ");
+      strBuf
+          .append("OR state LIKE CONCAT('%',")
+          .append(SqlUtils.preventSQLInjection(param))
+          .append(",'%') ");
+      strBuf
+          .append("OR description LIKE CONCAT('%',")
+          .append(SqlUtils.preventSQLInjection(param))
+          .append(",'%') ");
       strBuf.append(") ");
     }
     if (!isAdmin) {
-      strBuf.append("AND crt_user = " + SqlUtils.preventSQLInjection(username));
+      strBuf.append("AND crt_user = ").append(SqlUtils.preventSQLInjection(username));
     }
     strBuf.append("ORDER BY crt_dttm DESC,last_update_dttm DESC ");
 
@@ -310,7 +349,7 @@ public class ProcessMapperProvider {
 
   /** Query processGroup list according to param(processList) */
   public String getProcessGroupListByParam(String username, boolean isAdmin, String param) {
-    StringBuffer strBuf = new StringBuffer();
+    StringBuilder strBuf = new StringBuilder();
     strBuf.append("select * ");
     strBuf.append("from flow_process ");
     strBuf.append("where ");

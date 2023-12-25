@@ -214,7 +214,8 @@ object API {
 
     val flowMap = JsonUtil.jsonToMap(flowJson)
 
-    val env = flowMap.getOrElse("env", "flink")
+    val env =  flowMap("flow").asInstanceOf[Map[String, String]]("engineType")
+
     if ("flink".equals(env)) {
       val (appId, handle) = this.startFlinkFlow(flowMap)
       (appId, handle)

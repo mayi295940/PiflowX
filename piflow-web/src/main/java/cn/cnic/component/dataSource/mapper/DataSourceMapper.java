@@ -66,7 +66,7 @@ public interface DataSourceMapper {
    *
    * @param id DataSourceId
    */
-  @SelectProvider(type = DataSourceMapperProvider.class, method = "getDataSourceById")
+  @SelectProvider(type = DataSourceMapperProvider.class, method = "getDataSourceByMap")
   @Results({
     @Result(id = true, column = "id", property = "id"),
     @Result(column = "stops_template_bundle", property = "stopsTemplateBundle"),
@@ -87,7 +87,10 @@ public interface DataSourceMapper {
                     "cn.cnic.component.stopsComponent.mapper.StopsComponentMapper.getDataSourceStopsComponentByBundle",
                 fetchType = FetchType.LAZY))
   })
-  DataSource getDataSourceByIdAndUser(String username, boolean isAdmin, String id);
+  DataSource getDataSourceByIdAndUser(
+      @Param("username") String username,
+      @Param("isAdmin") boolean isAdmin,
+      @Param("id") String id);
 
   /**
    * query DataSource by DataSourceId

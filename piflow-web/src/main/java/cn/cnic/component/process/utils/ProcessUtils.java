@@ -532,6 +532,7 @@ public class ProcessUtils {
     flowVoMap.put("executorCores", process.getExecutorCores());
     flowVoMap.put("executorNumber", process.getExecutorNumber());
     flowVoMap.put("name", process.getName());
+    flowVoMap.put("engineType", process.getEngineType());
     flowVoMap.put("uuid", process.getId());
 
     // all stops

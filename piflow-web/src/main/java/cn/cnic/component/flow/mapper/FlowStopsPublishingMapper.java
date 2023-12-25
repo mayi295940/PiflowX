@@ -132,7 +132,7 @@ public interface FlowStopsPublishingMapper {
   @SelectProvider(
       type = FlowStopsPublishingMapperProvider.class,
       method = "getPublishingNameListByStopsIds")
-  List<String> getPublishingNameListByStopsIds(List<String> stopsIds);
+  List<String> getPublishingNameListByStopsIds(@Param("stopsIds") List<String> stopsIds);
 
   /**
    * Query PublishingName list by flowId

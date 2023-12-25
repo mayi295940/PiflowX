@@ -20,6 +20,7 @@ public class Process extends BaseModelUUIDNoCorpAgentId {
   private static final long serialVersionUID = 1L;
 
   private String name;
+  private String engineType;
   private String driverMemory;
   private String executorNumber;
   private String executorMemory;
@@ -40,8 +41,8 @@ public class Process extends BaseModelUUIDNoCorpAgentId {
   private Schedule schedule;
   private ProcessGroup processGroup;
   private MxGraphModel mxGraphModel;
-  private List<ProcessStop> processStopList = new ArrayList<ProcessStop>();
-  private List<ProcessPath> processPathList = new ArrayList<ProcessPath>();
+  private List<ProcessStop> processStopList = new ArrayList<>();
+  private List<ProcessPath> processPathList = new ArrayList<>();
   List<FlowGlobalParams> flowGlobalParamsList;
 
   public String getFlowId() {
