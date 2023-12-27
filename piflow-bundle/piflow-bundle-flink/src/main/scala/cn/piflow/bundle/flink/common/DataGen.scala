@@ -1,13 +1,15 @@
 package cn.piflow.bundle.flink.common
 
 import cn.piflow._
-import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import cn.piflow.util.IdGenerator
+import org.apache.commons.lang3.StringUtils
+import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.{Table, TableDescriptor}
+
+import scala.collection.mutable.{Map => MMap}
 
 class DataGen extends ConfigurableStop[Table] {
 
@@ -16,12 +18,12 @@ class DataGen extends ConfigurableStop[Table] {
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
-  private var schema: String = _
+  private var schema: List[Map[String, Any]] = _
   private var count: Int = _
   private var ratio: Int = _
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    schema = MapUtil.get(map, "schema").asInstanceOf[String]
+    schema = MapUtil.get(map, "schema").asInstanceOf[List[Map[String, Any]]]
     count = MapUtil.get(map, "count").asInstanceOf[String].toInt
     ratio = MapUtil.get(map, "ratio").asInstanceOf[String].toInt
   }
@@ -31,13 +33,10 @@ class DataGen extends ConfigurableStop[Table] {
     val schema = new PropertyDescriptor()
       .name("schema")
       .displayName("Schema")
-      .description("The schema of mock data, format is column:columnType:isNullable. " +
-        "Separate multiple fields with commas. " +
-        "columnType can be String/Int/Long/Float/Double/Boolean. " +
-        "isNullable can be left blank, the default value is false. ")
+      .description("数据生成规则")
       .defaultValue("")
       .required(true)
-      .example("id:String,name:String,age:Int")
+      .example("[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000},{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15},{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}]")
     descriptor = schema :: descriptor
 
     val count = new PropertyDescriptor()
@@ -71,27 +70,93 @@ class DataGen extends ConfigurableStop[Table] {
 
   override def initialize(ctx: ProcessContext[Table]): Unit = {}
 
+
   override def perform(in: JobInputStream[Table],
                        out: JobOutputStream[Table],
                        pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val tableDescriptor: TableDescriptor = TableDescriptor.forConnector("datagen")
-      .option("number-of-rows", count.toString)
-      .option("rows-per-second", ratio.toString)
-      //.option(DataGenConnectorOptions.ROWS_PER_SECOND, 100L)
-      .schema(RowTypeUtil.getRowSchema(schema))
-      .build()
+    val (columns, conf) = getWithColumnsAndConf(schema)
 
+    val tmpTable = "DataGen_" + IdGenerator.uuidWithoutSplit
 
-    val tmpTable = "SourceTable_" + IdGenerator.uuidWithoutSplit
-    tableEnv.createTemporaryTable(tmpTable, tableDescriptor)
+    // 生成数据源 DDL 语句
+    val sourceDDL =
+      s""" CREATE TABLE $tmpTable ($columns) WITH (
+         |'connector' = 'datagen',
+         | $conf
+         | 'number-of-rows'='$count',
+         | 'rows-per-second'='$ratio'
+         |)"""
+        .stripMargin
+        .replaceAll("\r\n", " ")
+        .replaceAll(Constants.LINE_SPLIT_N, " ")
+
+    println(sourceDDL)
+
+    tableEnv.executeSql(sourceDDL)
 
     val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
+    out.write(resultTable)
 
     out.write(resultTable)
   }
+
+
+  private def getWithColumnsAndConf(schema: List[Map[String, Any]]): (String, String) = {
+    var columns = List[String]()
+    var conf = List[String]()
+
+    schema.foreach(item => {
+
+      val filedMap = MMap(item.toSeq: _*)
+
+      val filedName = MapUtil.get(filedMap, "filedName").toString
+      val filedType = MapUtil.get(filedMap, "filedType").toString
+      columns = s"$filedName $filedType," :: columns
+
+
+      val kind = filedMap.getOrElse("kind", "").toString
+      if (StringUtils.isNotBlank(kind)) {
+        conf = s"'fields.$filedName.kind' = '$kind'," :: conf
+      }
+
+      val min = filedMap.getOrElse("min", "").toString
+      if (StringUtils.isNotBlank(min)) {
+        conf = s"'fields.$filedName.min' = '$min'," :: conf
+      }
+
+      val max = filedMap.getOrElse("max", "").toString
+      if (StringUtils.isNotBlank(max)) {
+        conf = s"'fields.$filedName.max' = '$max'," :: conf
+      }
+
+      val length = filedMap.getOrElse("length", "").toString
+      if (StringUtils.isNotBlank(length)) {
+        conf = s"'fields.$filedName.length' = '$length'," :: conf
+      }
+
+      val start = filedMap.getOrElse("start", "").toString
+      if (StringUtils.isNotBlank(start)) {
+        conf = s"'fields.$filedName.start' = '$start'," :: conf
+      }
+
+      val end = filedMap.getOrElse("end", "").toString
+      if (StringUtils.isNotBlank(end)) {
+        conf = s"'fields.$filedName.end' = '$end'," :: conf
+      }
+
+      val maxPast = filedMap.getOrElse("maxPast", "").toString
+      if (StringUtils.isNotBlank(maxPast)) {
+        conf = s"'fields.$filedName.max-past' = '$maxPast'," :: conf
+      }
+
+    })
+
+    (columns.mkString("").trim.dropRight(1), conf.mkString(""))
+  }
+
 
   override def getEngineType: String = Constants.ENGIN_FLINK
 
