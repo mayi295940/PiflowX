@@ -234,10 +234,6 @@
                 <version>${flink.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>flink-shaded-guava</artifactId>
-                        <groupId>org.apache.flink</groupId>
-                    </exclusion>
-                    <exclusion>
                         <artifactId>slf4j-api</artifactId>
                         <groupId>org.slf4j</groupId>
                     </exclusion>
