@@ -114,8 +114,7 @@ class DataGen extends ConfigurableStop[Table] {
 
       val filedName = MapUtil.get(filedMap, "filedName").toString
       val filedType = MapUtil.get(filedMap, "filedType").toString
-      columns = s"$filedName $filedType," :: columns
-
+      columns = columns :+ s"$filedName $filedType,"
 
       val kind = filedMap.getOrElse("kind", "").toString
       if (StringUtils.isNotBlank(kind)) {

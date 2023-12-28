@@ -1,16 +1,16 @@
 {
   "flow": {
-    "name": "MockDataTest",
+    "name": "DataGenTest",
     "uuid": "1234",
     "stops": [
       {
         "uuid": "0000",
-        "name": "MockData1",
+        "name": "DataGen1",
         "bundle": "cn.piflow.bundle.flink.common.DataGen",
         "properties": {
-          "schema": "[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000},{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15},{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}]",
+          "schema": "[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000},{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15},{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1},{\"filedName\":\"timeField\",\"filedType\":\"AS PROCTIME()\"}]",
           "count": "500",
-          "ratio": "1"
+          "ratio": "5"
         }
       },
       {
@@ -24,7 +24,7 @@
     ],
     "paths": [
       {
-        "from": "MockData1",
+        "from": "DataGen1",
         "outport": "",
         "inport": "",
         "to": "ShowData1"
