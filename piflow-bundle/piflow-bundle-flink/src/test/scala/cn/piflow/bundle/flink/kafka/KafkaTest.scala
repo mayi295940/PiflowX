@@ -9,7 +9,7 @@ class KafkaTest {
   def testFlow(): Unit = {
 
     //parse flow json
-    val file = "src/main/resources/test/kafka.json"
+    val file = "src/test/resources/kafka/kafka.json"
     BaseTest.testFlow(file)
   }
 

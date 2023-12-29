@@ -5,58 +5,74 @@ import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 
 class PropertyDescriptor {
-  var name : String = _
-  var displayName : String = _
-  var description : String = _
-  var defaultValue : String = _
-  var allowableValues : List[String] = _
-  var required : Boolean = false
-  var sensitive : Boolean = false
-  var example : String = _
-  var language : String = Language.Text
 
+  var name: String = _
+  var dataType: String = _
+  var displayName: String = _
+  var description: String = _
+  var defaultValue: String = _
+  var allowableValues: List[String] = _
+  var required: Boolean = false
+  var sensitive: Boolean = false
+  var example: String = _
+  var language: String = Language.Text
 
-  def name(name:String) : PropertyDescriptor = {
+  def name(name: String): PropertyDescriptor = {
     this.name = name
     this
   }
-  def displayName(displayName:String) : PropertyDescriptor = {
+
+  def dataType(dataType: String): PropertyDescriptor = {
+    this.dataType = dataType
+    this
+  }
+
+  def displayName(displayName: String): PropertyDescriptor = {
     this.displayName = displayName
     this
   }
-  def description(description:String) : PropertyDescriptor = {
+
+  def description(description: String): PropertyDescriptor = {
     this.description = description
     this
   }
-  def example(example: String) : PropertyDescriptor = {
+
+  def example(example: String): PropertyDescriptor = {
     this.example = example
     this
   }
-  def defaultValue(defaultValue:String) : PropertyDescriptor = {
+
+  def defaultValue(defaultValue: String): PropertyDescriptor = {
     this.defaultValue = defaultValue
     this
   }
-  def allowableValues(allowableValues:Set[String]) : PropertyDescriptor = {
+
+  def allowableValues(allowableValues: Set[String]): PropertyDescriptor = {
     this.allowableValues = allowableValues.toList
     this
   }
-  def required(required:Boolean) : PropertyDescriptor = {
+
+  def required(required: Boolean): PropertyDescriptor = {
     this.required = required
     this
   }
-  def sensitive(sensitive:Boolean) : PropertyDescriptor = {
+
+  def sensitive(sensitive: Boolean): PropertyDescriptor = {
     this.sensitive = sensitive
     this
   }
-  def language(language: String) : PropertyDescriptor = {
+
+  def language(language: String): PropertyDescriptor = {
     this.language = language
     this
   }
-  def toJson():String = {
-    val allowableValueStr = if(this.allowableValues == null)  "" else this.allowableValues.mkString(",")
+
+  def toJson(): String = {
+    val allowableValueStr = if (this.allowableValues == null) "" else this.allowableValues.mkString(",")
     val json =
       ("property" ->
         ("name" -> this.name) ~
+          ("dataType" -> this.dataType) ~
           ("displayName" -> this.displayName) ~
           ("description" -> this.description) ~
           ("defaultValue" -> this.defaultValue) ~
@@ -64,13 +80,12 @@ class PropertyDescriptor {
           ("required" -> this.required.toString) ~
           ("sensitive" -> this.sensitive.toString))
 
-
     val jsonString = compactRender(json)
     jsonString
   }
 }
 
-object PropertyDescriptor{
+object PropertyDescriptor {
   def apply(): PropertyDescriptor = {
     new PropertyDescriptor()
   }

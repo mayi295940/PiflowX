@@ -46,7 +46,7 @@ class CsvSave extends ConfigurableStop[Table] {
     tableEnv.createTemporaryView(inputTmpTable, inputTable)
 
     val columns = RowTypeUtil.getTableSchema(inputTable)
-    val tmpTable = "CsvSave_" + IdGenerator.uuidWithoutSplit
+    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
 
     val conf = getWithConf(delimiter, partition)
 

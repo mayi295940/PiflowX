@@ -29,7 +29,7 @@ class Route extends ConfigurableStop[Table] {
 
     val inputTable = in.read()
 
-    val tmpTable = "RouteTmp_" + IdGenerator.uuidWithoutSplit
+    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
     tableEnv.createTemporaryView(tmpTable, inputTable)
 
     if (this.customizedProperties != null || this.customizedProperties.nonEmpty) {

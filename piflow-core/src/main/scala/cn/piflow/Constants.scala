@@ -40,4 +40,6 @@ object Constants {
 
   val ENGIN_FLINK = "flink"
 
+  val UNDERLINE_SIGN = "_"
+
 }

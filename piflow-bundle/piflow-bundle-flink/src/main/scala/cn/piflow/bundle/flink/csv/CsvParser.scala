@@ -30,7 +30,7 @@ class CsvParser extends ConfigurableStop[Table] {
 
     val columns = RowTypeUtil.getTableSchema(schema)
 
-    val tmpTable = "CsvParser_" + IdGenerator.uuidWithoutSplit
+    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
 
     // 生成数据源 DDL 语句
     val sourceDDL =
@@ -51,29 +51,6 @@ class CsvParser extends ConfigurableStop[Table] {
 
     val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
     out.write(resultTable)
-
-
-    //    val env = pec.get[StreamExecutionEnvironment]()
-    //
-    //    val csvFormat = CsvReaderFormat.forSchema(
-    //      CsvSchema.builder
-    //        .addColumn(new CsvSchema.Column(0, "name", CsvSchema.ColumnType.STRING))
-    //        .addColumn(new CsvSchema.Column(1, "age", CsvSchema.ColumnType.NUMBER)
-    //          .withArrayElementSeparator("#"))
-    //        //        .addColumn(new CsvSchema.Column(4, "array", CsvSchema.ColumnType.ARRAY)
-    //        //          .withArrayElementSeparator("#"))
-    //        .setSkipFirstDataRow(header)
-    //        .build,
-    //      RowTypeUtil.getRowTypeInfo(schema))
-    //
-    //    val csvTableSource: FileSource[Row] =
-    //      FileSource.forRecordStreamFormat(csvFormat, Path.fromLocalFile(new File(csvPath)))
-    //        //.monitorContinuously(Duration.ofMillis(5))
-    //        .build()
-    //
-    //    val df = env.fromSource(csvTableSource, WatermarkStrategy.noWatermarks[Row](), "csvTableSource")
-    //    df.print()
-    //    out.write(df)
 
   }
 
@@ -123,7 +100,6 @@ class CsvParser extends ConfigurableStop[Table] {
       .description("The schema of csv file")
       .defaultValue("")
       .required(false)
-      //.example("id,name,gender,age")
       .example("name:string,age:int")
     descriptor = schema :: descriptor
 

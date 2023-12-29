@@ -7,12 +7,9 @@ import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.enums.DataBaseType
 import cn.piflow.util.IdGenerator
-import org.apache.commons.collections4.MapUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-
-import scala.collection.JavaConverters._
 
 class JDBCRead extends ConfigurableStop[Table] {
 
@@ -37,7 +34,7 @@ class JDBCRead extends ConfigurableStop[Table] {
 
     val columns = RowTypeUtil.getTableSchema(schema)
 
-    val tmpTable = "JDBCRead_" + IdGenerator.uuidWithoutSplit
+    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
 
     val conf = getWithConf(driver, username, password)
 
@@ -83,11 +80,8 @@ class JDBCRead extends ConfigurableStop[Table] {
   def initialize(ctx: ProcessContext[Table]): Unit = {}
 
   override def setProperties(map: Map[String, Any]): Unit = {
-
-    val javaMap = map.asJava
-
     url = MapUtil.get(map, "url").asInstanceOf[String]
-    driver = MapUtils.getString(javaMap, "driver")
+    driver = MapUtil.get(map, "driver", "").asInstanceOf[String]
     username = MapUtil.get(map, "username").asInstanceOf[String]
     password = MapUtil.get(map, "password").asInstanceOf[String]
     tableName = MapUtil.get(map, "tableName").asInstanceOf[String]

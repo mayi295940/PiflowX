@@ -29,14 +29,20 @@ class DataGen extends ConfigurableStop[Table] {
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
+
     var descriptor: List[PropertyDescriptor] = List()
+
     val schema = new PropertyDescriptor()
       .name("schema")
       .displayName("Schema")
       .description("数据生成规则")
       .defaultValue("")
       .required(true)
-      .example("[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000},{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15},{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}]")
+      .example("[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000}," +
+        "{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15}," +
+        "{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}," +
+        "{\"filedName\":\"timeField\",\"filedType\":\"AS PROCTIME()\"}]")
+
     descriptor = schema :: descriptor
 
     val count = new PropertyDescriptor()
@@ -79,7 +85,7 @@ class DataGen extends ConfigurableStop[Table] {
 
     val (columns, conf) = getWithColumnsAndConf(schema)
 
-    val tmpTable = "DataGen_" + IdGenerator.uuidWithoutSplit
+    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
 
     // 生成数据源 DDL 语句
     val sourceDDL =

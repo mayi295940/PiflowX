@@ -1,5 +1,6 @@
 package cn.piflow.bundle.flink.common
 
+import cn.piflow.Constants
 import cn.piflow.bundle.flink.source.mock.MockSourceFunction
 import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.util.IdGenerator
@@ -24,7 +25,7 @@ object ShowDataTest {
 
     val inputTable = tableEnv.fromDataStream(df)
 
-    val tmpTable = "TableShowTmp_" + IdGenerator.uuidWithoutSplit
+    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
 
     tableEnv.createTemporaryView(tmpTable, inputTable)
 

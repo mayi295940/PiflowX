@@ -4,9 +4,13 @@ import scala.collection.mutable.{Map => MMap}
 
 object MapUtil {
 
-  def get(map: Map[String, Any], key: String): Any = {
+  def get(map: Map[String, Any], key: String, defaultValue: Any = null): Any = {
     map.get(key) match {
-      case None => None
+      case None => if (defaultValue != null) {
+        defaultValue
+      } else {
+        None
+      }
       case Some(x: String) => x
       case Some(x: Integer) => x
       case Some(x: List[String]) => x

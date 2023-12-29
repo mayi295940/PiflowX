@@ -52,7 +52,7 @@ class Filter extends ConfigurableStop[Table] {
 
     val inputTable = in.read()
 
-    val tmpTable = "FilterTmp_" + IdGenerator.uuidWithoutSplit
+    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
     tableEnv.createTemporaryView(tmpTable, inputTable)
 
     val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable WHERE $condition")
