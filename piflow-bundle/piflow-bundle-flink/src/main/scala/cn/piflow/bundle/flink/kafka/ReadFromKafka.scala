@@ -113,6 +113,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .displayName("KAFKA_HOST")
       .description("逗号分隔的Kafka broker列表。")
       .defaultValue("")
+      .example("127.0.0.1:9092")
       .required(true)
 
     val topic = new PropertyDescriptor()
@@ -121,6 +122,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .description("读取数据的topic名。亦支持用分号间隔的topic列表，如 'topic-1;topic-2'。" +
         "注意，'topic' 和 'topic-pattern' 两个选项只能使用其中一个。")
       .defaultValue("")
+      .example("topic-1")
       .required(false)
 
     val topic_pattern = new PropertyDescriptor()
@@ -129,6 +131,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .description("匹配读取topic名称的正则表达式。在作业开始运行时，所有匹配该正则表达式的topic都将被Kafka consumer订阅。" +
         "注意，'topic' 和 'topic-pattern' 两个选项只能使用其中一个。")
       .defaultValue("")
+      .example("topic1_*")
       .required(false)
 
     val startup_mode = new PropertyDescriptor()
@@ -137,21 +140,25 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .description("Kafka consumer 的启动模式。")
       .allowableValues(Set("earliest-offset", "latest-offset", "group-offsets", "timestamp", "specific-offsets"))
       .defaultValue("")
+      .example("earliest-offset")
       .required(false)
 
     val schema = new PropertyDescriptor()
       .name("schema")
       .displayName("SCHEMA")
-      .defaultValue("id:int,name:string,age:int")
+      .description("Kafka消息的schema信息。")
+      .defaultValue("")
+      .example("id:int,name:string,age:int")
       .required(true)
 
     val format = new PropertyDescriptor()
       .name("format")
       .displayName("FORMAT")
-      .description("用来序列化或反序列化Kafka消息的格式。注意：该配置项和 'value.format' 二者必需其一。")
+      .description("用来反序列化Kafka消息的格式。注意：该配置项和 'value.format' 二者必需其一。")
       .allowableValues(Set("json", "csv", "avro", "parquet", "orc", "raw", "protobuf",
         "debezium-json", "canal-json", "maxwell-json", "ogg-json"))
       .defaultValue("")
+      .example("json")
       .required(true)
 
     val group = new PropertyDescriptor()
