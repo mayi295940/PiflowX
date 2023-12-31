@@ -1,9 +1,10 @@
 package cn.piflow.util
 
 import com.alibaba.fastjson2.{JSON, JSONArray, JSONObject}
+
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
-import scala.collection.JavaConverters.mapAsScalaMapConverter
 
 /**
  * Created by xjzhu@cnic.cn on 4/30/19
@@ -76,13 +77,17 @@ object JsonUtil {
     map1
   }
 
+  def mapToObject[T](o: Any, clazz: Class[T]): T = {
+    JSONObject.parseObject[T](toJson(o), clazz)
+  }
+
 
   private def jsonObjectToMapUtil(str: String): Map[String, Any] = {
     val map: Map[String, Any] = JSON.parseObject(str).asScala.toMap[String, Any]
     map.map(x => {
-      if (x._2.toString.startsWith("[")) (x._1, jsonArrayToMapUtil(JSON.parseArray(x._2.toString)))
+      if (x._2 == null) (x._1, "")
       else if (x._2.toString.startsWith("{")) (x._1, jsonObjectToMapUtil(x._2.toString))
-      else if (x._2 == null) (x._1, "")
+      else if (x._2.toString.startsWith("[")) (x._1, jsonArrayToMapUtil(JSON.parseArray(x._2.toString)))
       else (x._1, x._2)
     })
   }

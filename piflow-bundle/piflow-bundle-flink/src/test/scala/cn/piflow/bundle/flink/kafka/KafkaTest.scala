@@ -13,4 +13,12 @@ class KafkaTest {
     BaseTest.testFlow(file)
   }
 
+  @Test
+  def testFlow2(): Unit = {
+
+    //parse flow json
+    val file = "src/test/resources/kafka/kafka2.json"
+    BaseTest.testFlow(file)
+  }
+
 }

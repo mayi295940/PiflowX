@@ -1,11 +1,12 @@
 package cn.piflow.bundle.flink.kafka
 
 import cn.piflow._
+import cn.piflow.bundle.flink.model.FlinkTableDefinition
 import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.util.IdGenerator
+import cn.piflow.util.{IdGenerator, JsonUtil}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -21,7 +22,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
   private var topic: String = _
   private var topic_pattern: String = _
   private var startup_mode: String = _
-  private var schema: String = _
+  private var tableDefinition: FlinkTableDefinition = _
   private var format: String = _
   private var group: String = _
   private var properties: Map[String, Any] = _
@@ -32,18 +33,24 @@ class ReadFromKafka extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val columns = RowTypeUtil.getTableSchema(schema)
+    val columns = RowTypeUtil.getTableSchema(tableDefinition)
 
-    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + IdGenerator.uuidWithoutSplit
+    var tableName: String = ""
 
-    val conf = getWithConf(topic, topic_pattern, group, startup_mode, properties)
+    if (StringUtils.isEmpty(tableDefinition.getTableName)) {
+      tableName = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
+    } else {
+      tableName += tableDefinition.getRealTableName
+    }
+
+    val ifNotExists = if (tableDefinition.getIfNotExists) "IF NOT EXISTS" else ""
 
     // 生成数据源 DDL 语句
     val sourceDDL =
-      s""" CREATE TABLE $tmpTable ($columns) WITH (
+      s""" CREATE TABLE $ifNotExists $tableName ($columns) WITH (
          |'connector' = 'kafka',
          |'properties.bootstrap.servers' = '$kafka_host',
-         | $conf
+         | $getWithConf
          |'format' = '$format'
          |)"""
         .stripMargin
@@ -54,16 +61,12 @@ class ReadFromKafka extends ConfigurableStop[Table] {
 
     tableEnv.executeSql(sourceDDL)
 
-    val query = s"SELECT * FROM $tmpTable"
+    val query = s"SELECT * FROM $tableName"
     out.write(tableEnv.sqlQuery(query))
 
   }
 
-  private def getWithConf(topic: String,
-                          topic_pattern: String,
-                          group: String,
-                          startup_mode: String,
-                          properties: Map[String, Any]): String = {
+  private def getWithConf: String = {
 
     var result = List[String]()
 
@@ -99,7 +102,8 @@ class ReadFromKafka extends ConfigurableStop[Table] {
     topic = MapUtil.get(map, key = "topic", "").asInstanceOf[String]
     topic_pattern = MapUtil.get(map, key = "topic_pattern", "").asInstanceOf[String]
     startup_mode = MapUtil.get(map, key = "startup_mode", "").asInstanceOf[String]
-    schema = MapUtil.get(map, key = "schema", "").asInstanceOf[String]
+    val tableDefinitionMap = MapUtil.get(map, key = "tableDefinition", Map()).asInstanceOf[Map[String, Any]]
+    tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
     format = MapUtil.get(map, key = "format").asInstanceOf[String]
     group = MapUtil.get(map, key = "group", "").asInstanceOf[String]
     properties = MapUtil.get(map, key = "properties", Map()).asInstanceOf[Map[String, Any]]
@@ -143,12 +147,12 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .example("earliest-offset")
       .required(false)
 
-    val schema = new PropertyDescriptor()
-      .name("schema")
-      .displayName("SCHEMA")
-      .description("Kafka消息的schema信息。")
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
       .defaultValue("")
-      .example("id:int,name:string,age:int")
+      .example("")
       .required(true)
 
     val format = new PropertyDescriptor()
@@ -180,7 +184,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
     descriptor = topic :: descriptor
     descriptor = topic_pattern :: descriptor
     descriptor = startup_mode :: descriptor
-    descriptor = schema :: descriptor
+    descriptor = tableDefinition :: descriptor
     descriptor = format :: descriptor
     descriptor = group :: descriptor
     descriptor = properties :: descriptor

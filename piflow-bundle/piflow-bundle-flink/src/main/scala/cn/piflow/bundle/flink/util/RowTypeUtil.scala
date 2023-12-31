@@ -1,10 +1,15 @@
 package cn.piflow.bundle.flink.util
 
 import cn.piflow.Constants
+import cn.piflow.bundle.flink.model.FlinkTableDefinition
+import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation, Types}
 import org.apache.flink.api.java.typeutils.RowTypeInfo
 import org.apache.flink.table.api.{DataTypes, Schema, Table}
+import org.apache.flink.table.types.DataType
+
+import java.util
 
 // https://nightlies.apache.org/flink/flink-docs-release-1.17/zh/docs/dev/table/types/
 // TODO 类型完善
@@ -50,6 +55,49 @@ object RowTypeUtil {
     info
   }
 
+  def getDataType(schema: String): (DataType, Array[String]) = {
+
+    val fieldList = new util.ArrayList[DataTypes.Field]()
+
+
+    val field = schema.split(Constants.COMMA)
+
+    val fieldNames = new Array[String](field.size)
+
+    for (i <- 0 until field.size) {
+      val columnInfo = field(i).trim.split(Constants.COLON)
+      val columnName = columnInfo(0).trim
+      val columnType = columnInfo(1).trim
+      var isNullable = false
+      if (columnInfo.size == 3) {
+        isNullable = columnInfo(2).trim.toBoolean
+      }
+
+      fieldNames(i) = columnName
+
+      var filedType: DataType = null
+      columnType.toLowerCase() match {
+        case "string" => filedType = DataTypes.STRING
+        case "int" => filedType = DataTypes.INT
+        case "double" => filedType = DataTypes.DOUBLE
+        case "float" => filedType = DataTypes.FLOAT
+        case "long" => filedType = DataTypes.BIGINT
+        case "boolean" => filedType = DataTypes.BOOLEAN
+        case "date" => filedType = DataTypes.DATE
+        case "timestamp" => filedType = DataTypes.TIMESTAMP
+        case _ =>
+          throw new RuntimeException("Unsupported type: " + columnType)
+      }
+
+      val filed = DataTypes.FIELD(columnName, filedType)
+      fieldList.add(filed)
+    }
+
+    val info = DataTypes.ROW(fieldList)
+
+    (info, fieldNames)
+  }
+
 
   /**
    * 生成Row类型的TypeInformation.
@@ -92,7 +140,7 @@ object RowTypeUtil {
   def getTableSchema(schema: String): String = {
 
     var primaryKey: String = ""
-    var sourceDDL = ""
+    var tableSchema = ""
 
     val field = schema.split(Constants.COMMA)
     for (i <- 0 until field.size) {
@@ -105,25 +153,25 @@ object RowTypeUtil {
       }
 
       columnType.toLowerCase() match {
-        case "string" => sourceDDL += s"  `$columnName` ${DataTypes.STRING()},"
-        case "int" => sourceDDL += s"  `$columnName` ${DataTypes.INT()},"
-        case "double" => sourceDDL += s"  `$columnName` ${DataTypes.DOUBLE()},"
-        case "float" => sourceDDL += s"  `$columnName` ${DataTypes.FLOAT()},"
-        case "long" => sourceDDL += s"  `$columnName` ${DataTypes.BIGINT()},"
-        case "boolean" => sourceDDL += s"  `$columnName` ${DataTypes.BOOLEAN()},"
-        case "date" => sourceDDL += s"  `$columnName` ${DataTypes.DATE()},"
-        case "timestamp" => sourceDDL += s"  `$columnName` ${DataTypes.TIMESTAMP()},"
+        case "string" => tableSchema += s"  `$columnName` ${DataTypes.STRING()},"
+        case "int" => tableSchema += s"  `$columnName` ${DataTypes.INT()},"
+        case "double" => tableSchema += s"  `$columnName` ${DataTypes.DOUBLE()},"
+        case "float" => tableSchema += s"  `$columnName` ${DataTypes.FLOAT()},"
+        case "long" => tableSchema += s"  `$columnName` ${DataTypes.BIGINT()},"
+        case "boolean" => tableSchema += s"  `$columnName` ${DataTypes.BOOLEAN()},"
+        case "date" => tableSchema += s"  `$columnName` ${DataTypes.DATE()},"
+        case "timestamp" => tableSchema += s"  `$columnName` ${DataTypes.TIMESTAMP()},"
         case _ =>
           throw new RuntimeException("Unsupported type: " + columnType)
       }
     }
 
     if (StringUtils.isNotBlank(primaryKey)) {
-      sourceDDL = sourceDDL.stripMargin + s"PRIMARY KEY ($primaryKey) NOT ENFORCED"
-      sourceDDL
+      tableSchema = tableSchema.stripMargin + s"PRIMARY KEY ($primaryKey) NOT ENFORCED"
+      tableSchema
     }
     else {
-      sourceDDL.stripMargin.dropRight(1)
+      tableSchema.stripMargin.dropRight(1)
     }
   }
 
@@ -134,8 +182,7 @@ object RowTypeUtil {
 
     val schema = table.getResolvedSchema
 
-
-    var sourceDDL = ""
+    var tableSchema = ""
 
     val types = schema.getColumnDataTypes
     val fieldNum = schema.getColumnCount
@@ -145,20 +192,123 @@ object RowTypeUtil {
       val columnName = fieldNames.get(i)
       val columnType = types.get(i).toString.toLowerCase
       columnType match {
-        case "string" => sourceDDL += s"  $columnName ${DataTypes.STRING()},"
-        case "int" => sourceDDL += s"  $columnName ${DataTypes.INT()},"
-        case "double" => sourceDDL += s"  $columnName ${DataTypes.DOUBLE()},"
-        case "float" => sourceDDL += s"  $columnName ${DataTypes.FLOAT()},"
-        case "long" => sourceDDL += s"  $columnName ${DataTypes.BIGINT()},"
-        case "boolean" => sourceDDL += s"  $columnName ${DataTypes.BOOLEAN()},"
-        case "date" => sourceDDL += s"  $columnName ${DataTypes.DATE()},"
-        case "timestamp" => sourceDDL += s"  $columnName ${DataTypes.TIMESTAMP()},"
+        case "string" => tableSchema += s"  $columnName ${DataTypes.STRING()},"
+        case "int" => tableSchema += s"  $columnName ${DataTypes.INT()},"
+        case "double" => tableSchema += s"  $columnName ${DataTypes.DOUBLE()},"
+        case "float" => tableSchema += s"  $columnName ${DataTypes.FLOAT()},"
+        case "long" => tableSchema += s"  $columnName ${DataTypes.BIGINT()},"
+        case "boolean" => tableSchema += s"  $columnName ${DataTypes.BOOLEAN()},"
+        case "date" => tableSchema += s"  $columnName ${DataTypes.DATE()},"
+        case "timestamp" => tableSchema += s"  $columnName ${DataTypes.TIMESTAMP()},"
         case _ =>
           throw new RuntimeException("Unsupported type: " + columnType)
       }
     }
 
-    sourceDDL.stripMargin.dropRight(1)
+    tableSchema.stripMargin.dropRight(1)
+  }
+
+  /**
+   * 生成table Schema
+   */
+  def getTableSchema(tableDefinition: FlinkTableDefinition): String = {
+
+    var schema = ""
+    var primaryKeyList: List[String] = List()
+    var partitionKeyList: List[String] = List()
+
+    val physicalColumns = tableDefinition.getPhysicalColumnDefinition
+    val metadataColumns = tableDefinition.getMetadataColumnDefinition
+    val computedColumns = tableDefinition.getComputedColumnDefinition
+    val watermark = tableDefinition.getWatermarkDefinition
+
+    /*
+     * <physical_column_definition>:
+     * column_name column_type [ <column_constraint> ] [COMMENT column_comment]
+     */
+    if (CollectionUtils.isNotEmpty(physicalColumns)) {
+      physicalColumns.forEach(column => {
+        if (StringUtils.isNotBlank(column.getColumnName)) {
+
+          if (column.getLength != null && column.getLength > 0) {
+            schema += s"  ${column.getColumnName} ${column.getColumnType}(${column.getLength})"
+          } else if (column.getPrecision != null && column.getPrecision > 0 && column.getScale != null && column.getScale > 0) {
+            schema += s"  ${column.getColumnName} ${column.getColumnType}(${column.getPrecision}, ${column.getScale})"
+          } else {
+            schema += s"  ${column.getColumnName} ${column.getColumnType}"
+          }
+
+          if (StringUtils.isNotBlank(column.getComment)) {
+            schema += s" COMMENT '${column.getComment}'"
+          }
+          schema += Constants.COMMA
+
+          if (column.getPrimaryKey()) {
+            primaryKeyList = column.getColumnName :: primaryKeyList
+          }
+          if (column.getPartitionKey()) {
+            partitionKeyList = column.getColumnName :: partitionKeyList
+          }
+        }
+      })
+    }
+
+    /*
+     * <metadata_column_definition>:
+     *  column_name column_type METADATA [ FROM metadata_key ] [ VIRTUAL ]
+     */
+    if (CollectionUtils.isNotEmpty(metadataColumns)) {
+      metadataColumns.forEach(column => {
+        if (StringUtils.isNotBlank(column.getColumnName)) {
+          schema += s"  ${column.getColumnName} ${column.getColumnType} METADATA"
+          if (StringUtils.isNotBlank(column.getFrom)) {
+            schema += s" FROM '${column.getFrom}"
+          }
+          if (column.getVirtual) {
+            schema += " VIRTUAL"
+          }
+          schema += Constants.COMMA
+        }
+      })
+    }
+
+    /*
+     * <computed_column_definition>:
+     * column_name AS computed_column_expression [COMMENT column_comment]
+     */
+    if (CollectionUtils.isNotEmpty(computedColumns)) {
+      computedColumns.forEach(column => {
+        if (StringUtils.isNotBlank(column.getColumnName)) {
+          schema += s"  ${column.getColumnName} AS ${column.getComputedColumnExpression}"
+          if (StringUtils.isNotBlank(column.getComment)) {
+            schema += s" COMMENT '${column.getComment}"
+          }
+          schema += Constants.COMMA
+        }
+      })
+    }
+
+    /*
+     * <watermark_definition>:
+     * WATERMARK FOR rowtime_column_name AS watermark_strategy_expression
+     * WATERMARK FOR view_time as view_time - INTERVAL '5' SECOND
+     */
+    if (watermark != null) {
+      if (StringUtils.isNotBlank(watermark.getRowTimeColumnName)) {
+        schema += s" WATERMARK FOR  ${watermark.getRowTimeColumnName} " +
+          s"AS ${watermark.getRowTimeColumnName} - INTERVAL '${watermark.getTime}' ${watermark.getTimeUnit},"
+      }
+    }
+
+    if (primaryKeyList.nonEmpty) {
+      schema += s" PRIMARY KEY (${primaryKeyList.mkString(Constants.COMMA)}) NOT ENFORCED,"
+    }
+
+    if (partitionKeyList.nonEmpty) {
+      schema += s" PARTITIONED BY (${partitionKeyList.mkString(Constants.COMMA)}),"
+    }
+
+    schema.stripMargin.dropRight(1)
   }
 
 }
