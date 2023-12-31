@@ -17,7 +17,7 @@ class CsvStringParser extends ConfigurableStop[Table] {
   val outportList: List[String] = List(Port.DefaultPort)
   override val description: String = "Parse csv string"
 
-  var string: String = _
+  var content: String = _
   var delimiter: String = _
   var schema: String = _
 
@@ -27,10 +27,13 @@ class CsvStringParser extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val rowType = RowTypeUtil.getRowTypeInfo(schema)
-    val colNum: Int = rowType.getArity
+    val (rowType, _) = RowTypeUtil.getDataType(schema)
 
-    val arrStr: Array[String] = string.split(Constants.LINE_SPLIT_N).map(x => x.trim)
+    val children = rowType.getChildren
+
+    val colNum: Int = children.size()
+
+    val arrStr: Array[String] = content.split(Constants.LINE_SPLIT_N).map(x => x.trim)
 
     val listROW: List[Row] = arrStr.map(line => {
 
@@ -41,7 +44,7 @@ class CsvStringParser extends ConfigurableStop[Table] {
       val row = new Row(colNum)
       for (i <- 0 until colNum) {
 
-        val colType = rowType.getTypeAt(i).getTypeClass.getSimpleName.toLowerCase()
+        val colType = children.get(i).getConversionClass.getSimpleName.toLowerCase()
         colType match {
           case "string" => row.setField(i, seqSTR(i))
           case "integer" => row.setField(i, seqSTR(i).toInt)
@@ -58,11 +61,11 @@ class CsvStringParser extends ConfigurableStop[Table] {
       row
     }).toList
 
-    out.write(tableEnv.fromValues(rowType, listROW))
+    out.write(tableEnv.fromValues(rowType, listROW: _*))
   }
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    string = MapUtil.get(map, "string").asInstanceOf[String]
+    content = MapUtil.get(map, "content").asInstanceOf[String]
     delimiter = MapUtil.get(map, "delimiter").asInstanceOf[String]
     schema = MapUtil.get(map, "schema").asInstanceOf[String]
   }
@@ -70,19 +73,19 @@ class CsvStringParser extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val string = new PropertyDescriptor()
-      .name("string")
-      .displayName("String")
+    val content = new PropertyDescriptor()
+      .name("content")
+      .displayName("Content")
       .defaultValue("")
       .required(true)
       .example("1,zs\n2,ls\n3,ww")
-    descriptor = string :: descriptor
+    descriptor = content :: descriptor
 
     val delimiter = new PropertyDescriptor()
       .name("delimiter")
       .displayName("Delimiter")
       .description("The delimiter of CSV string")
-      .defaultValue("")
+      .defaultValue(",")
       .required(true)
       .example(",")
     descriptor = delimiter :: descriptor
