@@ -1,12 +1,13 @@
 package cn.piflow.bundle.flink.jdbc
 
 import cn.piflow._
+import cn.piflow.bundle.flink.model.FlinkTableDefinition
 import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.enums.DataBaseType
-import cn.piflow.util.IdGenerator
+import cn.piflow.util.{IdGenerator, JsonUtil}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -14,7 +15,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 class JDBCRead extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
-  val description: String = "Read data from database with jdbc"
+  val description: String = "使用JDBC驱动向任意类型的关系型数据库读取数据"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 
@@ -23,43 +24,57 @@ class JDBCRead extends ConfigurableStop[Table] {
   private var username: String = _
   private var password: String = _
   private var tableName: String = _
-  private var schema: String = _
+  private var fetchSize: Int = _
+  private var connectionMaxRetryTimeout: String = _
+  private var tableDefinition: FlinkTableDefinition = _
+  private var properties: Map[String, Any] = _
 
-  // todo jdbc connector other parameter
   def perform(in: JobInputStream[Table],
               out: JobOutputStream[Table],
               pec: JobContext[Table]): Unit = {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val columns = RowTypeUtil.getTableSchema(schema)
+    val (columns,
+    ifNotExists,
+    tableComment,
+    partitionStatement,
+    asSelectStatement,
+    likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
 
-    val tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
+    var tmpTable: String = ""
+    if (StringUtils.isEmpty(tableDefinition.getTableName)) {
+      tmpTable = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
+    } else {
+      tmpTable += tableDefinition.getRealTableName
+    }
 
-    val conf = getWithConf(driver, username, password)
-
-    // 生成数据源 DDL 语句
-    val sourceDDL =
-      s""" CREATE TABLE $tmpTable ($columns) WITH (
+    val ddl =
+      s""" CREATE TABLE $ifNotExists $tmpTable
+         | $columns
+         | $tableComment
+         | $partitionStatement
+         | WITH (
          |'connector' = 'jdbc',
          |'url' = '$url',
-         |$conf
+         |$getWithConf
          |'table-name' = '$tableName'
-         |)"""
+         |)
+         |$asSelectStatement
+         |$likeStatement
+         |"""
         .stripMargin
         .replaceAll("\r\n", " ")
         .replaceAll(Constants.LINE_SPLIT_N, " ")
 
-    println(sourceDDL)
-
-    tableEnv.executeSql(sourceDDL)
+    tableEnv.executeSql(ddl)
 
     val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
     out.write(resultTable)
 
   }
 
-  private def getWithConf(driver: String, username: String, password: String): String = {
+  private def getWithConf: String = {
     var result = List[String]()
 
     if (StringUtils.isNotBlank(driver)) {
@@ -74,6 +89,14 @@ class JDBCRead extends ConfigurableStop[Table] {
       result = s"'password' = '$password'," :: result
     }
 
+    if (fetchSize > 0) {
+      result = s"'scan.fetch-size' = '$fetchSize'," :: result
+    }
+
+    if (StringUtils.isNotBlank(connectionMaxRetryTimeout)) {
+      result = s"'connection.max-retry-timeout' = '$connectionMaxRetryTimeout'," :: result
+    }
+
     result.mkString("")
   }
 
@@ -82,10 +105,14 @@ class JDBCRead extends ConfigurableStop[Table] {
   override def setProperties(map: Map[String, Any]): Unit = {
     url = MapUtil.get(map, "url").asInstanceOf[String]
     driver = MapUtil.get(map, "driver", "").asInstanceOf[String]
-    username = MapUtil.get(map, "username").asInstanceOf[String]
-    password = MapUtil.get(map, "password").asInstanceOf[String]
+    username = MapUtil.get(map, "username", "").asInstanceOf[String]
+    password = MapUtil.get(map, "password", "").asInstanceOf[String]
     tableName = MapUtil.get(map, "tableName").asInstanceOf[String]
-    schema = MapUtil.get(map, "schema").asInstanceOf[String]
+    connectionMaxRetryTimeout = MapUtil.get(map, "connectionMaxRetryTimeout", "").asInstanceOf[String]
+    fetchSize = MapUtil.get(map, "fetchSize", 0).asInstanceOf[Int]
+    val tableDefinitionMap = MapUtil.get(map, key = "tableDefinition", Map()).asInstanceOf[Map[String, Any]]
+    tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
+    properties = MapUtil.get(map, key = "properties", Map()).asInstanceOf[Map[String, Any]]
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
@@ -94,7 +121,7 @@ class JDBCRead extends ConfigurableStop[Table] {
     val url = new PropertyDescriptor()
       .name("url")
       .displayName("Url")
-      .description("JDBC 数据库 url")
+      .description("JDBC数据库url")
       .defaultValue("")
       .required(true)
       .example("jdbc:mysql://127.0.0.1:3306/dbname")
@@ -128,27 +155,54 @@ class JDBCRead extends ConfigurableStop[Table] {
       .sensitive(true)
     descriptor = password :: descriptor
 
-    val schema = new PropertyDescriptor()
-      .name("schema")
-      .displayName("Schema")
-      .description("The schema of mock data, format is column:columnType:isNullable. " +
-        "Separate multiple fields with commas. " +
-        "columnType can be String/Int/Long/Float/Double/Boolean. " +
-        "isNullable can be left blank, the default value is false. ")
-      .defaultValue("")
-      .required(true)
-      .example("id:String,name:String,age:Int")
-    descriptor = schema :: descriptor
-
     val tableName = new PropertyDescriptor()
       .name("tableName")
       .displayName("TableName")
-      .description("连接到 JDBC 表的名称")
+      .description("连接到JDBC表的名称")
       .defaultValue("")
       .required(true)
-      .language(Language.Sql)
-      .example("test.user1")
+      .language(Language.Text)
+      .example("test")
     descriptor = tableName :: descriptor
+
+    val connectionMaxRetryTimeout = new PropertyDescriptor()
+      .name("connectionMaxRetryTimeout")
+      .displayName("ConnectionMaxRetryTimeout")
+      .description("最大重试超时时间，以秒为单位且不应该小于 1 秒。")
+      .defaultValue("60s")
+      .required(false)
+      .language(Language.Text)
+      .example("60s")
+    descriptor = connectionMaxRetryTimeout :: descriptor
+
+    val fetchSize = new PropertyDescriptor()
+      .name("fetchSize")
+      .displayName("FetchSize")
+      .description("每次循环读取时应该从数据库中获取的行数。如果指定的值为 '0'，则该配置项会被忽略。")
+      .defaultValue("")
+      .dataType("Integer")
+      .required(false)
+      .language(Language.Text)
+      .example("test")
+    descriptor = fetchSize :: descriptor
+
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
+    val properties = new PropertyDescriptor()
+      .name("properties")
+      .displayName("PROPERTIES")
+      .description("连接器其他配置")
+      .defaultValue("")
+      .required(false)
+
+    descriptor = properties :: descriptor
 
     descriptor
   }

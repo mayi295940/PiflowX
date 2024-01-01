@@ -8,11 +8,12 @@
         "name": "JDBCRead1",
         "bundle": "cn.piflow.bundle.flink.jdbc.JDBCRead",
         "properties": {
-          "schema": "id:String,name:String",
           "url": "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false&allowMultiQueries=true",
           "username": "root",
           "password": "123456",
-          "tableName": "test"
+          "tableName": "test",
+          "tableDefinition": "{\"catalogName\":null,\"dbname\":null,\"tableName\":\"\",\"ifNotExists\":true,\"physicalColumnDefinition\":[{\"columnName\":\"id\",\"columnType\":\"INT\",\"comment\":\"id\"},{\"columnName\":\"name\",\"columnType\":\"STRING\",\"comment\":\"name\"},{\"columnName\":\"age\",\"columnType\":\"INT\"}],\"metadataColumnDefinition\":null,\"computedColumnDefinition\":null,\"watermarkDefinition\":null}",
+          "properties": "{}"
         }
       },
       {
@@ -20,7 +21,7 @@
         "name": "ShowData1",
         "bundle": "cn.piflow.bundle.flink.common.ShowData",
         "properties": {
-          "showNumber": "10"
+          "showNumber": "100"
         }
       }
     ],
