@@ -23,7 +23,6 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
   private var tableDefinition: FlinkTableDefinition = _
   private var key_format: String = _
   private var value_format: String = _
-  private var sql: String = _
   private var value_fields_include: String = _
   private var sink_parallelism: String = _
   private var sink_buffer_flush_max_rows: String = _
@@ -36,21 +35,27 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val columns: String = RowTypeUtil.getTableSchema(tableDefinition)
+    val (columns,
+    ifNotExists,
+    tableComment,
+    partitionStatement,
+    _,
+    likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
 
     var tableName: String = ""
-
     if (StringUtils.isEmpty(tableDefinition.getTableName)) {
       tableName = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
     } else {
       tableName += tableDefinition.getRealTableName
     }
 
-    val ifNotExists = if (tableDefinition.getIfNotExists) "IF NOT EXISTS" else ""
-
     // 生成数据源 DDL 语句
-    val sourceDDL =
-      s""" CREATE TABLE $ifNotExists $tableName ($columns) WITH (
+    val ddl =
+      s""" CREATE TABLE $ifNotExists $tableName
+         | $columns
+         | $tableComment
+         | $partitionStatement
+         | WITH (
          |'connector' = 'upsert-kafka',
          |'properties.bootstrap.servers' = '$kafka_host',
          | $getWithConf
@@ -58,21 +63,23 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
          |'value.format' = '$value_format',
          |'value.fields-include' = '$value_fields_include',
          |'topic' = '$topic'
-         |)"""
+         |)
+         |$likeStatement
+         |"""
         .stripMargin
         .replaceAll("\r\n", " ")
         .replaceAll(Constants.LINE_SPLIT_N, " ")
 
-    println(sourceDDL)
+    println(ddl)
 
-    tableEnv.executeSql(sourceDDL)
+    tableEnv.executeSql(ddl)
 
-    if (StringUtils.isNotBlank(sql)) {
-      val result: TableResult = tableEnv.executeSql(sql)
-      result.print()
-    } else {
+    if (StringUtils.isEmpty(tableDefinition.getAsSelectStatement)) {
       val inputTable = in.read()
       inputTable.executeInsert(tableName)
+    } else {
+      val result: TableResult = tableEnv.executeSql(s"INSERT INTO $tableName ${tableDefinition.getAsSelectStatement}")
+      result.print()
     }
 
   }
@@ -97,7 +104,6 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
     tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
     key_format = MapUtil.get(map, key = "key_format").asInstanceOf[String]
     value_format = MapUtil.get(map, key = "value_format").asInstanceOf[String]
-    sql = MapUtil.get(map, key = "sql").asInstanceOf[String]
     value_fields_include = MapUtil.get(map, key = "value_fields_include").asInstanceOf[String]
     sink_parallelism = MapUtil.get(map, key = "sink_parallelism", "").asInstanceOf[String]
     sink_buffer_flush_max_rows = MapUtil.get(map, key = "sink_buffer_flush_max_rows", "").asInstanceOf[String]
@@ -149,14 +155,6 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
       .defaultValue("")
       .example("json")
       .required(true)
-
-    val sql = new PropertyDescriptor()
-      .name("sql")
-      .displayName("SQL")
-      .description("执行SQL计算逻辑，如果指定则将计算结果以upsert写入Kafka，如果未指定则将输入数据以upsert写入Kafka。")
-      .defaultValue("")
-      .example("")
-      .required(false)
 
     val value_fields_include = new PropertyDescriptor()
       .name("value_fields_include")
@@ -222,7 +220,6 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
     descriptor = tableDefinition :: descriptor
     descriptor = key_format :: descriptor
     descriptor = value_format :: descriptor
-    descriptor = sql :: descriptor
     descriptor = value_fields_include :: descriptor
     descriptor = key_fields_prefix :: descriptor
     descriptor = sink_parallelism :: descriptor

@@ -2,6 +2,8 @@ package cn.piflow.bundle.flink.model;
 
 import cn.piflow.Constants;
 import java.util.List;
+
+import com.mysql.cj.xdevapi.SelectStatement;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -40,7 +42,13 @@ public class FlinkTableDefinition {
 
   private String tableName;
 
+  private String tableComment;
+
   private Boolean ifNotExists;
+
+  private String asSelectStatement;
+
+  private String likeStatement;
 
   /**
    * <physical_column_definition>:
@@ -98,6 +106,14 @@ public class FlinkTableDefinition {
     this.tableName = tableName;
   }
 
+  public String getTableComment() {
+    return tableComment;
+  }
+
+  public void setTableComment(String tableComment) {
+    this.tableComment = tableComment;
+  }
+
   public Boolean getIfNotExists() {
     return ifNotExists;
   }
@@ -136,6 +152,22 @@ public class FlinkTableDefinition {
 
   public void setWatermarkDefinition(FlinkTableWatermark watermarkDefinition) {
     this.watermarkDefinition = watermarkDefinition;
+  }
+
+  public String getAsSelectStatement() {
+    return asSelectStatement;
+  }
+
+  public void setAsSelectStatement(String asSelectStatement) {
+    this.asSelectStatement = asSelectStatement;
+  }
+
+  public String getLikeStatement() {
+    return likeStatement;
+  }
+
+  public void setLikeStatement(String likeStatement) {
+    this.likeStatement = likeStatement;
   }
 
   public String getRealTableName() {

@@ -211,16 +211,16 @@ object RowTypeUtil {
   /**
    * 生成table Schema
    */
-  def getTableSchema(tableDefinition: FlinkTableDefinition): String = {
+  def getTableSchema(definition: FlinkTableDefinition): (String, String, String, String, String, String) = {
 
-    var schema = ""
+    var columns = ""
     var primaryKeyList: List[String] = List()
     var partitionKeyList: List[String] = List()
 
-    val physicalColumns = tableDefinition.getPhysicalColumnDefinition
-    val metadataColumns = tableDefinition.getMetadataColumnDefinition
-    val computedColumns = tableDefinition.getComputedColumnDefinition
-    val watermark = tableDefinition.getWatermarkDefinition
+    val physicalColumns = definition.getPhysicalColumnDefinition
+    val metadataColumns = definition.getMetadataColumnDefinition
+    val computedColumns = definition.getComputedColumnDefinition
+    val watermark = definition.getWatermarkDefinition
 
     /*
      * <physical_column_definition>:
@@ -231,17 +231,17 @@ object RowTypeUtil {
         if (StringUtils.isNotBlank(column.getColumnName)) {
 
           if (column.getLength != null && column.getLength > 0) {
-            schema += s"  ${column.getColumnName} ${column.getColumnType}(${column.getLength})"
+            columns += s"  ${column.getColumnName} ${column.getColumnType}(${column.getLength})"
           } else if (column.getPrecision != null && column.getPrecision > 0 && column.getScale != null && column.getScale > 0) {
-            schema += s"  ${column.getColumnName} ${column.getColumnType}(${column.getPrecision}, ${column.getScale})"
+            columns += s"  ${column.getColumnName} ${column.getColumnType}(${column.getPrecision}, ${column.getScale})"
           } else {
-            schema += s"  ${column.getColumnName} ${column.getColumnType}"
+            columns += s"  ${column.getColumnName} ${column.getColumnType}"
           }
 
           if (StringUtils.isNotBlank(column.getComment)) {
-            schema += s" COMMENT '${column.getComment}'"
+            columns += s" COMMENT '${column.getComment}'"
           }
-          schema += Constants.COMMA
+          columns += Constants.COMMA
 
           if (column.getPrimaryKey()) {
             primaryKeyList = column.getColumnName :: primaryKeyList
@@ -260,14 +260,14 @@ object RowTypeUtil {
     if (CollectionUtils.isNotEmpty(metadataColumns)) {
       metadataColumns.forEach(column => {
         if (StringUtils.isNotBlank(column.getColumnName)) {
-          schema += s"  ${column.getColumnName} ${column.getColumnType} METADATA"
+          columns += s"  ${column.getColumnName} ${column.getColumnType} METADATA"
           if (StringUtils.isNotBlank(column.getFrom)) {
-            schema += s" FROM '${column.getFrom}"
+            columns += s" FROM '${column.getFrom}"
           }
           if (column.getVirtual) {
-            schema += " VIRTUAL"
+            columns += " VIRTUAL"
           }
-          schema += Constants.COMMA
+          columns += Constants.COMMA
         }
       })
     }
@@ -279,11 +279,11 @@ object RowTypeUtil {
     if (CollectionUtils.isNotEmpty(computedColumns)) {
       computedColumns.forEach(column => {
         if (StringUtils.isNotBlank(column.getColumnName)) {
-          schema += s"  ${column.getColumnName} AS ${column.getComputedColumnExpression}"
+          columns += s"  ${column.getColumnName} AS ${column.getComputedColumnExpression}"
           if (StringUtils.isNotBlank(column.getComment)) {
-            schema += s" COMMENT '${column.getComment}"
+            columns += s" COMMENT '${column.getComment}"
           }
-          schema += Constants.COMMA
+          columns += Constants.COMMA
         }
       })
     }
@@ -295,20 +295,37 @@ object RowTypeUtil {
      */
     if (watermark != null) {
       if (StringUtils.isNotBlank(watermark.getRowTimeColumnName)) {
-        schema += s" WATERMARK FOR  ${watermark.getRowTimeColumnName} " +
+        columns += s" WATERMARK FOR  ${watermark.getRowTimeColumnName} " +
           s"AS ${watermark.getRowTimeColumnName} - INTERVAL '${watermark.getTime}' ${watermark.getTimeUnit},"
       }
     }
 
     if (primaryKeyList.nonEmpty) {
-      schema += s" PRIMARY KEY (${primaryKeyList.mkString(Constants.COMMA)}) NOT ENFORCED,"
+      columns += s" PRIMARY KEY (${primaryKeyList.mkString(Constants.COMMA)}) NOT ENFORCED,"
     }
 
-    if (partitionKeyList.nonEmpty) {
-      schema += s" PARTITIONED BY (${partitionKeyList.mkString(Constants.COMMA)}),"
+    val tableComment = if (StringUtils.isNotBlank(definition.getTableComment))
+      s" COMMENT ${definition.getTableComment}"
+    else ""
+
+    val partitionStatement = if (partitionKeyList.nonEmpty)
+      s" PARTITIONED BY (${partitionKeyList.mkString(Constants.COMMA)}) " else ""
+
+    val ifNotExists = if (definition.getIfNotExists) "IF NOT EXISTS" else ""
+
+    val asSelectStatement = if (StringUtils.isNotBlank(definition.getAsSelectStatement))
+      s" AS ${definition.getAsSelectStatement}"
+    else ""
+
+    val likeStatement = if (StringUtils.isNotBlank(definition.getLikeStatement))
+      s" LIKE  ${definition.getLikeStatement}"
+    else ""
+
+    if (StringUtils.isNotBlank(columns)) {
+      columns = s"( ${columns.stripMargin.dropRight(1)} )"
     }
 
-    schema.stripMargin.dropRight(1)
+    (columns, ifNotExists, tableComment, partitionStatement, asSelectStatement, likeStatement)
   }
 
 }

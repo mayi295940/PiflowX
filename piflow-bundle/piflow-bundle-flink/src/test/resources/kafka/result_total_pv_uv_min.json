@@ -47,5 +47,6 @@
   ],
   "metadataColumnDefinition": null,
   "computedColumnDefinition": null,
-  "watermarkDefinition": null
+  "watermarkDefinition": null,
+  "asSelectStatement": "SELECT  do_date,cast(DATE_FORMAT(access_time,'HH:mm') AS STRING) AS do_min,pv,uv,NOW() AS currenttime from view_total_pv_uv_min"
 }

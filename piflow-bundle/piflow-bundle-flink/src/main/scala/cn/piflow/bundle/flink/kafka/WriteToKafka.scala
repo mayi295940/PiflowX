@@ -30,29 +30,38 @@ class WriteToKafka extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val inputTable = in.read()
 
-    val columns = RowTypeUtil.getTableSchema(tableDefinition)
+    val (columns,
+    ifNotExists,
+    tableComment,
+    partitionStatement,
+    asSelectStatement,
+    likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
 
     var tableName: String = ""
-
     if (StringUtils.isEmpty(tableDefinition.getTableName)) {
       tableName = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
     } else {
       tableName += tableDefinition.getRealTableName
     }
 
-    val ifNotExists = if (tableDefinition.getIfNotExists) "IF NOT EXISTS" else ""
 
     // 生成数据源 DDL 语句
     val sourceDDL =
-      s""" CREATE TABLE $ifNotExists $tableName ($columns) WITH (
+      s""" CREATE TABLE $ifNotExists $tableName
+         | $columns
+         | $tableComment
+         | $partitionStatement
+         | WITH (
          |'connector' = 'kafka',
          |'properties.bootstrap.servers' = '$kafka_host',
          |'topic' = '$topic',
          | $getWithConf
          |'format' = '$format'
-         |)"""
+         |)
+         |$asSelectStatement
+         |$likeStatement
+         |"""
         .stripMargin
         .replaceAll("\r\n", " ")
         .replaceAll(Constants.LINE_SPLIT_N, " ")
@@ -61,7 +70,10 @@ class WriteToKafka extends ConfigurableStop[Table] {
 
     tableEnv.executeSql(sourceDDL)
 
-    inputTable.executeInsert(tableName)
+    if (StringUtils.isEmpty(asSelectStatement)) {
+      val inputTable = in.read()
+      inputTable.executeInsert(tableName)
+    }
   }
 
   private def getWithConf: String = {

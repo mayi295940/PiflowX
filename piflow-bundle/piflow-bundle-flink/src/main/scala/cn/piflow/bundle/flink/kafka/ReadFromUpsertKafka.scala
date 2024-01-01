@@ -33,21 +33,27 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val columns = RowTypeUtil.getTableSchema(tableDefinition)
+    val (columns,
+    ifNotExists,
+    tableComment,
+    partitionStatement,
+    asSelectStatement,
+    likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
 
     var tableName: String = ""
-
     if (StringUtils.isEmpty(tableDefinition.getTableName)) {
       tableName = this.getClass.getSimpleName.stripSuffix("$") + Constants.UNDERLINE_SIGN + IdGenerator.uuidWithoutSplit
     } else {
       tableName += tableDefinition.getRealTableName
     }
 
-    val ifNotExists = if (tableDefinition.getIfNotExists) "IF NOT EXISTS" else ""
-
     // 生成数据源 DDL 语句
-    val sourceDDL =
-      s""" CREATE TABLE $ifNotExists $tableName ($columns) WITH (
+    val ddl =
+      s""" CREATE TABLE $ifNotExists $tableName
+         | $columns
+         | $tableComment
+         | $partitionStatement
+         | WITH (
          |'connector' = 'upsert-kafka',
          |'properties.bootstrap.servers' = '$kafka_host',
          | $getWithConf
@@ -55,14 +61,16 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
          |'value.format' = '$value_format',
          |'value.fields-include' = '$value_fields_include',
          |'topic' = '$topic'
-         |)"""
+         |)
+         |$asSelectStatement
+         |$likeStatement
+         |"""
         .stripMargin
         .replaceAll("\r\n", " ")
         .replaceAll(Constants.LINE_SPLIT_N, " ")
 
-    println(sourceDDL)
-
-    tableEnv.executeSql(sourceDDL)
+    println(ddl)
+    tableEnv.executeSql(ddl)
 
     val query = s"SELECT * FROM $tableName"
     out.write(tableEnv.sqlQuery(query))

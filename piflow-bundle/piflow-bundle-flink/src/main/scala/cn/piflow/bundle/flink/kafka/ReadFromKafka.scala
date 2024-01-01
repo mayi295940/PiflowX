@@ -33,7 +33,12 @@ class ReadFromKafka extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val columns = RowTypeUtil.getTableSchema(tableDefinition)
+    val (columns,
+    ifNotExists,
+    tableComment,
+    partitionStatement,
+    asSelectStatement,
+    likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
 
     var tableName: String = ""
 
@@ -43,16 +48,21 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       tableName += tableDefinition.getRealTableName
     }
 
-    val ifNotExists = if (tableDefinition.getIfNotExists) "IF NOT EXISTS" else ""
-
     // 生成数据源 DDL 语句
     val sourceDDL =
-      s""" CREATE TABLE $ifNotExists $tableName ($columns) WITH (
+      s""" CREATE TABLE $ifNotExists $tableName
+         | $columns
+         | $tableComment
+         | $partitionStatement
+         | WITH (
          |'connector' = 'kafka',
          |'properties.bootstrap.servers' = '$kafka_host',
          | $getWithConf
          |'format' = '$format'
-         |)"""
+         |)
+         |$asSelectStatement
+         |$likeStatement
+         |"""
         .stripMargin
         .replaceAll("\r\n", " ")
         .replaceAll(Constants.LINE_SPLIT_N, " ")
