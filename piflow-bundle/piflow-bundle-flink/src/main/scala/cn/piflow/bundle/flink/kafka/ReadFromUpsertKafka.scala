@@ -154,7 +154,7 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
 
     val value_fields_include = new PropertyDescriptor()
       .name("value_fields_include")
-      .displayName("value_fields_include")
+      .displayName("ValueFieldsInclude")
       .description("控制哪些字段应该出现在 value 中。" +
         "可取值：\n" +
         "ALL：消息的 value 部分将包含 schema 中所有的字段包括定义为主键的字段。\n" +

@@ -150,7 +150,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
     val value_format = new PropertyDescriptor()
       .name("value_format")
       .displayName("ValueFormat")
-      .description("用于对Kafka消息中value部分序列化的格式")
+      .description("用于对Kafka消息中value部分序列化的格式。")
       .allowableValues(Set("json", "csv", "avro"))
       .defaultValue("")
       .example("json")
@@ -158,7 +158,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
 
     val value_fields_include = new PropertyDescriptor()
       .name("value_fields_include")
-      .displayName("value_fields_include")
+      .displayName("ValueFieldsInclude")
       .description("控制哪些字段应该出现在 value 中。" +
         "可取值：\n" +
         "ALL：消息的 value 部分将包含 schema 中所有的字段包括定义为主键的字段。\n" +
@@ -181,13 +181,13 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
     val sink_parallelism = new PropertyDescriptor()
       .name("sink_parallelism")
       .displayName("SinkParallelism")
-      .description("定义 upsert-kafka sink 算子的并行度。默认情况下，由框架确定并行度，与上游链接算子的并行度保持一致。")
+      .description("定义upsert-kafka sink算子的并行度。默认情况下，由框架确定并行度，与上游链接算子的并行度保持一致。")
       .defaultValue("")
       .required(false)
 
     val sink_buffer_flush_max_rows = new PropertyDescriptor()
       .name("sink_buffer_flush_max_rows")
-      .displayName("KeyFieldsPrefix")
+      .displayName("SinkBufferFlushMaxRows")
       .description("缓存刷新前，最多能缓存多少条记录。当sink收到很多同key上的更新时，缓存将保留同key的最后一条记录，" +
         "因此sink缓存能帮助减少发往Kafka topic的数据量，以及避免发送潜在的tombstone消息。 可以通过设置为 '0' 来禁用它。" +
         "默认，该选项是未开启的。注意，如果要开启sink缓存，需要同时设置 'sink.buffer-flush.max-rows' 和 'sink.buffer-flush.interval' " +
@@ -197,7 +197,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
 
     val sink_buffer_flush_interval = new PropertyDescriptor()
       .name("sink_buffer_flush_interval")
-      .displayName("KeyFieldsPrefix")
+      .displayName("SinkBufferFlushInterval")
       .description("缓存刷新的间隔时间，超过该时间后异步线程将刷新缓存数据。当 sink收到很多同key上的更新时，" +
         "缓存将保留同key的最后一条记录，因此sink缓存能帮助减少发往Kafka topic的数据量，以及避免发送潜在的tombstone消息。 " +
         "可以通过设置为 '0' 来禁用它。默认，该选项是未开启的。注意，如果要开启 sink 缓存，需要同时设置 'sink.buffer-flush.max-rows' " +

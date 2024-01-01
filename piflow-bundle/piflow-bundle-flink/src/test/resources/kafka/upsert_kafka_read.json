@@ -1,6 +1,6 @@
 {
   "flow": {
-    "name": "UpsertKafkaTest",
+    "name": "ReadFromUpsertKafkaTest",
     "uuid": "1234",
     "stops": [
       {
