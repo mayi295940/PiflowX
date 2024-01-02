@@ -45,6 +45,7 @@ class SQLExecute extends ConfigurableStop[Table] {
       .description("sql语句，多行sql以';'分隔")
       .defaultValue("")
       .required(true)
+      .language(Language.Sql)
       .example("select * from temp;show tables;")
     descriptor = sql :: descriptor
 

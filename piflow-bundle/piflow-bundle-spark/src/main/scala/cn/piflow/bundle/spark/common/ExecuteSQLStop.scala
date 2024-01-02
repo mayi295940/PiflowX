@@ -47,6 +47,7 @@ class ExecuteSQLStop extends ConfigurableStop[DataFrame] {
       .description("Sql string")
       .defaultValue("")
       .required(true)
+      .language(Language.Sql)
       .example("select * from temp")
     descriptor = sql :: descriptor
 

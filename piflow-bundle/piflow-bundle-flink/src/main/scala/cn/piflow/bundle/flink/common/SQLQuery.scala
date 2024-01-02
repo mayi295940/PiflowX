@@ -49,6 +49,7 @@ class SQLQuery extends ConfigurableStop[Table] {
       .description("Sql string")
       .defaultValue("")
       .required(true)
+      .language(Language.Sql)
       .example("select * from temp")
     descriptor = sql :: descriptor
 

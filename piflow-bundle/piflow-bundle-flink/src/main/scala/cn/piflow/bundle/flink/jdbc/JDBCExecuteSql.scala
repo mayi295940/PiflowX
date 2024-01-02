@@ -107,6 +107,7 @@ class JDBCExecuteSql extends ConfigurableStop[Table] {
       .description("execute sql语句，多行sql以';'分隔")
       .defaultValue("")
       .required(true)
+      .language(Language.Sql)
       .example("CREATE TABLE IF NOT EXISTS `test` (`id` int DEFAULT NULL,`name` varchar(20) DEFAULT NULL,`age` int DEFAULT NULL);")
     descriptor = sql :: descriptor
 

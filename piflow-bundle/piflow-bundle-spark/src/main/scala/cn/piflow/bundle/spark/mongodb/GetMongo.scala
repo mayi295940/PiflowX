@@ -3,7 +3,7 @@ package cn.piflow.bundle.spark.mongodb
 import java.util
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.{Constants, JobContext, JobInputStream, JobOutputStream, ProcessContext}
 import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor, MongoDatabase}
 import com.mongodb.{MongoClient, MongoCredential, ServerAddress}
@@ -145,6 +145,7 @@ class GetMongo extends ConfigurableStop[DataFrame] {
       .displayName("sql")
       .description("We take the collection you need as a form, and you can find what you want.")
       .defaultValue("")
+      .language(Language.Sql)
       .required(false)
     descriptor = sql :: descriptor
     descriptor

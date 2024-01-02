@@ -2,7 +2,7 @@ package cn.piflow.bundle.spark.mongodb
 
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -69,6 +69,7 @@ class GetMongoDB extends ConfigurableStop[DataFrame] {
         "and you can find what you want.You can also give up filling in this item," +
         "and you will get all the data for this collection")
       .defaultValue("")
+      .language(Language.Sql)
       .required(false)
     descriptor = sql :: descriptor
 
