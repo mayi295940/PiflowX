@@ -1,6 +1,6 @@
 {
   "flow": {
-    "name": "MockDataTest",
+    "name": "JDBCReadTest",
     "uuid": "1234",
     "stops": [
       {

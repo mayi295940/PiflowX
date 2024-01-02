@@ -133,17 +133,17 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .name("driver")
       .displayName("Driver")
       .description("用于连接到此URL的JDBC驱动类名，如果不设置，将自动从URL中推导")
-      .defaultValue(DataBaseType.MySQL8.getDriverClassName)
-      .required(true)
+      .defaultValue("")
+      .required(false)
       .example(DataBaseType.MySQL8.getDriverClassName)
     descriptor = driver :: descriptor
 
     val username = new PropertyDescriptor()
       .name("username")
-      .displayName("username")
+      .displayName("Username")
       .description("JDBC 用户名。如果指定了 'username' 和 'password' 中的任一参数，则两者必须都被指定。")
       .defaultValue("")
-      .required(true)
+      .required(false)
       .example("root")
     descriptor = username :: descriptor
 
@@ -152,7 +152,7 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .displayName("Password")
       .description("JDBC密码")
       .defaultValue("")
-      .required(true)
+      .required(false)
       .example("123456")
       .sensitive(true)
     descriptor = password :: descriptor
