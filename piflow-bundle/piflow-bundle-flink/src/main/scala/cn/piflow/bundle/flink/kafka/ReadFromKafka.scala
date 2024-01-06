@@ -162,6 +162,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .displayName("TableDefinition")
       .description("Flink table定义。")
       .defaultValue("")
+      .language(Language.FlinkTableSchema)
       .example("")
       .required(true)
 

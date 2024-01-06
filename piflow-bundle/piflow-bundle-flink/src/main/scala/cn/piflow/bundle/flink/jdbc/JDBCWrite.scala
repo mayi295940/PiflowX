@@ -181,6 +181,7 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .displayName("TableDefinition")
       .description("Flink table定义。")
       .defaultValue("")
+      .language(Language.FlinkTableSchema)
       .example("")
       .required(true)
     descriptor = tableDefinition :: descriptor

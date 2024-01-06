@@ -3,7 +3,7 @@ package cn.piflow.bundle.flink.common
 import cn.piflow._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
+import cn.piflow.conf.{ConfigurableStop, Language, Port, StopGroup}
 import cn.piflow.util.IdGenerator
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Table
@@ -38,6 +38,7 @@ class DataGen extends ConfigurableStop[Table] {
       .description("数据生成规则")
       .defaultValue("")
       .required(true)
+      .language(Language.DataGenSchema)
       .example("[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000}," +
         "{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15}," +
         "{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}," +
@@ -51,6 +52,7 @@ class DataGen extends ConfigurableStop[Table] {
       .description("The count of dataframe")
       .defaultValue("")
       .required(true)
+      .dataType(Int.toString())
       .example("10")
     descriptor = count :: descriptor
 
@@ -60,6 +62,7 @@ class DataGen extends ConfigurableStop[Table] {
       .description("rows per second")
       .defaultValue("1")
       .required(false)
+      .dataType(Int.toString())
       .example("10")
     descriptor = ratio :: descriptor
 

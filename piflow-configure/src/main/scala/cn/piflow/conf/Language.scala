@@ -7,4 +7,6 @@ object Language {
   val Python = "Python"
   val Shell = "Shell"
   val Sql = "Sql"
+  val DataGenSchema = "DataGenSchema"
+  val FlinkTableSchema = "FlinkTableSchema"
 }
