@@ -2,8 +2,6 @@ package cn.piflow.bundle.flink.model;
 
 import cn.piflow.Constants;
 import java.util.List;
-
-import com.mysql.cj.xdevapi.SelectStatement;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -35,91 +33,54 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class FlinkTableDefinition {
 
-  private String catalogName;
+  private FlinkTableBaseInfo tableBaseInfo;
 
-  private String dbname;
-  private String schema;
+  private FlinkTableAsSelectStatement asSelectStatement;
 
-  private String tableName;
-
-  private String tableComment;
-
-  private Boolean ifNotExists;
-
-  private String asSelectStatement;
-
-  private String likeStatement;
+  private FlinkTableLikeStatement likeStatement;
 
   /**
-   * <physical_column_definition>:
-   * column_name column_type [ <column_constraint> ] [COMMENT column_comment]
+   * <physical_column_definition>: column_name column_type [ <column_constraint> ] [COMMENT
+   * column_comment]
    */
   private List<FlinkTablePhysicalColumn> physicalColumnDefinition;
 
   /**
-   * <metadata_column_definition>:
-   * column_name column_type METADATA [ FROM metadata_key ] [ VIRTUAL]
+   * <metadata_column_definition>: column_name column_type METADATA [ FROM metadata_key ] [ VIRTUAL]
    */
   private List<FlinkTableMetadataColumn> metadataColumnDefinition;
 
   /**
-   * <computed_column_definition>:
-   * column_name AS computed_column_expression [COMMENT column_comment]
+   * <computed_column_definition>: column_name AS computed_column_expression [COMMENT
+   * column_comment]
    */
   private List<FlinkTableComputedColumn> computedColumnDefinition;
 
-  /**
-   * <watermark_definition>:
-   * WATERMARK FOR rowtime_column_name AS watermark_strategy_expression
-   */
+  /** <watermark_definition>: WATERMARK FOR rowtime_column_name AS watermark_strategy_expression */
   private FlinkTableWatermark watermarkDefinition;
 
-  public String getCatalogName() {
-    return catalogName;
+  public FlinkTableBaseInfo getTableBaseInfo() {
+    return tableBaseInfo;
   }
 
-  public void setCatalogName(String catalogName) {
-    this.catalogName = catalogName;
+  public void setTableBaseInfo(FlinkTableBaseInfo tableBaseInfo) {
+    this.tableBaseInfo = tableBaseInfo;
   }
 
-  public String getDbname() {
-    return dbname;
+  public FlinkTableAsSelectStatement getAsSelectStatement() {
+    return asSelectStatement;
   }
 
-  public void setDbname(String dbname) {
-    this.dbname = dbname;
+  public void setAsSelectStatement(FlinkTableAsSelectStatement asSelectStatement) {
+    this.asSelectStatement = asSelectStatement;
   }
 
-  public String getSchema() {
-    return schema;
+  public FlinkTableLikeStatement getLikeStatement() {
+    return likeStatement;
   }
 
-  public void setSchema(String schema) {
-    this.schema = schema;
-  }
-
-  public String getTableName() {
-    return tableName;
-  }
-
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
-  }
-
-  public String getTableComment() {
-    return tableComment;
-  }
-
-  public void setTableComment(String tableComment) {
-    this.tableComment = tableComment;
-  }
-
-  public Boolean getIfNotExists() {
-    return ifNotExists;
-  }
-
-  public void setIfNotExists(Boolean ifNotExists) {
-    this.ifNotExists = ifNotExists;
+  public void setLikeStatement(FlinkTableLikeStatement likeStatement) {
+    this.likeStatement = likeStatement;
   }
 
   public List<FlinkTablePhysicalColumn> getPhysicalColumnDefinition() {
@@ -154,35 +115,37 @@ public class FlinkTableDefinition {
     this.watermarkDefinition = watermarkDefinition;
   }
 
-  public String getAsSelectStatement() {
-    return asSelectStatement;
-  }
-
-  public void setAsSelectStatement(String asSelectStatement) {
-    this.asSelectStatement = asSelectStatement;
-  }
-
-  public String getLikeStatement() {
-    return likeStatement;
-  }
-
-  public void setLikeStatement(String likeStatement) {
-    this.likeStatement = likeStatement;
+  public String getTableName() {
+    if (getTableBaseInfo() != null) {
+      return getTableBaseInfo().getTableName();
+    } else {
+      return "";
+    }
   }
 
   public String getRealTableName() {
+
     String realTableName = "";
-    if (StringUtils.isNotEmpty(catalogName)) {
-      realTableName += catalogName + Constants.DOT();
-    }
-    if (StringUtils.isNotEmpty(dbname)) {
-      realTableName += dbname + Constants.DOT();
+    if (getTableBaseInfo() == null) {
+      return realTableName;
     }
 
-    if (StringUtils.isNotEmpty(schema)) {
-      realTableName += "`" + schema + Constants.DOT() + tableName + "`";
+    if (StringUtils.isNotEmpty(getTableBaseInfo().getCatalogName())) {
+      realTableName += getTableBaseInfo().getCatalogName() + Constants.DOT();
+    }
+    if (StringUtils.isNotEmpty(getTableBaseInfo().getDbname())) {
+      realTableName += getTableBaseInfo().getDbname() + Constants.DOT();
+    }
+
+    if (StringUtils.isNotEmpty(getTableBaseInfo().getSchema())) {
+      realTableName +=
+          "`"
+              + getTableBaseInfo().getSchema()
+              + Constants.DOT()
+              + getTableBaseInfo().getTableName()
+              + "`";
     } else {
-      realTableName += tableName;
+      realTableName += getTableBaseInfo().getSchema();
     }
 
     return realTableName;

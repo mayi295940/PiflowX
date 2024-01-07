@@ -217,6 +217,9 @@ object RowTypeUtil {
     var primaryKeyList: List[String] = List()
     var partitionKeyList: List[String] = List()
 
+    val baseInfo = definition.getTableBaseInfo
+    val asSelectStatement = definition.getAsSelectStatement
+    val likeStatement = definition.getLikeStatement
     val physicalColumns = definition.getPhysicalColumnDefinition
     val metadataColumns = definition.getMetadataColumnDefinition
     val computedColumns = definition.getComputedColumnDefinition
@@ -304,28 +307,28 @@ object RowTypeUtil {
       columns += s" PRIMARY KEY (${primaryKeyList.mkString(Constants.COMMA)}) NOT ENFORCED,"
     }
 
-    val tableComment = if (StringUtils.isNotBlank(definition.getTableComment))
-      s" COMMENT ${definition.getTableComment}"
+    val tableComment = if (baseInfo != null && StringUtils.isNotBlank(baseInfo.getTableComment))
+      s" COMMENT ${baseInfo.getTableComment}"
     else ""
 
     val partitionStatement = if (partitionKeyList.nonEmpty)
       s" PARTITIONED BY (${partitionKeyList.mkString(Constants.COMMA)}) " else ""
 
-    val ifNotExists = if (definition.getIfNotExists) "IF NOT EXISTS" else ""
+    val ifNotExists = if (baseInfo != null && baseInfo.getIfNotExists) "IF NOT EXISTS" else ""
 
-    val asSelectStatement = if (StringUtils.isNotBlank(definition.getAsSelectStatement))
-      s" AS ${definition.getAsSelectStatement}"
+    val selectStatement = if (asSelectStatement != null && StringUtils.isNotBlank(asSelectStatement.getSelectStatement))
+      s" AS ${asSelectStatement.getSelectStatement}"
     else ""
 
-    val likeStatement = if (StringUtils.isNotBlank(definition.getLikeStatement))
-      s" LIKE  ${definition.getLikeStatement}"
+    val like = if (likeStatement != null && StringUtils.isNotBlank(likeStatement.getLikeStatement))
+      s" LIKE  ${likeStatement.getLikeStatement}"
     else ""
 
     if (StringUtils.isNotBlank(columns)) {
       columns = s"( ${columns.stripMargin.dropRight(1)} )"
     }
 
-    (columns, ifNotExists, tableComment, partitionStatement, asSelectStatement, likeStatement)
+    (columns, ifNotExists, tableComment, partitionStatement, selectStatement, like)
   }
 
 }
