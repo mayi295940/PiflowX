@@ -75,7 +75,8 @@ class JDBCWrite extends ConfigurableStop[Table] {
     println(ddl)
     tableEnv.executeSql(ddl)
 
-    if (StringUtils.isEmpty(tableDefinition.getAsSelectStatement)) {
+    if (tableDefinition.getAsSelectStatement != null &&
+      StringUtils.isEmpty(tableDefinition.getAsSelectStatement.getSelectStatement)) {
       inputTable.insertInto(tmpTable).execute().print()
     }
 

@@ -8,8 +8,8 @@
         "name": "MockData1",
         "bundle": "cn.piflow.bundle.flink.common.DataGen",
         "properties": {
-          "schema": "age:int,time:date",
-          "count": "50000",
+          "schema": "[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000},{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15},{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}]",
+          "count": "500",
           "ratio": "1"
         }
       },
