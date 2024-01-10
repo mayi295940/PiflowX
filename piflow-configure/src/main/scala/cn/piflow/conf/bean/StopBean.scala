@@ -38,7 +38,9 @@ class StopBean[DataType] {
       stop.setCustomizedProperties(this.customizedProperties)
       stop
     } catch {
-      case ex: Exception => throw ex
+      case ex: Exception =>
+        ex.printStackTrace()
+        throw ex
     }
   }
 

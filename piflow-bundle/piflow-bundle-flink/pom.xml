@@ -10,6 +10,18 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>piflow-bundle-flink</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>piflow-bundle-flink-base</module>
+        <module>piflow-bundle-flink-cdc</module>
+        <module>piflow-bundle-flink-common</module>
+        <module>piflow-bundle-flink-filesystem</module>
+        <module>piflow-bundle-flink-ftp</module>
+        <module>piflow-bundle-flink-hive</module>
+        <module>piflow-bundle-flink-jdbc</module>
+        <module>piflow-bundle-flink-kafka</module>
+    </modules>
 
     <dependencies>
         <dependency>
@@ -218,23 +230,6 @@
             <version>${flink.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-json</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-parquet</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-avro</artifactId>
-        </dependency>
-
         <!--读取hadoop文件-->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -265,11 +260,6 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-jdbc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
             <artifactId>flink-sql-gateway</artifactId>
             <version>${flink.version}</version>
         </dependency>
@@ -282,212 +272,6 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-statebackend-rocksdb</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jackson-annotations</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson-databind</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-csv</artifactId>
-        </dependency>
-
-        <!-- Hive Connector的支持-->
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-hive_${scala.binary.version}</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-exec</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jackson-core</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson-databind</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jsr305</artifactId>
-                    <groupId>com.google.code.findbugs</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>curator-recipes</artifactId>
-                    <groupId>org.apache.curator</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson-annotations</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>zookeeper</artifactId>
-                    <groupId>org.apache.zookeeper</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>guice</artifactId>
-                    <groupId>com.google.inject</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>guice-servlet</artifactId>
-                    <groupId>com.google.inject.extensions</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jersey-client</artifactId>
-                    <groupId>com.sun.jersey</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jersey-guice</artifactId>
-                    <groupId>com.sun.jersey.contribs</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-server</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-util</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-util-ajax</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-jdbc</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jetty-util</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-client</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-server</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-servlet</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-webapp</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>joda-time</artifactId>
-                    <groupId>joda-time</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>derby</artifactId>
-                    <groupId>org.apache.derby</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>orc-core</artifactId>
-                    <groupId>org.apache.orc</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson-annotations</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson-core</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hbase-metrics</artifactId>
-                    <groupId>org.apache.hbase</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hbase-metrics-api</artifactId>
-                    <groupId>org.apache.hbase</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hbase-protocol-shaded</artifactId>
-                    <groupId>org.apache.hbase</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hbase-shaded-miscellaneous</artifactId>
-                    <groupId>org.apache.hbase.thirdparty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hbase-shaded-netty</artifactId>
-                    <groupId>org.apache.hbase.thirdparty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hbase-shaded-protobuf</artifactId>
-                    <groupId>org.apache.hbase.thirdparty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-crypto</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hadoop-annotations</artifactId>
-                    <groupId>org.apache.hadoop</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>javassist</artifactId>
-                    <groupId>org.javassist</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-http</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-security</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-util-ajax</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jamon-runtime</artifactId>
-                    <groupId>org.jamon</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jettison</artifactId>
-                    <groupId>org.codehaus.jettison</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>asm</artifactId>
-                    <groupId>org.ow2.asm</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>asm-commons</artifactId>
-                    <groupId>org.ow2.asm</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>websocket-client</artifactId>
-                    <groupId>org.eclipse.jetty.websocket</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>websocket-common</artifactId>
-                    <groupId>org.eclipse.jetty.websocket</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>websocket-api</artifactId>
-                    <groupId>org.eclipse.jetty.websocket</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -511,25 +295,6 @@
                 <exclusion>
                     <artifactId>nimbus-jose-jwt</artifactId>
                     <groupId>com.nimbusds</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!--连接Oracle-->
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc6</artifactId>
-            <version>11.2.0.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.28</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>protobuf-java</artifactId>
-                    <groupId>com.google.protobuf</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -575,30 +340,30 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--            <plugin>-->
+            <!--                <artifactId>maven-shade-plugin</artifactId>-->
+            <!--                <version>1.5</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <phase>package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>shade</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <filters>-->
+            <!--                                <filter>-->
+            <!--                                    <artifact>*:*</artifact>-->
+            <!--                                    <excludes>-->
+            <!--                                        <exclude>META-INF/*.SF</exclude>-->
+            <!--                                        <exclude>META-INF/*.DSA</exclude>-->
+            <!--                                        <exclude>META-INF/*.RSA</exclude>-->
+            <!--                                    </excludes>-->
+            <!--                                </filter>-->
+            <!--                            </filters>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
