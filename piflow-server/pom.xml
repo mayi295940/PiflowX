@@ -81,12 +81,17 @@
             <artifactId>piflow-bundle-flink-kafka</artifactId>
             <version>0.9</version>
         </dependency>
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-doris</artifactId>
+            <version>0.9</version>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>piflow</groupId>-->
-<!--            <artifactId>piflow-bundle-spark</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-spark</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.typesafe.akka</groupId>

@@ -21,6 +21,7 @@
         <module>piflow-bundle-flink-hive</module>
         <module>piflow-bundle-flink-jdbc</module>
         <module>piflow-bundle-flink-kafka</module>
+        <module>piflow-bundle-flink-doris</module>
     </modules>
 
     <dependencies>

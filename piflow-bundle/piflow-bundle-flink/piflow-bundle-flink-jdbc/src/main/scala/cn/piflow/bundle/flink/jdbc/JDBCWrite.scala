@@ -109,6 +109,16 @@ class JDBCWrite extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val url = new PropertyDescriptor()
       .name("url")
       .displayName("Url")
@@ -155,15 +165,6 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .example("test")
     descriptor = tableName :: descriptor
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
 
     val properties = new PropertyDescriptor()
       .name("properties")

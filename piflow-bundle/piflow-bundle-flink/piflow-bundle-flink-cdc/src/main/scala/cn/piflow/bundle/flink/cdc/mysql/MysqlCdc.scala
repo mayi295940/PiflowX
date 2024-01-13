@@ -113,6 +113,16 @@ class MysqlCdc extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val url = new PropertyDescriptor()
       .name("hostname")
       .displayName("Hostname")
@@ -169,7 +179,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
     val port = new PropertyDescriptor()
       .name("port")
       .displayName("Port")
-      .description("MySQL 数据库服务器的整数端口号。")
+      .description("MySQL数据库服务器的整数端口号。")
       .defaultValue("")
       .required(false)
       .language(Language.Text)
@@ -189,15 +199,6 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .example("5400-5408")
     descriptor = serverId :: descriptor
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
 
     val properties = new PropertyDescriptor()
       .name("properties")

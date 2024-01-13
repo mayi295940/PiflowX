@@ -122,6 +122,15 @@ class ReadFromKafka extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .example("")
+      .required(true)
+
     val kafka_host = new PropertyDescriptor()
       .name("kafka_host")
       .displayName("KAFKA_HOST")
@@ -157,15 +166,6 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .example("earliest-offset")
       .required(false)
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-
     val format = new PropertyDescriptor()
       .name("format")
       .displayName("FORMAT")
@@ -191,11 +191,11 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .defaultValue("{}")
       .required(false)
 
+    descriptor = tableDefinition :: descriptor
     descriptor = kafka_host :: descriptor
     descriptor = topic :: descriptor
     descriptor = topic_pattern :: descriptor
     descriptor = startup_mode :: descriptor
-    descriptor = tableDefinition :: descriptor
     descriptor = format :: descriptor
     descriptor = group :: descriptor
     descriptor = properties :: descriptor

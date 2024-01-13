@@ -16,7 +16,7 @@
     <modules>
         <module>piflow-bundle-core</module>
         <module>piflow-bundle-flink</module>
-<!--        <module>piflow-bundle-spark</module>-->
+        <module>piflow-bundle-spark</module>
     </modules>
 
 </project>

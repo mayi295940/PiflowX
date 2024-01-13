@@ -109,6 +109,15 @@ class WriteToKafka extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .example("")
+      .required(true)
+
     val kafka_host = new PropertyDescriptor()
       .name("kafka_host")
       .displayName("KAFKA_HOST")
@@ -123,15 +132,6 @@ class WriteToKafka extends ConfigurableStop[Table] {
       .description("写入的topic名。注意不支持topic列表。")
       .defaultValue("")
       .example("test")
-      .required(true)
-
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
       .required(true)
 
     val format = new PropertyDescriptor()
@@ -150,9 +150,9 @@ class WriteToKafka extends ConfigurableStop[Table] {
       .defaultValue("{}")
       .required(false)
 
+    descriptor = tableDefinition :: descriptor
     descriptor = kafka_host :: descriptor
     descriptor = topic :: descriptor
-    descriptor = tableDefinition :: descriptor
     descriptor = format :: descriptor
     descriptor = properties :: descriptor
     descriptor

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>piflow</groupId>
+        <artifactId>piflow-bundle-flink</artifactId>
+        <version>0.9</version>
+    </parent>
+
+    <artifactId>piflow-bundle-flink-doris</artifactId>
+
+    <properties>
+        <flink.doris.version>1.18</flink.doris.version>
+        <flink.connnector.doris.version>1.5.0</flink.connnector.doris.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-base</artifactId>
+            <version>0.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-common</artifactId>
+            <version>0.9</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- flink-doris-connector -->
+        <dependency>
+            <groupId>org.apache.doris</groupId>
+            <artifactId>flink-doris-connector-${flink.doris.version}</artifactId>
+            <version>${flink.connnector.doris.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-base</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

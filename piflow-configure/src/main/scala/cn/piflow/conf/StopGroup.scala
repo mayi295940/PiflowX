@@ -7,6 +7,7 @@ object StopGroup {
   val CsvGroup = "CSV"
   val HiveGroup = "Hive"
   val JdbcGroup = "Jdbc"
+  val DorisGroup = "Doris"
   val CdcGroup = "Cdc"
   val JsonGroup = "Json"
   val XmlGroup = "Xml"
