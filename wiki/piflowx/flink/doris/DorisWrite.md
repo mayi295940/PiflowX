@@ -116,4 +116,4 @@ outport：默认端口
 
 #### 演示DEMO
 
-![](https://cdn.jsdelivr.net/gh/mayi295940/blog_pic_ma@main/img/piflowx/stop/flink/jdbcJDBCRead.gif)
+![](https://cdn.jsdelivr.net/gh/mayi295940/blog_pic_ma@main/img/piflowx/stop/flink/dorisDorisRead.gif)
