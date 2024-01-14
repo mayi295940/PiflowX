@@ -1,20 +1,16 @@
-# DorisRead组件
+# DorisWrite组件
 
 ### 组件说明
 
-从Doris存储读取数据。
+往Doris存储写入数据。
 
 ### 计算引擎
 
 flink
 
-### 有界性
-
-目前Doris Source是有界流，不支持CDC方式读取。
-
 ### 组件分组
 
-Doris
+doris
 
 ### 端口
 
@@ -24,21 +20,19 @@ outport：默认端口
 
 ### 组件属性
 
-| 名称              | 展示名称            | 默认值  | 允许值 | 是否必填 | 描述                                                                     | 例子                          |
-| --------------- | --------------- | ---- | --- | ---- | ---------------------------------------------------------------------- | --------------------------- |
-| fenodes         | Fenodes         | ""   | 无   | 是    | Doris FE http地址， 支持多个地址，使用逗号分隔。                                        | 127.0.0.1:8030              |
-| benodes         | Benodes         | ""   | 无   | 否    | Doris BE http地址， 支持多个地址，使用逗号分隔。                                        |                             |
-| username        | Username        | ""   | 无   | 是    | 访问Doris的用户名。                                                           | root                        |
-| password        | Password        | ""   | 无   | 是    | 访问Doris的密码。                                                            | 123456                      |
-| tableIdentifier | TableIdentifier | ""   | 无   | 是    | Doris表名。                                                               | db.tbl                      |
-| jdbcUrl         | JdbcUrl         | ""   | 无   | 否    | jdbc连接信息。                                                              | jdbc:mysql://127.0.0.1:9030 |
-| batchSize       | BatchSize       | 1024 | 无   | 否    | 一次从 BE 读取数据的最大行数。增大此数值可减少 Flink 与 Doris 之间建立连接的次数。 从而减轻网络延迟所带来的额外时间开销。 | 1024                        |
-| readField       | ReadField       | ""   | 无   | 否    | 读取Doris表的列名列表，多列之间使用逗号分隔。                                              |                             |
-| queryFilter     | QueryFilter     | ""   | 无   | 否    | 过滤读取数据的表达式，此表达式透传给Doris。Doris使用此表达式完成源端数据过滤。                           | age=18                      |
-| tableDefinition | TableDefinition | ""   | 无   | 是    | Flink table定义。                                                         |                             |
-| properties      | PROPERTIES      | ""   | 无   | 否    | 连接器其他配置。                                                               |                             |
+| 名称              | 展示名称            | 默认值 | 允许值 | 是否必填 | 描述                                                     | 例子                          |
+| --------------- | --------------- | --- | --- | ---- | ------------------------------------------------------ | --------------------------- |
+| fenodes         | Fenodes         | ""  | 无   | 是    | Doris FE http地址， 支持多个地址，使用逗号分隔。                        | 127.0.0.1:8030              |
+| benodes         | Benodes         | ""  | 无   | 否    | Doris BE http地址， 支持多个地址，使用逗号分隔。                        |                             |
+| username        | Username        | ""  | 无   | 是    | 访问Doris的用户名。                                           | root                        |
+| password        | Password        | ""  | 无   | 是    | 访问Doris的密码。                                            | 123456                      |
+| tableIdentifier | TableIdentifier | ""  | 无   | 是    | Doris表名。                                               | db.tbl                      |
+| jdbcUrl         | JdbcUrl         | ""  | 无   | 否    | jdbc连接信息。                                              | jdbc:mysql://127.0.0.1:9030 |
+| sinkLabelPrefix | SinkLabelPrefix | ""  | 无   | 是    | Stream load导入使用的label前缀。2pc场景下要求全局唯一 ，用来保证Flink的EOS语义。 | sink-label-demo             |
+| tableDefinition | TableDefinition | ""  | 无   | 是    | Flink table定义。                                         |                             |
+| properties      | PROPERTIES      | ""  | 无   | 否    | 连接器其他配置。                                               |                             |
 
-### DorisRead示例配置
+### DorisWrite示例配置
 
 ```json
 {
@@ -116,7 +110,7 @@ outport：默认端口
 }
 ```
 
-#### DorisRead示例说明
+#### DorisWrite示例说明
 
 本示例演示了通过`DataGen`生成100条测试数据，然后使用DorisWrite组件写入doris，然后使用DorisRead组件将数据从doris中读取，最后通过`showData`组件打印到控制台。
 

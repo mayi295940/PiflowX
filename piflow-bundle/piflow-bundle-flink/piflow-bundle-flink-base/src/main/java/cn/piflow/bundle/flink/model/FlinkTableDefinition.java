@@ -147,7 +147,7 @@ public class FlinkTableDefinition {
               + getTableBaseInfo().getRegisterTableName()
               + "`";
     } else {
-      realTableName += getTableBaseInfo().getSchema();
+      realTableName += getTableBaseInfo().getRegisterTableName();
     }
 
     return realTableName;
