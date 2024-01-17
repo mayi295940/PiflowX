@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PluginClassLoader extends URLClassLoader {
 
-  private List<JarURLConnection> cachedJarFiles = new ArrayList<JarURLConnection>();
+  private final List<JarURLConnection> cachedJarFiles = new ArrayList<>();
 
   public PluginClassLoader() {
     super(new URL[] {}, findParentClassLoader());

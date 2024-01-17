@@ -43,6 +43,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-test</artifactId>
+            <version>0.9</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 

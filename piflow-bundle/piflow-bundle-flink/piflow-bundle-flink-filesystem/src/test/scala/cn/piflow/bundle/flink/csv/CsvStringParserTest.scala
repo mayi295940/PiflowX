@@ -1,6 +1,6 @@
 package cn.piflow.bundle.flink.csv
 
-import cn.piflow.bundle.flink.BaseTest
+import cn.piflow.bundle.flink.test.BaseTest
 import org.junit.Test
 
 class CsvStringParserTest {

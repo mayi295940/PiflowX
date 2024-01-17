@@ -1,5 +1,6 @@
 package cn.piflow.bundle.flink.common
 
+import cn.piflow.bundle.flink.test.BaseTest
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.junit.Test
 

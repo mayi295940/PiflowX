@@ -17,6 +17,13 @@
             <artifactId>piflow-bundle-flink-base</artifactId>
             <version>0.9</version>
         </dependency>
+
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-test</artifactId>
+            <version>0.9</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

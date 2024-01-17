@@ -28,6 +28,7 @@ class JDBCExecuteSql extends ConfigurableStop[Table] {
               pec: JobContext[Table]): Unit = {
 
     if (StringUtils.isNotEmpty(sql)) {
+      sql = sql.replaceAll("\n|\t", "")
       var connection: Connection = null
       var statement: Statement = null
       try {

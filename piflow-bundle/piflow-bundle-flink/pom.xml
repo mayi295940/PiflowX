@@ -25,6 +25,7 @@
         <module>piflow-bundle-flink-es7</module>
         <module>piflow-bundle-flink-hbase</module>
         <module>piflow-bundle-flink-hdfs</module>
+        <module>piflow-bundle-flink-test</module>
     </modules>
 
     <dependencies>
