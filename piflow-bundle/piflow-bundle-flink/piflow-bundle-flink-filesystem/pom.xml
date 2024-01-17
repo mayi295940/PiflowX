@@ -23,6 +23,13 @@
             <artifactId>flink-json</artifactId>
             <version>${flink.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-common</artifactId>
+            <version>0.9</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

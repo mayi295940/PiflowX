@@ -9,21 +9,19 @@
         <version>0.9</version>
     </parent>
 
-    <packaging>pom</packaging>
-
-    <artifactId>piflow-bundle-flink-cdc</artifactId>
-
-    <modules>
-        <module>piflow-bundle-flink-cdc-mysql</module>
-        <module>piflow-bundle-flink-cdc-oracle</module>
-    </modules>
+    <artifactId>piflow-bundle-flink-hbase</artifactId>
 
     <dependencies>
+        <!--操作Hbase-->
         <dependency>
-            <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-common</artifactId>
-            <version>0.9</version>
-            <scope>test</scope>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>nimbus-jose-jwt</artifactId>
+                    <groupId>com.nimbusds</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

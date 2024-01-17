@@ -22,6 +22,9 @@
         <module>piflow-bundle-flink-jdbc</module>
         <module>piflow-bundle-flink-kafka</module>
         <module>piflow-bundle-flink-doris</module>
+        <module>piflow-bundle-flink-es7</module>
+        <module>piflow-bundle-flink-hbase</module>
+        <module>piflow-bundle-flink-hdfs</module>
     </modules>
 
     <dependencies>
@@ -37,10 +40,6 @@
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>fastjson2</artifactId>
-                    <groupId>com.alibaba.fastjson2</groupId>
                 </exclusion>
                 <exclusion>
                     <artifactId>commons-cli</artifactId>
@@ -67,20 +66,8 @@
                     <groupId>org.apache.commons</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-collections</artifactId>
-                    <groupId>commons-collections</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>commons-lang</artifactId>
                     <groupId>commons-lang</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-math3</artifactId>
-                    <groupId>org.apache.commons</groupId>
                 </exclusion>
                 <exclusion>
                     <artifactId>zookeeper</artifactId>
@@ -174,6 +161,34 @@
                     <artifactId>paranamer</artifactId>
                     <groupId>com.thoughtworks.paranamer</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-common</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>httpclient</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>h2</artifactId>
+                    <groupId>com.h2database</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>lift-json_2.12</artifactId>
+                    <groupId>net.liftweb</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>quartz</artifactId>
+                    <groupId>org.quartz-scheduler</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-slf4j-impl</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -181,12 +196,32 @@
             <groupId>piflow</groupId>
             <artifactId>piflow-configure</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-io</artifactId>
+                    <groupId>commons-io</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>piflow</groupId>
             <artifactId>piflow-bundle-core</artifactId>
             <version>0.9</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-api</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-common</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -198,14 +233,6 @@
                     <artifactId>commons-compress</artifactId>
                     <groupId>org.apache.commons</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-text</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
             </exclusions>
         </dependency>
 
@@ -214,10 +241,6 @@
             <artifactId>flink-table-api-java-bridge</artifactId>
             <version>${flink.version}</version>
             <exclusions>
-                <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
                 <exclusion>
                     <artifactId>kryo</artifactId>
                     <groupId>com.esotericsoftware.kryo</groupId>
@@ -229,34 +252,6 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-        </dependency>
-
-        <!--读取hadoop文件-->
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-client</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jackson-annotations</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jackson-databind</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hadoop-yarn-common</artifactId>
-                    <groupId>org.apache.hadoop</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jetty-http</artifactId>
-                    <groupId>org.eclipse.jetty</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-hadoop-compatibility_${scala.binary.version}</artifactId>
         </dependency>
 
         <dependency>
@@ -276,28 +271,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>3.16.3</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>4.8.0</version>
-        </dependency>
-
-        <!--操作Hbase-->
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-client</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>nimbus-jose-jwt</artifactId>
-                    <groupId>com.nimbusds</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
     </dependencies>

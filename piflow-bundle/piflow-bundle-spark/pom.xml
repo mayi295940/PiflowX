@@ -48,15 +48,7 @@
                     <groupId>commons-io</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>commons-math3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-text</artifactId>
                     <groupId>org.apache.commons</groupId>
                 </exclusion>
                 <exclusion>
@@ -158,10 +150,6 @@
                     <groupId>org.xerial.snappy</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>curator-client</artifactId>
                     <groupId>org.apache.curator</groupId>
                 </exclusion>
@@ -229,10 +217,6 @@
             <version>${spark.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>protobuf-java</artifactId>
                     <groupId>com.google.protobuf</groupId>
                 </exclusion>
@@ -266,10 +250,6 @@
                 <exclusion>
                     <artifactId>commons-lang</artifactId>
                     <groupId>commons-lang</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
                 </exclusion>
                 <exclusion>
                     <artifactId>metrics-core</artifactId>
@@ -829,12 +809,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
             <version>2.4.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.5</version>
         </dependency>
 
         <dependency>

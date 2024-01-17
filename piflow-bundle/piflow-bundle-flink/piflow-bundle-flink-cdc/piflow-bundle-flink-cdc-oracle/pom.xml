@@ -5,11 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>piflow</groupId>
-        <artifactId>piflow-bundle-flink</artifactId>
+        <artifactId>piflow-bundle-flink-cdc</artifactId>
         <version>0.9</version>
     </parent>
 
-    <artifactId>piflow-bundle-flink-jdbc</artifactId>
+    <artifactId>piflow-bundle-flink-cdc-oracle</artifactId>
+
+    <properties>
+        <flink.cdc.oracle.version>3.0.0</flink.cdc.oracle.version>
+    </properties>
 
     <dependencies>
 
@@ -20,30 +24,26 @@
         </dependency>
 
         <dependency>
+            <groupId>com.ververica</groupId>
+            <artifactId>flink-connector-oracle-cdc</artifactId>
+            <version>${flink.cdc.oracle.version}</version>
+        </dependency>
+
+        <!--连接Oracle-->
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>21.7.0.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-jdbc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.28</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>protobuf-java</artifactId>
-                    <groupId>com.google.protobuf</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-common</artifactId>
-            <version>0.9</version>
+            <artifactId>flink-shaded-guava</artifactId>
+            <version>31.1-jre-17.0</version>
             <scope>test</scope>
         </dependency>
 
     </dependencies>
+
 
 </project>

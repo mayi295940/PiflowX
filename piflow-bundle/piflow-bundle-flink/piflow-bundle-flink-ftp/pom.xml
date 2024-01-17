@@ -12,10 +12,18 @@
     <artifactId>piflow-bundle-flink-ftp</artifactId>
 
     <dependencies>
+        
         <dependency>
             <groupId>piflow</groupId>
             <artifactId>piflow-bundle-flink-base</artifactId>
             <version>0.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-common</artifactId>
+            <version>0.9</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

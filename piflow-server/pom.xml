@@ -48,7 +48,12 @@
 
         <dependency>
             <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-cdc</artifactId>
+            <artifactId>piflow-bundle-flink-cdc-mysql</artifactId>
+            <version>0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-cdc-oracle</artifactId>
             <version>0.9</version>
         </dependency>
         <dependency>
@@ -84,6 +89,11 @@
         <dependency>
             <groupId>piflow</groupId>
             <artifactId>piflow-bundle-flink-doris</artifactId>
+            <version>0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-es7</artifactId>
             <version>0.9</version>
         </dependency>
 
