@@ -39,8 +39,8 @@ class OracleCdc extends ConfigurableStop[Table] {
     ifNotExists,
     tableComment,
     partitionStatement,
-    asSelectStatement,
-    likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
+    _,
+    _) = RowTypeUtil.getTableSchema(tableDefinition)
 
     var tmpTable: String = ""
     if (StringUtils.isEmpty(tableDefinition.getRegisterTableName)) {
@@ -64,8 +64,6 @@ class OracleCdc extends ConfigurableStop[Table] {
          |'schema-name' = '$schemaName',
          |'table-name' = '$tableName'
          |)
-         |$asSelectStatement
-         |$likeStatement
          |"""
         .stripMargin
         .replaceAll("\r\n", " ")
@@ -227,7 +225,7 @@ class OracleCdc extends ConfigurableStop[Table] {
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/oracle/OracleRead.png")
+    ImageUtil.getImage("icon/oracle/OracleCdc.png")
   }
 
   override def getGroup(): List[String] = {

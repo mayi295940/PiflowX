@@ -40,7 +40,7 @@ class Elasticsearch7Write extends ConfigurableStop[Table] {
     asSelectStatement,
     likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
 
-    if (StringUtils.isEmpty(columns)) {
+    if (StringUtils.isAllEmpty(columns, asSelectStatement)) {
       columns = RowTypeUtil.getTableSchema(inputTable)
     }
 
@@ -166,7 +166,7 @@ class Elasticsearch7Write extends ConfigurableStop[Table] {
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/es7/MysqlWrite.png")
+    ImageUtil.getImage("icon/es7/Es.png")
   }
 
   override def getGroup(): List[String] = {

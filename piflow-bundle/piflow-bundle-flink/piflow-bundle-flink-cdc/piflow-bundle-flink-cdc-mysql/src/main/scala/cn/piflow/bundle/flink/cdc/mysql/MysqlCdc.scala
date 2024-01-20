@@ -38,8 +38,8 @@ class MysqlCdc extends ConfigurableStop[Table] {
     ifNotExists,
     tableComment,
     partitionStatement,
-    asSelectStatement,
-    likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
+    _,
+    _) = RowTypeUtil.getTableSchema(tableDefinition)
 
     var tmpTable: String = ""
     if (StringUtils.isEmpty(tableDefinition.getRegisterTableName)) {
@@ -62,8 +62,6 @@ class MysqlCdc extends ConfigurableStop[Table] {
          |'database-name' = '$databaseName',
          |'table-name' = '$tableName'
          |)
-         |$asSelectStatement
-         |$likeStatement
          |"""
         .stripMargin
         .replaceAll("\r\n", " ")
@@ -123,7 +121,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .required(true)
     descriptor = tableDefinition :: descriptor
 
-    val url = new PropertyDescriptor()
+    val hostname = new PropertyDescriptor()
       .name("hostname")
       .displayName("Hostname")
       .description("MySQL数据库服务器的IP地址或主机名。")
@@ -131,7 +129,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .required(true)
       .example("127.0.0.1")
       .language(Language.Text)
-    descriptor = url :: descriptor
+    descriptor = hostname :: descriptor
 
     val username = new PropertyDescriptor()
       .name("username")
@@ -213,7 +211,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/mysql/MysqlRead.png")
+    ImageUtil.getImage("icon/mysql/MysqlCdc.png")
   }
 
   override def getGroup(): List[String] = {

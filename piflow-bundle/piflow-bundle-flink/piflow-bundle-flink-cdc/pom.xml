@@ -16,6 +16,8 @@
     <modules>
         <module>piflow-bundle-flink-cdc-mysql</module>
         <module>piflow-bundle-flink-cdc-oracle</module>
+        <module>piflow-bundle-flink-cdc-mongodb</module>
+        <module>piflow-bundle-flink-cdc-oceanbase</module>
     </modules>
 
     <dependencies>

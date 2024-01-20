@@ -58,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-cdc-mongodb</artifactId>
+            <version>0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>piflow</groupId>
             <artifactId>piflow-bundle-flink-common</artifactId>
             <version>0.9</version>
         </dependency>
@@ -66,11 +71,11 @@
             <artifactId>piflow-bundle-flink-filesystem</artifactId>
             <version>0.9</version>
         </dependency>
-        <dependency>
-            <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-ftp</artifactId>
-            <version>0.9</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>piflow</groupId>-->
+<!--            <artifactId>piflow-bundle-flink-ftp</artifactId>-->
+<!--            <version>0.9</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>piflow</groupId>
             <artifactId>piflow-bundle-flink-hive</artifactId>

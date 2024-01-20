@@ -1,4 +1,4 @@
-package cn.piflow.bundle.flink.doris
+package cn.piflow.bundle.flink.cdc.mongodb
 
 import cn.piflow._
 import cn.piflow.bundle.flink.model.FlinkTableDefinition
@@ -11,21 +11,19 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
-class DorisWrite extends ConfigurableStop[Table] {
+class MongoDBCdc extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
-  val description: String = "往Doris存储写入数据"
+  val description: String = "MongoDB CDC连接器允许从MongoDB读取快照数据和增量数据。"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 
-  private var tableDefinition: FlinkTableDefinition = _
-  private var fenodes: String = _
+  private var hosts: String = _
   private var username: String = _
   private var password: String = _
-  private var benodes: String = _
-  private var tableIdentifier: String = _
-  private var jdbcUrl: String = _
-  private var sinkLabelPrefix: String = _
+  private var database: String = _
+  private var collection: String = _
+  private var tableDefinition: FlinkTableDefinition = _
   private var properties: Map[String, Any] = _
 
   def perform(in: JobInputStream[Table],
@@ -34,18 +32,12 @@ class DorisWrite extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val inputTable = in.read()
-
-    var (columns,
+    val (columns,
     ifNotExists,
     tableComment,
     partitionStatement,
-    asSelectStatement,
-    likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
-
-    if (StringUtils.isAllEmpty(columns, asSelectStatement)) {
-      columns = RowTypeUtil.getTableSchema(inputTable)
-    }
+    _,
+    _) = RowTypeUtil.getTableSchema(tableDefinition)
 
     var tmpTable: String = ""
     if (StringUtils.isEmpty(tableDefinition.getRegisterTableName)) {
@@ -60,16 +52,10 @@ class DorisWrite extends ConfigurableStop[Table] {
          | $tableComment
          | $partitionStatement
          | WITH (
-         |'connector' = 'doris',
-         |'fenodes' = '$fenodes',
-         |'username' = '$username',
-         |'password' = '$password',
+         |'connector' = 'mongodb-cdc',
          |$getWithConf
-         |'table.identifier' = '$tableIdentifier',
-         |'sink.label-prefix' = '$sinkLabelPrefix'
+         |'hosts' = '$hosts'
          |)
-         |$asSelectStatement
-         |$likeStatement
          |"""
         .stripMargin
         .replaceAll("\r\n", " ")
@@ -77,21 +63,34 @@ class DorisWrite extends ConfigurableStop[Table] {
 
     tableEnv.executeSql(ddl)
 
-    if (StringUtils.isEmpty(asSelectStatement)) {
-      inputTable.insertInto(tmpTable).execute().print()
-    }
+    val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
+    out.write(resultTable)
 
   }
 
   private def getWithConf: String = {
     var result = List[String]()
 
-    if (StringUtils.isNotBlank(benodes)) {
-      result = s"'benodes' = '$benodes'," :: result
+    if (StringUtils.isNotBlank(username)) {
+      result = s"'username' = '$username'," :: result
     }
 
-    if (StringUtils.isNotBlank(jdbcUrl)) {
-      result = s"'jdbc-url' = '$jdbcUrl'," :: result
+    if (StringUtils.isNotBlank(password)) {
+      result = s"'password' = '$password'," :: result
+    }
+
+    if (StringUtils.isNotBlank(database)) {
+      result = s"'database' = '$database'," :: result
+    }
+
+    if (StringUtils.isNotBlank(collection)) {
+      result = s"'collection' = '$collection'," :: result
+    }
+
+    if (properties != null && properties.nonEmpty) {
+      for ((k, v) <- properties) {
+        result = s"'$k' = '$v'," :: result
+      }
     }
 
     result.mkString("")
@@ -100,13 +99,11 @@ class DorisWrite extends ConfigurableStop[Table] {
   def initialize(ctx: ProcessContext[Table]): Unit = {}
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    fenodes = MapUtil.get(map, "fenodes").asInstanceOf[String]
+    hosts = MapUtil.get(map, "hosts").asInstanceOf[String]
     username = MapUtil.get(map, "username", "").asInstanceOf[String]
     password = MapUtil.get(map, "password", "").asInstanceOf[String]
-    benodes = MapUtil.get(map, "benodes", "").asInstanceOf[String]
-    tableIdentifier = MapUtil.get(map, "tableIdentifier").asInstanceOf[String]
-    jdbcUrl = MapUtil.get(map, "jdbcUrl", "").asInstanceOf[String]
-    sinkLabelPrefix = MapUtil.get(map, "sinkLabelPrefix").asInstanceOf[String]
+    database = MapUtil.get(map, "database").asInstanceOf[String]
+    collection = MapUtil.get(map, "collection").asInstanceOf[String]
     val tableDefinitionMap = MapUtil.get(map, key = "tableDefinition", Map()).asInstanceOf[Map[String, Any]]
     tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
     properties = MapUtil.get(map, key = "properties", Map()).asInstanceOf[Map[String, Any]]
@@ -125,72 +122,58 @@ class DorisWrite extends ConfigurableStop[Table] {
       .required(true)
     descriptor = tableDefinition :: descriptor
 
-    val fenodes = new PropertyDescriptor()
-      .name("fenodes")
-      .displayName("fenodes")
-      .description("Doris FE http地址， 支持多个地址，使用逗号分隔。")
+    val url = new PropertyDescriptor()
+      .name("hosts")
+      .displayName("hosts")
+      .description("MongoDB 服务器的主机名和端口对的逗号分隔列表。")
       .defaultValue("")
       .required(true)
-      .example("127.0.0.1:8030")
-    descriptor = fenodes :: descriptor
-
-    val benodes = new PropertyDescriptor()
-      .name("benodes")
-      .displayName("benodes")
-      .description("Doris BE http地址， 支持多个地址，使用逗号分隔。")
-      .defaultValue("")
-      .required(false)
-      .example("127.0.0.1:8030")
-    descriptor = benodes :: descriptor
+      .example("localhost:27017,localhost:27018")
+      .language(Language.Text)
+    descriptor = url :: descriptor
 
     val username = new PropertyDescriptor()
       .name("username")
       .displayName("Username")
-      .description("访问Doris的用户名。")
+      .description("连接到 MongoDB 时要使用的数据库用户的名称。只有当MongoDB配置为使用身份验证时，才需要填写。")
       .defaultValue("")
-      .required(true)
+      .required(false)
+      .language(Language.Text)
       .example("root")
     descriptor = username :: descriptor
 
     val password = new PropertyDescriptor()
       .name("password")
-      .displayName("password")
-      .description("访问Doris的密码。")
+      .displayName("Password")
+      .description("连接到 MongoDB 时要使用的密码。只有当MongoDB配置为使用身份验证时，才需要填写。")
       .defaultValue("")
-      .required(true)
+      .required(false)
       .example("12345")
+      .language(Language.Text)
       .sensitive(true)
     descriptor = password :: descriptor
 
-    val tableIdentifier = new PropertyDescriptor()
-      .name("tableIdentifier")
-      .displayName("TableIdentifier")
-      .description("Doris表名。")
-      .defaultValue("")
-      .required(true)
-      .language(Language.Text)
-      .example("db.tbl")
-    descriptor = tableIdentifier :: descriptor
-
-    val sinkLabelPrefix = new PropertyDescriptor()
-      .name("sinkLabelPrefix")
-      .displayName("SinkLabelPrefix")
-      .description("Stream load导入使用的label前缀。2pc场景下要求全局唯一 ，用来保证Flink的EOS语义。")
-      .defaultValue("")
-      .required(true)
-      .language(Language.Text)
-      .example("")
-    descriptor = sinkLabelPrefix :: descriptor
-
-    val jdbcUrl = new PropertyDescriptor()
-      .name("jdbcUrl")
-      .displayName("JdbcUrl")
-      .description("jdbc连接信息。")
+    val database = new PropertyDescriptor()
+      .name("database")
+      .displayName("database")
+      .description("要监视更改的数据库的名称。 如果未设置，则将捕获所有数据库。" +
+        "该数据库还支持正则表达式来监视与正则表达式匹配的多个数据库。")
       .defaultValue("")
       .required(false)
       .language(Language.Text)
-      .example("jdbc:mysql://127.0.0.1:9030")
-    descriptor = jdbcUrl :: descriptor
+      .example("test")
+    descriptor = database :: descriptor
+
+    val collection = new PropertyDescriptor()
+      .name("collection")
+      .displayName("collection")
+      .description("数据库中要监视更改的集合的名称。 如果未设置，则将捕获所有集合。" +
+        "该集合还支持正则表达式来监视与完全限定的集合标识符匹配的多个集合。")
+      .defaultValue("")
+      .required(true)
+      .language(Language.Text)
+      .example("test")
+    descriptor = collection :: descriptor
 
     val properties = new PropertyDescriptor()
       .name("properties")
@@ -205,11 +188,11 @@ class DorisWrite extends ConfigurableStop[Table] {
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/jdbc/MysqlWrite.png")
+    ImageUtil.getImage("icon/mongodb/MongoCdc.png")
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.DorisGroup)
+    List(StopGroup.CdcGroup)
   }
 
   override def getEngineType: String = Constants.ENGIN_FLINK

@@ -36,7 +36,7 @@ class JDBCExecuteSql extends ConfigurableStop[Table] {
         connection = DriverManager.getConnection(url, username, password)
         statement = connection.createStatement()
         sql.split(Constants.SEMICOLON).map(t => {
-          statement.execute(sql)
+          statement.execute(t)
         })
       } catch {
         case e: Exception => e.printStackTrace()
