@@ -1,4 +1,4 @@
-package cn.piflow.bundle.flink.cdc.mysql
+package cn.piflow.bundle.flink.cdc.postgres
 
 import cn.piflow._
 import cn.piflow.bundle.flink.model.FlinkTableDefinition
@@ -11,10 +11,10 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
-class MysqlCdc extends ConfigurableStop[Table] {
+class PostgresCdc extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
-  val description: String = "MySQL CDC连接器允许从MySQL数据库读取快照数据和增量数据。"
+  val description: String = "Postgres CDC连接器允许从PostgreSQL数据库读取快照数据和增量数据。"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 
@@ -23,8 +23,9 @@ class MysqlCdc extends ConfigurableStop[Table] {
   private var username: String = _
   private var password: String = _
   private var databaseName: String = _
+  private var schemaName: String = _
   private var tableName: String = _
-  private var serverId: String = _
+  private var slotName: String = _
   private var tableDefinition: FlinkTableDefinition = _
   private var properties: Map[String, Any] = _
 
@@ -54,12 +55,14 @@ class MysqlCdc extends ConfigurableStop[Table] {
          | $tableComment
          | $partitionStatement
          | WITH (
-         |'connector' = 'mysql-cdc',
+         |'connector' = 'postgres-cdc',
          |'hostname' = '$hostname',
          |'username' = '$username',
          |'password' = '$password',
          |$getWithConf
          |'database-name' = '$databaseName',
+         |'schema-name' = '$schemaName',
+         |'slot.name' = '$slotName',
          |'table-name' = '$tableName'
          |)
          |"""
@@ -76,12 +79,9 @@ class MysqlCdc extends ConfigurableStop[Table] {
 
   private def getWithConf: String = {
     var result = List[String]()
+
     if (port > 0) {
       result = s"'port' = '$port'," :: result
-    }
-
-    if (StringUtils.isNotBlank(serverId)) {
-      result = s"'server-id' = '$serverId'," :: result
     }
 
     if (properties != null && properties.nonEmpty) {
@@ -97,12 +97,13 @@ class MysqlCdc extends ConfigurableStop[Table] {
 
   override def setProperties(map: Map[String, Any]): Unit = {
     hostname = MapUtil.get(map, "hostname").asInstanceOf[String]
-    serverId = MapUtil.get(map, "serverId", "").asInstanceOf[String]
-    username = MapUtil.get(map, "username", "").asInstanceOf[String]
-    password = MapUtil.get(map, "password", "").asInstanceOf[String]
-    databaseName = MapUtil.get(map, "databaseName").asInstanceOf[String]
-    tableName = MapUtil.get(map, "tableName").asInstanceOf[String]
     port = MapUtil.get(map, "port", 0).asInstanceOf[String].toInt
+    username = MapUtil.get(map, "username").asInstanceOf[String]
+    password = MapUtil.get(map, "password").asInstanceOf[String]
+    databaseName = MapUtil.get(map, "databaseName").asInstanceOf[String]
+    schemaName = MapUtil.get(map, "schemaName").asInstanceOf[String]
+    tableName = MapUtil.get(map, "tableName").asInstanceOf[String]
+    slotName = MapUtil.get(map, "slotName").asInstanceOf[String]
     val tableDefinitionMap = MapUtil.get(map, key = "tableDefinition", Map()).asInstanceOf[Map[String, Any]]
     tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
     properties = MapUtil.get(map, key = "properties", Map()).asInstanceOf[Map[String, Any]]
@@ -124,7 +125,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
     val hostname = new PropertyDescriptor()
       .name("hostname")
       .displayName("Hostname")
-      .description("MySQL数据库服务器的IP地址或主机名。")
+      .description("PostgreSQL数据库服务器的IP地址或主机名。")
       .defaultValue("")
       .required(true)
       .example("127.0.0.1")
@@ -134,7 +135,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
     val username = new PropertyDescriptor()
       .name("username")
       .displayName("Username")
-      .description("连接到MySQL数据库服务器时要使用的MySQL用户的名称。")
+      .description("连接到PostgreSQL数据库服务器时要使用的用户名。")
       .defaultValue("")
       .required(true)
       .language(Language.Text)
@@ -144,7 +145,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
     val password = new PropertyDescriptor()
       .name("password")
       .displayName("Password")
-      .description("连接MySQL数据库服务器时使用的密码。")
+      .description("连接PostgreSQL数据库服务器时使用的密码。")
       .defaultValue("")
       .required(true)
       .example("12345")
@@ -155,17 +156,27 @@ class MysqlCdc extends ConfigurableStop[Table] {
     val databaseName = new PropertyDescriptor()
       .name("databaseName")
       .displayName("DatabaseName")
-      .description("要监视的MySQL服务器的数据库名称。数据库名称还支持正则表达式，以监视多个与正则表达式匹配的表。")
+      .description("要监视的PostgreSQL服务器的数据库名称。")
       .defaultValue("")
       .required(true)
       .language(Language.Text)
       .example("test")
     descriptor = databaseName :: descriptor
 
+    val schemaName = new PropertyDescriptor()
+      .name("schemaName")
+      .displayName("Schema")
+      .description("要监视的PostgreSQL数据库的Schema。")
+      .defaultValue("")
+      .required(true)
+      .language(Language.Text)
+      .example("public")
+    descriptor = schemaName :: descriptor
+
     val tableName = new PropertyDescriptor()
       .name("tableName")
       .displayName("TableName")
-      .description("需要监视的MySQL数据库的表名。表名支持正则表达式，以监视满足正则表达式的多个表。注意：MySQL CDC 连接器在正则匹配表名时，会把用户填写的database-name，table-name通过字符串连接成一个全路径的正则表达式，然后使用该正则表达式和MySQL数据库中表的全限定名进行正则匹配。")
+      .description("需要监视的PostgreSQL数据库的表名。")
       .defaultValue("")
       .required(true)
       .language(Language.Text)
@@ -175,26 +186,23 @@ class MysqlCdc extends ConfigurableStop[Table] {
     val port = new PropertyDescriptor()
       .name("port")
       .displayName("Port")
-      .description("MySQL数据库服务器的整数端口号。")
-      .defaultValue("3306")
+      .description("PostgreSQL数据库服务器的整数端口号。")
+      .defaultValue("5432")
       .required(false)
       .language(Language.Text)
-      .example("3306")
+      .example("5432")
     descriptor = port :: descriptor
 
-    val serverId = new PropertyDescriptor()
-      .name("serverId")
-      .displayName("ServerId")
-      .description("读取数据使用的 server id，server id 可以是个整数或者一个整数范围，比如 '5400' 或 '5400-5408', " +
-        "建议在 'scan.incremental.snapshot.enabled' 参数为启用时，配置成整数范围。因为在当前 MySQL 集群中运行的所有 slave 节点，" +
-        "标记每个 salve 节点的 id 都必须是唯一的。 所以当连接器加入 MySQL 集群作为另一个 slave 节点（并且具有唯一 id 的情况下），" +
-        "它就可以读取 binlog。 默认情况下，连接器会在 5400 和 6400 之间生成一个随机数，但是我们建议用户明确指定 Server id。")
+    val slotName = new PropertyDescriptor()
+      .name("slotName")
+      .displayName("SlotName")
+      .description("The name of the PostgreSQL logical decoding slot that was created for streaming changes from a particular plug-in for a particular database/schema. The server uses this slot to stream events to the connector that you are configuring." +
+        "Slot names must conform to PostgreSQL replication slot naming rules, which state: \"Each replication slot has a name, which can contain lower-case letters, numbers, and the underscore character.")
       .defaultValue("")
-      .required(false)
+      .required(true)
+      .example("")
       .language(Language.Text)
-      .example("5400-5408")
-    descriptor = serverId :: descriptor
-
+    descriptor = slotName :: descriptor
 
     val properties = new PropertyDescriptor()
       .name("properties")
@@ -209,7 +217,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/mysql/MysqlCdc.png")
+    ImageUtil.getImage("icon/postgres/PostgresCdc.png")
   }
 
   override def getGroup(): List[String] = {

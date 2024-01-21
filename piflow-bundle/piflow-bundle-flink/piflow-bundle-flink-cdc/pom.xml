@@ -18,15 +18,7 @@
         <module>piflow-bundle-flink-cdc-oracle</module>
         <module>piflow-bundle-flink-cdc-mongodb</module>
         <module>piflow-bundle-flink-cdc-oceanbase</module>
+        <module>piflow-bundle-flink-cdc-postgres</module>
     </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-common</artifactId>
-            <version>0.9</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
 </project>

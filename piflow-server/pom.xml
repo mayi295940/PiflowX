@@ -58,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-cdc-postgres</artifactId>
+            <version>0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>piflow</groupId>
             <artifactId>piflow-bundle-flink-cdc-mongodb</artifactId>
             <version>0.9</version>
         </dependency>
