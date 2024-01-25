@@ -76,6 +76,11 @@
             <artifactId>piflow-bundle-flink-filesystem</artifactId>
             <version>0.9</version>
         </dependency>
+        <dependency>
+            <groupId>piflow</groupId>
+            <artifactId>piflow-bundle-flink-catalog</artifactId>
+            <version>0.9</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>piflow</groupId>-->
 <!--            <artifactId>piflow-bundle-flink-ftp</artifactId>-->

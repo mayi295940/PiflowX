@@ -16,6 +16,7 @@
         <module>piflow-bundle-flink-base</module>
         <module>piflow-bundle-flink-cdc</module>
         <module>piflow-bundle-flink-common</module>
+        <module>piflow-bundle-flink-catalog</module>
         <module>piflow-bundle-flink-filesystem</module>
         <module>piflow-bundle-flink-ftp</module>
         <module>piflow-bundle-flink-hive</module>
@@ -61,10 +62,6 @@
                 <exclusion>
                     <artifactId>netty</artifactId>
                     <groupId>io.netty</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-compress</artifactId>
-                    <groupId>org.apache.commons</groupId>
                 </exclusion>
                 <exclusion>
                     <artifactId>commons-lang</artifactId>
@@ -229,12 +226,6 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-common</artifactId>
             <version>${flink.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-compress</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
