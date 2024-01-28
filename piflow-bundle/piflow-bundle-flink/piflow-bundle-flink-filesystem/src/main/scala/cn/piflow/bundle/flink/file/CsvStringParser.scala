@@ -1,4 +1,4 @@
-package cn.piflow.bundle.flink.file.json
+package cn.piflow.bundle.flink.file
 
 import cn.piflow._
 import cn.piflow.bundle.flink.util.RowTypeUtil
@@ -10,14 +10,15 @@ import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.types.Row
 
-class JsonStringParser extends ConfigurableStop[Table] {
+class CsvStringParser extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
-  override val description: String = "Parse json string"
+  override val description: String = "Parse csv string"
 
-  var content: List[Map[String, String]] = _
+  var content: String = _
+  var delimiter: String = _
   var schema: String = _
 
   override def perform(in: JobInputStream[Table],
@@ -26,13 +27,17 @@ class JsonStringParser extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val (rowType, fieldNames: Array[String]) = RowTypeUtil.getDataType(schema)
+    val (rowType, _) = RowTypeUtil.getDataType(schema)
 
     val children = rowType.getChildren
 
     val colNum: Int = children.size()
 
-    val listROW: List[Row] = content.map(lineMap => {
+    val arrStr: Array[String] = content.split(Constants.LINE_SPLIT_N).map(x => x.trim)
+
+    val listROW: List[Row] = arrStr.map(line => {
+
+      val seqSTR: Seq[String] = line.split(delimiter).map(x => x.trim).toSeq
 
       // todo time format
 
@@ -41,26 +46,27 @@ class JsonStringParser extends ConfigurableStop[Table] {
 
         val colType = children.get(i).getConversionClass.getSimpleName.toLowerCase()
         colType match {
-          case "string" => row.setField(i, lineMap(fieldNames(i)))
-          case "integer" => row.setField(i, lineMap(fieldNames(i)).toInt)
-          case "long" => row.setField(i, lineMap(fieldNames(i)).toLong)
-          case "double" => row.setField(i, lineMap(fieldNames(i)).toDouble)
-          case "float" => row.setField(i, lineMap(fieldNames(i)).toFloat)
-          case "boolean" => row.setField(i, lineMap(fieldNames(i)).toBoolean)
-          case "date" => row.setField(i, DateUtils.strToDate(lineMap(fieldNames(i))))
-          case "timestamp" => row.setField(i, DateUtils.strToSqlTimestamp(lineMap(fieldNames(i))))
-          case _ => row.setField(i, lineMap(fieldNames(i)))
+          case "string" => row.setField(i, seqSTR(i))
+          case "integer" => row.setField(i, seqSTR(i).toInt)
+          case "long" => row.setField(i, seqSTR(i).toLong)
+          case "double" => row.setField(i, seqSTR(i).toDouble)
+          case "float" => row.setField(i, seqSTR(i).toFloat)
+          case "boolean" => row.setField(i, seqSTR(i).toBoolean)
+          case "date" => row.setField(i, DateUtils.strToDate(seqSTR(i)))
+          case "timestamp" => row.setField(i, DateUtils.strToSqlTimestamp(seqSTR(i)))
+          case _ => row.setField(i, seqSTR(i))
         }
       }
 
       row
-    })
+    }).toList
 
     out.write(tableEnv.fromValues(rowType, listROW: _*))
   }
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    content = MapUtil.get(map, "content").asInstanceOf[List[Map[String, String]]]
+    content = MapUtil.get(map, "content").asInstanceOf[String]
+    delimiter = MapUtil.get(map, "delimiter").asInstanceOf[String]
     schema = MapUtil.get(map, "schema").asInstanceOf[String]
   }
 
@@ -69,18 +75,27 @@ class JsonStringParser extends ConfigurableStop[Table] {
 
     val content = new PropertyDescriptor()
       .name("content")
-      .displayName("content")
+      .displayName("Content")
       .defaultValue("")
       .required(true)
-      .example("{\"id\":\"13\",\"name\":\"13\",\"score\":\"13\",\"school\":\"13\",\"class\":\"13\"}")
+      .example("1,zs\n2,ls\n3,ww")
     descriptor = content :: descriptor
+
+    val delimiter = new PropertyDescriptor()
+      .name("delimiter")
+      .displayName("Delimiter")
+      .description("The delimiter of CSV string")
+      .defaultValue(",")
+      .required(true)
+      .example(",")
+    descriptor = delimiter :: descriptor
 
     val schema = new PropertyDescriptor()
       .name("schema")
       .displayName("Schema")
-      .description("The schema of json string")
+      .description("The schema of CSV string")
       .defaultValue("")
-      .required(true)
+      .required(false)
       .example("")
     descriptor = schema :: descriptor
 
@@ -88,11 +103,11 @@ class JsonStringParser extends ConfigurableStop[Table] {
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/json/JsonStringParser.png")
+    ImageUtil.getImage("icon/csv/CsvStringParser.png")
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.JsonGroup)
+    List(StopGroup.CsvGroup)
   }
 
   override def initialize(ctx: ProcessContext[Table]): Unit = {}

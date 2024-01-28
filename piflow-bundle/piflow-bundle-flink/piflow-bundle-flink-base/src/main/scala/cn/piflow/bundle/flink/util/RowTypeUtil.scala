@@ -205,7 +205,7 @@ object RowTypeUtil {
       }
     }
 
-    tableSchema.stripMargin.dropRight(1)
+    s"( ${tableSchema.stripMargin.dropRight(1)} )"
   }
 
   /**

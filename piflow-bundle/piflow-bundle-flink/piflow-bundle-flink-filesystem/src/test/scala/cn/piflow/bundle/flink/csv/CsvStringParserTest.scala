@@ -8,7 +8,7 @@ class CsvStringParserTest {
   @Test
   def testFlow(): Unit = {
     //parse flow json
-    val file = "src/test/resources/csv/CsvStringParser.json"
+    val file = "src/test/resources/file/CsvStringParser.json"
     BaseTest.testFlow(file)
   }
 

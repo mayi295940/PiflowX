@@ -94,6 +94,12 @@ class DorisWrite extends ConfigurableStop[Table] {
       result = s"'jdbc-url' = '$jdbcUrl'," :: result
     }
 
+    if (properties != null && properties.nonEmpty) {
+      for ((k, v) <- properties) {
+        result = s"'$k' = '$v'," :: result
+      }
+    }
+
     result.mkString("")
   }
 

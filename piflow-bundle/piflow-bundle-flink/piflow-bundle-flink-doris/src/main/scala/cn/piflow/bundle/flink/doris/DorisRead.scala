@@ -100,6 +100,12 @@ class DorisRead extends ConfigurableStop[Table] {
       result = s"'doris.batch.size' = '$batchSize'," :: result
     }
 
+    if (properties != null && properties.nonEmpty) {
+      for ((k, v) <- properties) {
+        result = s"'$k' = '$v'," :: result
+      }
+    }
+
     result.mkString("")
   }
 

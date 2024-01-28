@@ -1,4 +1,4 @@
-package cn.piflow.bundle.flink.jdbc
+package cn.piflow.bundle.flink.common
 
 import cn.piflow._
 import cn.piflow.bundle.flink.model.FlinkTableDefinition
@@ -6,24 +6,19 @@ import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.enums.DataBaseType
 import cn.piflow.util.{IdGenerator, JsonUtil}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
-class JDBCWrite extends ConfigurableStop[Table] {
+class CreateTable extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
-  val description: String = "使用JDBC驱动向任意类型的关系型数据库写入数据"
+  val description: String = "创建Flink table。"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 
-  private var url: String = _
-  private var username: String = _
-  private var password: String = _
-  private var tableName: String = _
-  private var driver: String = _
+  private var connector: String = _
   private var tableDefinition: FlinkTableDefinition = _
   private var properties: Map[String, Any] = _
 
@@ -42,7 +37,7 @@ class JDBCWrite extends ConfigurableStop[Table] {
     asSelectStatement,
     likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
 
-    if (StringUtils.isEmpty(columns)) {
+    if (StringUtils.isAllEmpty(columns, asSelectStatement)) {
       columns = RowTypeUtil.getTableSchema(inputTable)
     }
 
@@ -59,12 +54,8 @@ class JDBCWrite extends ConfigurableStop[Table] {
          | $tableComment
          | $partitionStatement
          | WITH (
-         |'connector' = 'jdbc',
-         |'url' = '$url',
-         |'username' = '$username',
-         |'password' = '$password',
          |$getWithConf
-         |'table-name' = '$tableName'
+         |'connector' = 'connector'
          |)
          |$asSelectStatement
          |$likeStatement
@@ -73,11 +64,9 @@ class JDBCWrite extends ConfigurableStop[Table] {
         .replaceAll("\r\n", " ")
         .replaceAll(Constants.LINE_SPLIT_N, " ")
 
-    println(ddl)
     tableEnv.executeSql(ddl)
 
-    if (tableDefinition.getAsSelectStatement != null &&
-      StringUtils.isEmpty(tableDefinition.getAsSelectStatement.getSelectStatement)) {
+    if (StringUtils.isEmpty(asSelectStatement)) {
       inputTable.insertInto(tmpTable).execute().print()
     }
 
@@ -85,10 +74,6 @@ class JDBCWrite extends ConfigurableStop[Table] {
 
   private def getWithConf: String = {
     var result = List[String]()
-
-    if (StringUtils.isNotBlank(driver)) {
-      result = s"'driver' = '$driver'," :: result
-    }
 
     if (properties != null && properties.nonEmpty) {
       for ((k, v) <- properties) {
@@ -102,11 +87,7 @@ class JDBCWrite extends ConfigurableStop[Table] {
   def initialize(ctx: ProcessContext[Table]): Unit = {}
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    url = MapUtil.get(map, "url").asInstanceOf[String]
-    username = MapUtil.get(map, "username", "").asInstanceOf[String]
-    password = MapUtil.get(map, "password", "").asInstanceOf[String]
-    driver = MapUtil.get(map, "driver", "").asInstanceOf[String]
-    tableName = MapUtil.get(map, "tableName").asInstanceOf[String]
+    connector = MapUtil.get(map, "connector").asInstanceOf[String]
     val tableDefinitionMap = MapUtil.get(map, key = "tableDefinition", Map()).asInstanceOf[Map[String, Any]]
     tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
     properties = MapUtil.get(map, key = "properties", Map()).asInstanceOf[Map[String, Any]]
@@ -114,6 +95,15 @@ class JDBCWrite extends ConfigurableStop[Table] {
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
+
+    val connector = new PropertyDescriptor()
+      .name("connector")
+      .displayName("connector")
+      .description("连接器")
+      .defaultValue("")
+      .required(true)
+      .example("datagen")
+    descriptor = connector :: descriptor
 
     val tableDefinition = new PropertyDescriptor()
       .name("tableDefinition")
@@ -125,57 +115,10 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .required(true)
     descriptor = tableDefinition :: descriptor
 
-    val url = new PropertyDescriptor()
-      .name("url")
-      .displayName("Url")
-      .description("JDBC数据库url")
-      .defaultValue("")
-      .required(true)
-      .example("jdbc:mysql://127.0.0.1:3306/test")
-    descriptor = url :: descriptor
-
-    val driver = new PropertyDescriptor()
-      .name("driver")
-      .displayName("Driver")
-      .description("用于连接到此URL的JDBC驱动类名，如果不设置，将自动从URL中推导")
-      .defaultValue("")
-      .required(false)
-      .example(DataBaseType.MySQL8.getDriverClassName)
-    descriptor = driver :: descriptor
-
-    val username = new PropertyDescriptor()
-      .name("username")
-      .displayName("Username")
-      .description("JDBC 用户名。如果指定了 'username' 和 'password' 中的任一参数，则两者必须都被指定。")
-      .defaultValue("")
-      .required(true)
-      .example("root")
-    descriptor = username :: descriptor
-
-    val password = new PropertyDescriptor()
-      .name("password")
-      .displayName("Password")
-      .description("JDBC密码")
-      .defaultValue("")
-      .required(true)
-      .example("123456")
-      .sensitive(true)
-    descriptor = password :: descriptor
-
-    val tableName = new PropertyDescriptor()
-      .name("tableName")
-      .displayName("DBTable")
-      .description("连接到JDBC表的名称")
-      .defaultValue("")
-      .required(true)
-      .example("test")
-    descriptor = tableName :: descriptor
-
-
     val properties = new PropertyDescriptor()
       .name("properties")
       .displayName("PROPERTIES")
-      .description("连接器其他配置")
+      .description("连接器其他配置。")
       .defaultValue("{}")
       .required(false)
 
@@ -185,11 +128,11 @@ class JDBCWrite extends ConfigurableStop[Table] {
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/jdbc/MysqlWrite.png")
+    ImageUtil.getImage("icon/common/CreateTable.png")
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.JdbcGroup)
+    List(StopGroup.CommonGroup)
   }
 
   override def getEngineType: String = Constants.ENGIN_FLINK

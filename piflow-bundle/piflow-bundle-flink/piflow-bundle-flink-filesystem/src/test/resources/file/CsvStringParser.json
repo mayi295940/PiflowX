@@ -4,14 +4,13 @@
     "uuid": "1234",
     "stops": [
       {
-        "uuid": "1111",
-        "name": "CsvParser",
-        "bundle": "cn.piflow.bundle.flink.csv.CsvParser",
+        "uuid": "0000",
+        "name": "CsvStringParser",
+        "bundle": "cn.piflow.bundle.flink.file.CsvStringParser",
         "properties": {
-          "csvPath": "src/test/resources/csv/user.csv",
-          "header": "true",
+          "content": "1,zs,13112345678,1000.12344,180.12,false,2023-12-15,2023-12-15 21:41:29\n2,ls,13112345678,1000.12344,180.12,false,2023-12-15,2023-12-15 21:41:29",
           "delimiter": ",",
-          "schema": "name:string,age:int"
+          "schema": "id:int,name:string,phone:long,salary:double,height:float,sex:boolean,birthdate:date,birthdate2:timestamp"
         }
       },
       {
@@ -25,7 +24,7 @@
     ],
     "paths": [
       {
-        "from": "CsvParser",
+        "from": "CsvStringParser",
         "outport": "",
         "inport": "",
         "to": "ShowData1"

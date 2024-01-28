@@ -3,12 +3,11 @@ package cn.piflow.bundle.flink.csv
 import cn.piflow.bundle.flink.test.BaseTest
 import org.junit.Test
 
-class CsvParserTest {
+class FileWriteTest {
 
   @Test
   def testFlow(): Unit = {
-    //parse flow json
-    val file = "src/test/resources/csv/CsvParser.json"
+    val file = "src/test/resources/file/FileWrite.json"
     BaseTest.testFlow(file)
   }
 

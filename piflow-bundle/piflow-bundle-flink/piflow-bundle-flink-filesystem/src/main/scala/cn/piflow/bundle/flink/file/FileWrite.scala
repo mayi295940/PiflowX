@@ -1,4 +1,4 @@
-package cn.piflow.bundle.flink.jdbc
+package cn.piflow.bundle.flink.file
 
 import cn.piflow._
 import cn.piflow.bundle.flink.model.FlinkTableDefinition
@@ -6,25 +6,20 @@ import cn.piflow.bundle.flink.util.RowTypeUtil
 import cn.piflow.conf._
 import cn.piflow.conf.bean.PropertyDescriptor
 import cn.piflow.conf.util.{ImageUtil, MapUtil}
-import cn.piflow.enums.DataBaseType
 import cn.piflow.util.{IdGenerator, JsonUtil}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
-class JDBCRead extends ConfigurableStop[Table] {
+class FileWrite extends ConfigurableStop[Table] {
 
   val authorEmail: String = ""
-  val description: String = "使用JDBC驱动向任意类型的关系型数据库读取数据"
+  val description: String = "往文件系统写入。"
   val inportList: List[String] = List(Port.DefaultPort)
   val outportList: List[String] = List(Port.DefaultPort)
 
-  private var url: String = _
-  private var driver: String = _
-  private var username: String = _
-  private var password: String = _
-  private var tableName: String = _
-  private var fetchSize: Int = _
+  private var path: String = _
+  private var format: String = _
   private var tableDefinition: FlinkTableDefinition = _
   private var properties: Map[String, Any] = _
 
@@ -34,12 +29,18 @@ class JDBCRead extends ConfigurableStop[Table] {
 
     val tableEnv = pec.get[StreamTableEnvironment]()
 
-    val (columns,
+    val inputTable = in.read()
+
+    var (columns,
     ifNotExists,
     tableComment,
     partitionStatement,
     asSelectStatement,
     likeStatement) = RowTypeUtil.getTableSchema(tableDefinition)
+
+    if (StringUtils.isEmpty(columns)) {
+      columns = RowTypeUtil.getTableSchema(inputTable)
+    }
 
     var tmpTable: String = ""
     if (StringUtils.isEmpty(tableDefinition.getRegisterTableName)) {
@@ -54,12 +55,10 @@ class JDBCRead extends ConfigurableStop[Table] {
          | $tableComment
          | $partitionStatement
          | WITH (
-         |'connector' = 'jdbc',
-         |'url' = '$url',
-         |'username' = '$username',
-         |'password' = '$password',
+         |'connector' = 'filesystem',
+         |'path' = '$path',
          |$getWithConf
-         |'table-name' = '$tableName'
+         |'format' = '$format'
          |)
          |$asSelectStatement
          |$likeStatement
@@ -68,23 +67,17 @@ class JDBCRead extends ConfigurableStop[Table] {
         .replaceAll("\r\n", " ")
         .replaceAll(Constants.LINE_SPLIT_N, " ")
 
+    println(ddl)
     tableEnv.executeSql(ddl)
 
-    val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
-    out.write(resultTable)
+    if (StringUtils.isEmpty(asSelectStatement)) {
+      inputTable.executeInsert(tmpTable)
+    }
 
   }
 
   private def getWithConf: String = {
     var result = List[String]()
-
-    if (StringUtils.isNotBlank(driver)) {
-      result = s"'driver' = '$driver'," :: result
-    }
-
-    if (fetchSize > 0) {
-      result = s"'scan.fetch-size' = '$fetchSize'," :: result
-    }
 
     if (properties != null && properties.nonEmpty) {
       for ((k, v) <- properties) {
@@ -98,12 +91,8 @@ class JDBCRead extends ConfigurableStop[Table] {
   def initialize(ctx: ProcessContext[Table]): Unit = {}
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    url = MapUtil.get(map, "url").asInstanceOf[String]
-    driver = MapUtil.get(map, "driver", "").asInstanceOf[String]
-    username = MapUtil.get(map, "username", "").asInstanceOf[String]
-    password = MapUtil.get(map, "password", "").asInstanceOf[String]
-    tableName = MapUtil.get(map, "tableName").asInstanceOf[String]
-    fetchSize = MapUtil.get(map, "fetchSize", 0).asInstanceOf[String].toInt
+    path = MapUtil.get(map, "path").asInstanceOf[String]
+    format = MapUtil.get(map, "format").asInstanceOf[String]
     val tableDefinitionMap = MapUtil.get(map, key = "tableDefinition", Map()).asInstanceOf[Map[String, Any]]
     tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
     properties = MapUtil.get(map, key = "properties", Map()).asInstanceOf[Map[String, Any]]
@@ -122,69 +111,29 @@ class JDBCRead extends ConfigurableStop[Table] {
       .required(true)
     descriptor = tableDefinition :: descriptor
 
-    val url = new PropertyDescriptor()
-      .name("url")
-      .displayName("Url")
-      .description("JDBC数据库url。")
+    val path = new PropertyDescriptor()
+      .name("path")
+      .displayName("path")
+      .description("文件路径。")
       .defaultValue("")
       .required(true)
-      .example("jdbc:mysql://127.0.0.1:3306/test")
-    descriptor = url :: descriptor
+      .example(" hdfs://server1:8020/flink/test/text.txt")
+    descriptor = path :: descriptor
 
-    val driver = new PropertyDescriptor()
-      .name("driver")
-      .displayName("Driver")
-      .description("用于连接到此URL的JDBC驱动类名，如果不设置，将自动从URL中推导。")
+    val format = new PropertyDescriptor()
+      .name("format")
+      .displayName("FORMAT")
+      .description("文件系统连接器支持format。")
+      .allowableValues(Set("json", "csv", "avro", "parquet", "orc", "raw", "debezium-json", "canal-json"))
       .defaultValue("")
-      .required(false)
-      .example(DataBaseType.MySQL8.getDriverClassName)
-    descriptor = driver :: descriptor
-
-    val username = new PropertyDescriptor()
-      .name("username")
-      .displayName("Username")
-      .description("JDBC用户名。如果指定了username和password中的任一参数，则两者必须都被指定。")
-      .defaultValue("")
+      .example("json")
       .required(true)
-      .example("root")
-    descriptor = username :: descriptor
-
-    val password = new PropertyDescriptor()
-      .name("password")
-      .displayName("password")
-      .description("JDBC密码。")
-      .defaultValue("")
-      .required(true)
-      .example("12345")
-      .sensitive(true)
-    descriptor = password :: descriptor
-
-    val tableName = new PropertyDescriptor()
-      .name("tableName")
-      .displayName("TableName")
-      .description("连接到JDBC表的名称。")
-      .defaultValue("")
-      .required(true)
-      .language(Language.Text)
-      .example("test")
-    descriptor = tableName :: descriptor
-
-
-    val fetchSize = new PropertyDescriptor()
-      .name("fetchSize")
-      .displayName("FetchSize")
-      .description("每次循环读取时应该从数据库中获取的行数。如果指定的值为 '0'，则该配置项会被忽略。")
-      .defaultValue("")
-      .dataType("Integer")
-      .required(false)
-      .language(Language.Text)
-      .example("500")
-    descriptor = fetchSize :: descriptor
+    descriptor = format :: descriptor
 
     val properties = new PropertyDescriptor()
       .name("properties")
       .displayName("PROPERTIES")
-      .description("连接器其他配置。")
+      .description("连接器其他配置")
       .defaultValue("{}")
       .required(false)
 
@@ -194,11 +143,11 @@ class JDBCRead extends ConfigurableStop[Table] {
   }
 
   override def getIcon(): Array[Byte] = {
-    ImageUtil.getImage("icon/jdbc/MysqlRead.png")
+    ImageUtil.getImage("icon/file/FileWrite.png")
   }
 
   override def getGroup(): List[String] = {
-    List(StopGroup.JdbcGroup)
+    List(StopGroup.FileGroup)
   }
 
   override def getEngineType: String = Constants.ENGIN_FLINK
