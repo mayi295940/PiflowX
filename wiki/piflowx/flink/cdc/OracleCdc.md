@@ -81,3 +81,5 @@ outport：默认端口
 本示例演示了通过`OracleCdc`从数据库`ORCLCDB`中读取`PRODUCTS_TEST`表数据，并使用`ShowChangeLogData`组件将数据打印在控制台。
 
 #### 演示DEMO
+
+[PiflowX组件-OracleCdc_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV16k4y1D71E/?vd_source=3fdc89de16a8f73489873ba5a0a3d2a7)

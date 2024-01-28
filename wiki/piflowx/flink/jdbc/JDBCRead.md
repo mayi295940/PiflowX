@@ -86,4 +86,6 @@ outport：默认端口
 
 #### 演示DEMO
 
+[PiflowX-JdbcRead组件演示_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1694y1u79w/?vd_source=3fdc89de16a8f73489873ba5a0a3d2a7)
+
 ![](https://cdn.jsdelivr.net/gh/mayi295940/blog_pic_ma@main/img/piflowx/stop/flink/jdbcJDBCRead.gif)

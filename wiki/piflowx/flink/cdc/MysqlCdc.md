@@ -84,3 +84,7 @@ outport：默认端口
 #### 演示DEMO
 
 ![](https://cdn.jsdelivr.net/gh/mayi295940/blog_pic_ma@main/img/piflowx/stop/flink/cdcMysqlCdc.gif)
+
+
+
+[PiflowX-MysqlCdc组件_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1wi4y1B7TH/?vd_source=3fdc89de16a8f73489873ba5a0a3d2a7)
