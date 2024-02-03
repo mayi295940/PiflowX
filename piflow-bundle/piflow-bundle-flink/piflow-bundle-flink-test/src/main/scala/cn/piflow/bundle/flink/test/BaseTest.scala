@@ -2,7 +2,7 @@ package cn.piflow.bundle.flink.test
 
 import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
-import cn.piflow.conf.util.FileUtil
+import cn.piflow.conf.util.{FileUtil, MapUtil}
 import cn.piflow.util.JsonUtil
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.streaming.api.CheckpointingMode
@@ -28,7 +28,19 @@ object BaseTest {
     // Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "50001").start()
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.setRuntimeMode(mode)
+
+    // 设置执行模型
+    // env.setRuntimeMode(mode)
+
+    val environment = flow.getEnvironment
+
+    val runtimeMode = MapUtil.get(environment, "runtimeMode", "").asInstanceOf[String]
+    if (RuntimeExecutionMode.BATCH.name().equalsIgnoreCase(runtimeMode)) {
+      env.setRuntimeMode(RuntimeExecutionMode.BATCH)
+    } else {
+      env.setRuntimeMode(RuntimeExecutionMode.STREAMING)
+    }
+
     env.setParallelism(1)
     // 每20秒作为checkpoint的一个周期
     env.enableCheckpointing(20000);
@@ -44,8 +56,6 @@ object BaseTest {
     env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
     // checkpoint存储位置
     env.getCheckpointConfig.setCheckpointStorage("file:///src/test/resources/checkpoint");
-    // 设置执行模型为Streaming方式
-    env.setRuntimeMode(RuntimeExecutionMode.STREAMING);
 
     val tableEnv = StreamTableEnvironment.create(env)
 

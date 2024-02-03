@@ -103,7 +103,7 @@ class JDBCRead extends ConfigurableStop[Table] {
     username = MapUtil.get(map, "username", "").asInstanceOf[String]
     password = MapUtil.get(map, "password", "").asInstanceOf[String]
     tableName = MapUtil.get(map, "tableName").asInstanceOf[String]
-    fetchSize = MapUtil.get(map, "fetchSize", 0).asInstanceOf[String].toInt
+    fetchSize = MapUtil.get(map, "fetchSize", "0").asInstanceOf[String].toInt
     val tableDefinitionMap = MapUtil.get(map, key = "tableDefinition", Map()).asInstanceOf[Map[String, Any]]
     tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
     properties = MapUtil.get(map, key = "properties", Map()).asInstanceOf[Map[String, Any]]

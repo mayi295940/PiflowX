@@ -34,7 +34,7 @@ class ShowChangeLogData extends ConfigurableStop[Table] {
 
   //set customized properties of your Stop
   def setProperties(map: Map[String, Any]): Unit = {
-    showNumber = MapUtil.get(map, "showNumber").asInstanceOf[String].toInt
+    showNumber = MapUtil.get(map, "showNumber", "10").asInstanceOf[String].toInt
   }
 
   //get descriptor of customized properties

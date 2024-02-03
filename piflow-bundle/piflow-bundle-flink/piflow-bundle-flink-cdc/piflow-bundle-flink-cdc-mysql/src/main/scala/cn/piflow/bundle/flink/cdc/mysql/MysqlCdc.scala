@@ -102,7 +102,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
     password = MapUtil.get(map, "password", "").asInstanceOf[String]
     databaseName = MapUtil.get(map, "databaseName").asInstanceOf[String]
     tableName = MapUtil.get(map, "tableName").asInstanceOf[String]
-    port = MapUtil.get(map, "port", 0).asInstanceOf[String].toInt
+    port = MapUtil.get(map, "port", "0").asInstanceOf[String].toInt
     val tableDefinitionMap = MapUtil.get(map, key = "tableDefinition", Map()).asInstanceOf[Map[String, Any]]
     tableDefinition = JsonUtil.mapToObject[FlinkTableDefinition](tableDefinitionMap, classOf[FlinkTableDefinition])
     properties = MapUtil.get(map, key = "properties", Map()).asInstanceOf[Map[String, Any]]

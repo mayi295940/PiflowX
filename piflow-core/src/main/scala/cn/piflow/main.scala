@@ -142,6 +142,10 @@ trait Flow[DataType] extends GroupEntry[DataType] {
   def setUUID(uuid: String): Unit
 
   def getUUID: String
+
+  def setEnvironment(env: Map[String, Any]): Unit
+
+  def getEnvironment: Map[String, Any]
 }
 
 class FlowImpl[DataType] extends Flow[DataType] {
@@ -151,6 +155,7 @@ class FlowImpl[DataType] extends Flow[DataType] {
 
   val edges: ArrayBuffer[Edge] = ArrayBuffer[Edge]()
   val stops: MMap[String, Stop[DataType]] = MMap[String, Stop[DataType]]()
+
   private val checkpoints = ArrayBuffer[String]()
   var checkpointParentProcessId = ""
   var runMode = ""
@@ -161,6 +166,8 @@ class FlowImpl[DataType] extends Flow[DataType] {
   var executorNum = ""
   var executorMem = ""
   var executorCores = ""
+
+  var environment: Map[String, Any] = Map[String, Any]()
 
   def addStop(name: String, process: Stop[DataType]): FlowImpl[DataType] = {
     stops(name) = process
@@ -328,6 +335,14 @@ class FlowImpl[DataType] extends Flow[DataType] {
   }
 
   override def show(): Unit = {}
+
+  override def getEnvironment: Map[String, Any] = {
+    this.environment
+  }
+
+  override def setEnvironment(env: Map[String, Any]): Unit = {
+    this.environment = env
+  }
 }
 
 trait AnalyzedFlowGraph[DataType] {

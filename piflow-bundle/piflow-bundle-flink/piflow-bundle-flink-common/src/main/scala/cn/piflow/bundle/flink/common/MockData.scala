@@ -22,7 +22,7 @@ class MockData extends ConfigurableStop[Table] {
 
   override def setProperties(map: Map[String, Any]): Unit = {
     schema = MapUtil.get(map, "schema").asInstanceOf[String]
-    count = MapUtil.get(map, "count").asInstanceOf[String].toInt
+    count = MapUtil.get(map, "count", "10").asInstanceOf[String].toInt
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {

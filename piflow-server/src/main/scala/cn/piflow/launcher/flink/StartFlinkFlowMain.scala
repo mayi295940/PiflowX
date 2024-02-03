@@ -2,7 +2,9 @@ package cn.piflow.launcher.flink
 
 import cn.piflow.Runner
 import cn.piflow.conf.bean.FlowBean
+import cn.piflow.conf.util.MapUtil
 import cn.piflow.util.{FlowFileUtil, JsonUtil}
+import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -32,6 +34,16 @@ object StartFlinkFlowMain {
     val flow = flowBean.constructFlow(false)
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
+
+    val environment = flow.getEnvironment
+
+    val runtimeMode = MapUtil.get(environment, "runtimeMode", "").asInstanceOf[String]
+    if (RuntimeExecutionMode.BATCH.name().equalsIgnoreCase(runtimeMode)) {
+      env.setRuntimeMode(RuntimeExecutionMode.BATCH)
+    } else {
+      env.setRuntimeMode(RuntimeExecutionMode.BATCH)
+    }
+
     val tableEnv = StreamTableEnvironment.create(env)
     println("StreamExecutionEnvironment is " + env + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 

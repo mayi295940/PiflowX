@@ -24,8 +24,8 @@ class DataGen extends ConfigurableStop[Table] {
 
   override def setProperties(map: Map[String, Any]): Unit = {
     schema = MapUtil.get(map, "schema").asInstanceOf[List[Map[String, Any]]]
-    count = MapUtil.get(map, "count").asInstanceOf[String].toInt
-    ratio = MapUtil.get(map, "ratio").asInstanceOf[String].toInt
+    count = MapUtil.get(map, "count", "10").asInstanceOf[String].toInt
+    ratio = MapUtil.get(map, "ratio", "1").asInstanceOf[String].toInt
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {

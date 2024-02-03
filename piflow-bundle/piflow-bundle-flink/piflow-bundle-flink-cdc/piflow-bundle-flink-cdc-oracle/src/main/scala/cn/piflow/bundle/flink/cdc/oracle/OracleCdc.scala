@@ -105,7 +105,7 @@ class OracleCdc extends ConfigurableStop[Table] {
 
   override def setProperties(map: Map[String, Any]): Unit = {
     hostname = MapUtil.get(map, "hostname").asInstanceOf[String]
-    port = MapUtil.get(map, "port", 0).asInstanceOf[String].toInt
+    port = MapUtil.get(map, "port", "0").asInstanceOf[String].toInt
     url = MapUtil.get(map, "url", "").asInstanceOf[String]
     username = MapUtil.get(map, "username", "").asInstanceOf[String]
     password = MapUtil.get(map, "password", "").asInstanceOf[String]

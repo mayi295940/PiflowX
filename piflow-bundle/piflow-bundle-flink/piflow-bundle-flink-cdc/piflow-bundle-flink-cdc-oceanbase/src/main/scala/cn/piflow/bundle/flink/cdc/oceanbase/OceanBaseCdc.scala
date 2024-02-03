@@ -120,7 +120,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
     logProxyHost = MapUtil.get(map, "logProxyHost").asInstanceOf[String]
     logProxyPort = MapUtil.get(map, "logProxyPort").asInstanceOf[String].toInt
     hostname = MapUtil.get(map, "hostname", "").asInstanceOf[String]
-    port = MapUtil.get(map, "port", 2881).asInstanceOf[String].toInt
+    port = MapUtil.get(map, "port", "2881").asInstanceOf[String].toInt
     databaseName = MapUtil.get(map, "databaseName", "").asInstanceOf[String]
     tableName = MapUtil.get(map, "tableName", "").asInstanceOf[String]
     tableList = MapUtil.get(map, "tableList", "").asInstanceOf[String]

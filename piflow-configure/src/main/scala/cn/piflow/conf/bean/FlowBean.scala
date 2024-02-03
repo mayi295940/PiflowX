@@ -28,6 +28,8 @@ class FlowBean[DataType] extends GroupEntryBean {
   private var executorMem: String = _
   var executorCores: String = _
 
+  private var environment: Map[String, Any] = _
+
   //flow environment variable
   var environmentVariable: Map[String, Any] = _
 
@@ -54,6 +56,7 @@ class FlowBean[DataType] extends GroupEntryBean {
     this.executorCores = flowMap.getOrElse("executorCores", "1").asInstanceOf[String]
 
     this.environmentVariable = flowMap.getOrElse("environmentVariable", Map()).asInstanceOf[Map[String, Any]]
+    this.environment = flowMap.getOrElse("environment", Map()).asInstanceOf[Map[String, Any]]
 
     //construct StopBean List
     val stopsList = MapUtil.get(flowMap, "stops").asInstanceOf[List[Map[String, Any]]]
@@ -100,8 +103,9 @@ class FlowBean[DataType] extends GroupEntryBean {
   //create Flow by FlowBean
   def constructFlow(buildScalaJar: Boolean = true): FlowImpl[DataType] = {
 
-    if (buildScalaJar)
+    if (buildScalaJar) {
       ScalaExecutorUtil.buildScalaExcutorJar(this)
+    }
 
     val flow = new FlowImpl[DataType]()
 
@@ -115,6 +119,8 @@ class FlowBean[DataType] extends GroupEntryBean {
     flow.setExecutorNum(this.executorNum)
     flow.setExecutorCores(this.executorCores)
     flow.setExecutorMem(this.executorMem)
+
+    flow.setEnvironment(this.environment)
 
     this.stops.foreach(stopBean => {
       flow.addStop(stopBean.name, stopBean.constructStop())

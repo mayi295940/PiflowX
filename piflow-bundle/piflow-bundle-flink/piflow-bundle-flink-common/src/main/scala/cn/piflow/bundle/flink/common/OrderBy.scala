@@ -6,31 +6,28 @@ import cn.piflow.conf.util.{ImageUtil, MapUtil}
 import cn.piflow.conf.{ConfigurableStop, Port, StopGroup}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.table.api.Expressions.$
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.api.{ApiExpression, Table}
 
 class OrderBy extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
-  override val description: String = "返回跨所有并行分区的全局有序记录"
+  override val description: String = "ORDER BY组件使结果行根据指定的表达式进行排序。"
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
   private var expression: String = _
-  private var offset: String = _
-  private var fetch: String = _
+  private var offset: Int = _
+  private var fetch: Int = _
 
   override def setProperties(map: Map[String, Any]): Unit = {
     expression = MapUtil.get(map, "expression").asInstanceOf[String]
-    offset = MapUtil.get(map, "offset").asInstanceOf[String]
-    fetch = MapUtil.get(map, "fetch").asInstanceOf[String]
+    offset = MapUtil.get(map, "offset", "0").asInstanceOf[String].toInt
+    fetch = MapUtil.get(map, "fetch", "0").asInstanceOf[String].toInt
   }
 
   override def perform(in: JobInputStream[Table],
                        out: JobOutputStream[Table],
                        pec: JobContext[Table]): Unit = {
-
-    val tableEnv = pec.get[StreamTableEnvironment]()
 
     val inputTable = in.read()
     var resultTable = inputTable
@@ -48,16 +45,14 @@ class OrderBy extends ConfigurableStop[Table] {
       resultTable = resultTable.orderBy(array: _*)
     }
 
-    if (StringUtils.isNotEmpty(offset) && StringUtils.isNumeric(offset)) {
-      resultTable = resultTable.offset(offset.toInt)
+    if (offset > 0) {
+      resultTable = resultTable.offset(offset)
     }
-
-    if (StringUtils.isNotEmpty(fetch) && StringUtils.isNumeric(fetch)) {
-      resultTable = resultTable.fetch(fetch.toInt)
+    if (fetch > 0) {
+       resultTable = resultTable.fetch(fetch)
     }
 
     out.write(resultTable)
-
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
@@ -66,7 +61,7 @@ class OrderBy extends ConfigurableStop[Table] {
 
     val condition = new PropertyDescriptor().name("expression").
       displayName("Expression")
-      .description("The expression you want to order")
+      .description("在流模式下运行时，表的主要排序顺序必须按时间属性升序。所有后续的orders都可以自由选择。但是批处理模式没有这个限制。")
       .defaultValue("")
       .required(false)
       .example("name->desc,age->asc")
@@ -74,7 +69,7 @@ class OrderBy extends ConfigurableStop[Table] {
 
     val offset = new PropertyDescriptor().name("offset").
       displayName("offset")
-      .description("Offset 操作根据偏移位置来限定（可能是已排序的）结果集。")
+      .description("Offset操作根据偏移位置来限定（可能是已排序的）结果集。")
       .defaultValue("")
       .required(false)
       .example("10")
@@ -82,7 +77,7 @@ class OrderBy extends ConfigurableStop[Table] {
 
     val fetch = new PropertyDescriptor().name("fetch").
       displayName("fetch")
-      .description("Fetch 操作将（可能已排序的）结果集限制为前 n 行。")
+      .description("Fetch操作将（可能已排序的）结果集限制为前n行。")
       .defaultValue("")
       .required(false)
       .example("10")
