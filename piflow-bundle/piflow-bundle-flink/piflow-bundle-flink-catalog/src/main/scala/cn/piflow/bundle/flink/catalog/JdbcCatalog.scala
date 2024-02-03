@@ -66,13 +66,12 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .example("my_catalog")
     descriptor = catalogName :: descriptor
 
-    // todo 前端下拉框未获取到值，暂时注释
     val databaseType = new PropertyDescriptor()
       .name("databaseType")
       .displayName("DatabaseType")
-      .description("Postgres Catalog或 MySQL Catalog。")
+      .description("Postgres Catalog或MySQL Catalog。")
       .defaultValue("")
-      //.allowableValues(Set("postgresql", "mysql"))
+      .allowableValues(Set("postgresql", "mysql"))
       .required(true)
       .example("mysql")
     descriptor = databaseType :: descriptor
@@ -107,7 +106,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
     val username = new PropertyDescriptor()
       .name("username")
       .displayName("username")
-      .description("Postgres/MySQL账户的用户名。")
+      .description("账户的用户名。")
       .defaultValue("")
       .required(true)
       .example("root")
@@ -118,6 +117,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .displayName("password")
       .description("账户的密码。")
       .defaultValue("")
+      .sensitive(true)
       .required(true)
       .example("123456")
     descriptor = password :: descriptor
