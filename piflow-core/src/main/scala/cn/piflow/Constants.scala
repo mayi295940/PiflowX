@@ -40,6 +40,8 @@ object Constants {
 
   val ENGIN_FLINK = "flink"
 
+  val ENGIN_BEAM = "beam"
+
   val UNDERLINE_SIGN = "_"
 
 }

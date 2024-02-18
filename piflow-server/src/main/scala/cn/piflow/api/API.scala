@@ -3,11 +3,13 @@ package cn.piflow.api
 import cn.piflow.conf.bean.{FlowBean, GroupBean}
 import cn.piflow.conf.util.{ClassUtil, MapUtil, OptionUtil, PluginManager}
 import cn.piflow.conf.{ConfigurableStop, VisualizationType}
+import cn.piflow.launcher.beam.BeamFlowLauncher
 import cn.piflow.launcher.flink.{FlinkFlowLauncher, FlinkLauncher}
 import cn.piflow.launcher.spark.SparkFlowLauncher
 import cn.piflow.util.HdfsUtil.{getJsonMapList, getLine}
 import cn.piflow.util._
 import cn.piflow.{Constants, GroupExecution, Process, Runner}
+import org.apache.beam.sdk.values.{PCollection, Row}
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.Table
 import org.apache.flink.util.IOUtils
@@ -214,14 +216,19 @@ object API {
 
     val flowMap = JsonUtil.jsonToMap(flowJson)
 
-    val env =  flowMap("flow").asInstanceOf[Map[String, String]]("engineType")
+    val env = flowMap("flow").asInstanceOf[Map[String, String]]("engineType")
 
     if ("flink".equals(env)) {
       val (appId, handle) = this.startFlinkFlow(flowMap)
       (appId, handle)
-    } else {
+    } else if ("spark".equals(env)) {
       val (appId, handle) = this.startSparkFlow(flowMap)
       (appId, handle)
+    } else if ("beam".equals(env)) {
+      val (appId, handle) = this.startBeamFlow(flowMap)
+      (appId, handle)
+    } else {
+      throw new Exception("Unsupported engineType: " + env)
     }
   }
 
@@ -287,6 +294,24 @@ object API {
     val (stdout, stderr) = getLogFile(uuid, appName)
 
     appId = FlinkFlowLauncher.launch(flow)
+
+    (appId, null)
+
+  }
+
+  private def startBeamFlow(flowMap: Map[String, Any]): (String, Any) = {
+
+    var appId: String = null
+
+    //create flow
+    val flowBean = FlowBean[PCollection[Row]](flowMap)
+    val flow = flowBean.constructFlow()
+
+    val uuid = flow.getUUID
+    val appName = flow.getFlowName
+    val (stdout, stderr) = getLogFile(uuid, appName)
+
+    appId = BeamFlowLauncher.launch(flow)
 
     (appId, null)
 
@@ -528,8 +553,10 @@ object API {
 
     if (Constants.ENGIN_SPARK.equalsIgnoreCase(engineType)) {
       configurableStopList = ClassUtil.findAllConfigurableStop[DataFrame]("cn.piflow.bundle.spark")
-    } else {
+    } else if (Constants.ENGIN_FLINK.equalsIgnoreCase(engineType)) {
       configurableStopList = ClassUtil.findAllConfigurableStop[Table]("cn.piflow.bundle.flink")
+    } else if (Constants.ENGIN_BEAM.equalsIgnoreCase(engineType)) {
+      configurableStopList = ClassUtil.findAllConfigurableStop[PCollection[Row]]("cn.piflow.bundle.beam")
     }
 
     configurableStopList.foreach(s => {

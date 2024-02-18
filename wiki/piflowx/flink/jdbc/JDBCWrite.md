@@ -70,7 +70,7 @@ outport：默认端口
       {
         "uuid": "2222",
         "name": "JDBCWrite1",
-        "bundle": "cn.piflow.bundle.flink.jdbc.JDBCWrite",
+        "bundle": "cn.piflow.bundle.beam.jdbc.JDBCWrite",
         "properties": {
           "url": "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false&allowMultiQueries=true",
           "username": "root",
@@ -83,7 +83,7 @@ outport：默认端口
       {
         "uuid": "3333",
         "name": "JDBCRead1",
-        "bundle": "cn.piflow.bundle.flink.jdbc.JDBCRead",
+        "bundle": "cn.piflow.bundle.beam.jdbc.JDBCRead",
         "properties": {
           "url": "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false&allowMultiQueries=true",
           "username": "root",

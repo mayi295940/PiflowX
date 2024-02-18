@@ -49,7 +49,7 @@ outport：默认端口
       {
         "uuid": "0000",
         "name": "JDBCRead1",
-        "bundle": "cn.piflow.bundle.flink.jdbc.JDBCRead",
+        "bundle": "cn.piflow.bundle.beam.jdbc.JDBCRead",
         "properties": {
           "url": "jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false&allowMultiQueries=true",
           "username": "root",
