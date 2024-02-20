@@ -41,7 +41,7 @@ object StartFlinkFlowMain {
     if (RuntimeExecutionMode.BATCH.name().equalsIgnoreCase(runtimeMode)) {
       env.setRuntimeMode(RuntimeExecutionMode.BATCH)
     } else {
-      env.setRuntimeMode(RuntimeExecutionMode.BATCH)
+      env.setRuntimeMode(RuntimeExecutionMode.STREAMING)
     }
 
     val tableEnv = StreamTableEnvironment.create(env)

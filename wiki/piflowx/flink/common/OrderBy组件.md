@@ -33,7 +33,9 @@ outport：默认端口
   "flow": {
     "name": "OrderByTest",
     "uuid": "1234",
-    "runtimeMode": "batch",
+    "environment": {
+      "runtimeMode": "batch"
+    },
     "stops": [
       {
         "uuid": "0000",

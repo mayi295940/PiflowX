@@ -2,7 +2,9 @@
   "flow": {
     "name": "FilterTest",
     "uuid": "1234",
-    "runtimeMode": "batch",
+    "environment": {
+      "runtimeMode": "batch"
+    },
     "stops": [
       {
         "uuid": "0000",

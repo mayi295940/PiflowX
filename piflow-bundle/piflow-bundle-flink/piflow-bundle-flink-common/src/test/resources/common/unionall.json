@@ -1,6 +1,8 @@
 {
   "flow": {
-    "name": "UnionTest",
+    "uuid": "7a5d97d288224a358a2d30ae8a229230",
+    "runMode": "DEBUG",
+    "name": "UnionAllTest",
     "engineType": "flink",
     "environment": {
       "runtimeMode": "batch"
@@ -9,18 +11,18 @@
       {
         "inport": "1",
         "from": "CsvStringParser1",
-        "to": "Union",
+        "to": "UnionAll",
         "outport": ""
       },
       {
         "inport": "2",
         "from": "CsvStringParser2",
-        "to": "Union",
+        "to": "UnionAll",
         "outport": ""
       },
       {
         "inport": "",
-        "from": "Union",
+        "from": "UnionAll",
         "to": "ShowData",
         "outport": ""
       }
@@ -48,9 +50,9 @@
       },
       {
         "customizedProperties": {},
-        "name": "Union",
+        "name": "UnionAll",
         "uuid": "0f0cf231dbf64852b17ac3ee2064134d",
-        "bundle": "cn.piflow.bundle.flink.common.Union",
+        "bundle": "cn.piflow.bundle.flink.common.UnionAll",
         "properties": {
           "inports": "1,2"
         }
@@ -64,8 +66,6 @@
           "showNumber": "1000"
         }
       }
-    ],
-    "uuid": "7a5d97d288224a358a2d30ae8a229230",
-    "runMode": "DEBUG"
+    ]
   }
 }

@@ -29,15 +29,15 @@ object BaseTest {
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-    // 设置执行模型
-    // env.setRuntimeMode(mode)
+    // 使用传递参数设置执行模型
+     env.setRuntimeMode(mode)
 
+    // 环境变量设置了执行模型，则使用环境变量的
     val environment = flow.getEnvironment
-
     val runtimeMode = MapUtil.get(environment, "runtimeMode", "").asInstanceOf[String]
     if (RuntimeExecutionMode.BATCH.name().equalsIgnoreCase(runtimeMode)) {
       env.setRuntimeMode(RuntimeExecutionMode.BATCH)
-    } else {
+    } else if (RuntimeExecutionMode.STREAMING.name().equalsIgnoreCase(runtimeMode)) {
       env.setRuntimeMode(RuntimeExecutionMode.STREAMING)
     }
 
