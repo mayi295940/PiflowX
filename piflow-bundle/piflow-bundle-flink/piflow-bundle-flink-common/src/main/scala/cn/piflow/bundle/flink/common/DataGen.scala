@@ -109,7 +109,6 @@ class DataGen extends ConfigurableStop[Table] {
     val resultTable = tableEnv.sqlQuery(s"SELECT * FROM $tmpTable")
     out.write(resultTable)
 
-    out.write(resultTable)
   }
 
 
