@@ -5,25 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>piflow</groupId>
-        <artifactId>piflow-bundle-flink</artifactId>
+        <artifactId>piflow-bundle-beam</artifactId>
         <version>0.9</version>
     </parent>
 
-    <artifactId>piflow-bundle-flink-ftp</artifactId>
+    <artifactId>piflow-bundle-beam-all</artifactId>
 
     <dependencies>
-        
         <dependency>
             <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-base</artifactId>
-            <version>0.9</version>
-        </dependency>
-
-        <dependency>
-            <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-common</artifactId>
-            <version>0.9</version>
-            <scope>test</scope>
+            <artifactId>piflow-bundle-beam-jdbc</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

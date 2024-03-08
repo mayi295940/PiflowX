@@ -12,6 +12,7 @@
     <artifactId>piflow-bundle-beam</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>piflow-bundle-beam-all</module>
         <module>piflow-bundle-beam-jdbc</module>
         <module>piflow-bundle-beam-test</module>
     </modules>

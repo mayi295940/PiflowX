@@ -664,8 +664,6 @@ object HTTPService extends DefaultJsonProtocol with Directives with SprayJsonSup
   def run(): Unit = {
 
     val ip = InetAddress.getLocalHost.getHostAddress
-    //write ip to server.ip file
-    FileUtil.writeFile("server.ip=" + ip, ServerIpUtil.getServerIpFile())
 
     val port = PropertyUtil.getIntPropertyValue("server.port")
     Http().bindAndHandleAsync(route, ip, port)

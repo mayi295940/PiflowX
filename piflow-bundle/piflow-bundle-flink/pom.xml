@@ -13,12 +13,12 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>piflow-bundle-flink-all</module>
         <module>piflow-bundle-flink-base</module>
         <module>piflow-bundle-flink-cdc</module>
         <module>piflow-bundle-flink-common</module>
         <module>piflow-bundle-flink-catalog</module>
         <module>piflow-bundle-flink-filesystem</module>
-        <module>piflow-bundle-flink-ftp</module>
         <module>piflow-bundle-flink-hive</module>
         <module>piflow-bundle-flink-jdbc</module>
         <module>piflow-bundle-flink-kafka</module>
@@ -208,7 +208,7 @@
         <dependency>
             <groupId>piflow</groupId>
             <artifactId>piflow-bundle-core</artifactId>
-            <version>0.9</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>log4j-api</artifactId>

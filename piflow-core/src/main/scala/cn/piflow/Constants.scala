@@ -5,6 +5,8 @@ object Constants {
   /** comma , */
   val COMMA = ","
 
+  val SPACE = " "
+
   /** DOT . */
   val DOT = "."
 

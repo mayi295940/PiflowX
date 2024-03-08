@@ -22,12 +22,6 @@ class FlowBean[DataType] extends GroupEntryBean {
   var stops: List[StopBean[DataType]] = List()
   var paths: List[PathBean] = List()
 
-  //flow resource info
-  private var driverMem: String = _
-  private var executorNum: String = _
-  private var executorMem: String = _
-  var executorCores: String = _
-
   private var environment: Map[String, Any] = _
 
   //flow environment variable
@@ -49,11 +43,6 @@ class FlowBean[DataType] extends GroupEntryBean {
     this.checkpointParentProcessId = flowMap.getOrElse("checkpointParentProcessId", "").asInstanceOf[String]
     this.runMode = flowMap.getOrElse("runMode", "RUN").asInstanceOf[String]
     this.showData = flowMap.getOrElse("showData", "0").asInstanceOf[String]
-
-    this.driverMem = flowMap.getOrElse("driverMemory", "1g").asInstanceOf[String]
-    this.executorNum = flowMap.getOrElse("executorNumber", "1").asInstanceOf[String]
-    this.executorMem = flowMap.getOrElse("executorMemory", "1g").asInstanceOf[String]
-    this.executorCores = flowMap.getOrElse("executorCores", "1").asInstanceOf[String]
 
     this.environmentVariable = flowMap.getOrElse("environmentVariable", Map()).asInstanceOf[Map[String, Any]]
     this.environment = flowMap.getOrElse("environment", Map()).asInstanceOf[Map[String, Any]]
@@ -114,12 +103,6 @@ class FlowBean[DataType] extends GroupEntryBean {
     flow.setUUID(uuid)
     flow.setCheckpointParentProcessId(this.checkpointParentProcessId)
     flow.setRunMode(this.runMode)
-
-    flow.setDriverMemory(this.driverMem)
-    flow.setExecutorNum(this.executorNum)
-    flow.setExecutorCores(this.executorCores)
-    flow.setExecutorMem(this.executorMem)
-
     flow.setEnvironment(this.environment)
 
     this.stops.foreach(stopBean => {

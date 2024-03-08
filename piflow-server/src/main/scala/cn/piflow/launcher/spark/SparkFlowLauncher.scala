@@ -78,18 +78,24 @@ object SparkFlowLauncher {
 
     val launcher = new SparkLauncher
 
+    val environment = flow.getEnvironment
+    val driverMem = environment.getOrElse("driverMemory", "1g").asInstanceOf[String]
+    val executorNum = environment.getOrElse("executorNumber", "1").asInstanceOf[String]
+    val executorMem = environment.getOrElse("executorMemory", "1g").asInstanceOf[String]
+    val executorCores = environment.getOrElse("executorCores", "1").asInstanceOf[String]
+
     val sparkLauncher = launcher
       .setAppName(flow.getFlowName)
       .setMaster(PropertyUtil.getPropertyValue("spark.master"))
-      //.setDeployMode(PropertyUtil.getPropertyValue("spark.deploy.mode"))
+      .setDeployMode(PropertyUtil.getPropertyValue("spark.deploy.mode"))
       .setAppResource(ConfigureUtil.getPiFlowBundlePath())
       .setVerbose(true)
-      .setConf("spark.driver.memory", flow.getDriverMemory)
-      .setConf("spark.executor.instances", flow.getExecutorNum)
-      .setConf("spark.executor.memory", flow.getExecutorMem)
-      .setConf("spark.executor.cores", flow.getExecutorCores)
-      //      .setConf("spark.driver.allowMultipleContexts","true")
-      //      .setConf("spark.pyspark.python","pyspark/venv/bin/python3")
+      .setConf("spark.driver.memory", driverMem)
+      .setConf("spark.executor.instances", executorNum)
+      .setConf("spark.executor.memory", executorMem)
+      .setConf("spark.executor.cores",  executorCores)
+      //.setConf("spark.driver.allowMultipleContexts","true")
+      //.setConf("spark.pyspark.python","pyspark/venv/bin/python3")
       .addFile(PropertyUtil.getConfigureFile())
       .addFile(ServerIpUtil.getServerIpFile())
       .addFile(flowFile)
@@ -98,7 +104,7 @@ object SparkFlowLauncher {
       .addAppArgs(flowFileName)
 
     val sparkMaster = PropertyUtil.getPropertyValue("spark.master")
-    if (sparkMaster.equals("yarn")) {
+    if ("yarn".equals(sparkMaster)) {
       sparkLauncher.setDeployMode(PropertyUtil.getPropertyValue("spark.deploy.mode"))
       sparkLauncher.setConf("spark.hadoop.yarn.resourcemanager.hostname",
         PropertyUtil.getPropertyValue("yarn.resourcemanager.hostname"))

@@ -122,23 +122,6 @@ trait Flow[DataType] extends GroupEntry[DataType] {
 
   def getFlowJson: String
 
-  // Flow resource API
-  def setDriverMemory(driverMem: String): Unit
-
-  def getDriverMemory: String
-
-  def setExecutorNum(executorNum: String): Unit
-
-  def getExecutorNum: String
-
-  def setExecutorMem(executorMem: String): Unit
-
-  def getExecutorMem: String
-
-  def setExecutorCores(executorCores: String): Unit
-
-  def getExecutorCores: String
-
   def setUUID(uuid: String): Unit
 
   def getUUID: String
@@ -160,12 +143,6 @@ class FlowImpl[DataType] extends Flow[DataType] {
   var checkpointParentProcessId = ""
   var runMode = ""
   var flowJson = ""
-
-  //Flow Resource
-  var driverMem = ""
-  var executorNum = ""
-  var executorMem = ""
-  var executorCores = ""
 
   var environment: Map[String, Any] = Map[String, Any]()
 
@@ -292,38 +269,6 @@ class FlowImpl[DataType] extends Flow[DataType] {
 
   override def getFlowJson: String = {
     flowJson
-  }
-
-  override def setDriverMemory(driverMem: String): Unit = {
-    this.driverMem = driverMem
-  }
-
-  override def getDriverMemory: String = {
-    this.driverMem
-  }
-
-  override def setExecutorNum(executorNum: String): Unit = {
-    this.executorNum = executorNum
-  }
-
-  override def getExecutorNum: String = {
-    this.executorNum
-  }
-
-  override def setExecutorMem(executorMem: String): Unit = {
-    this.executorMem = executorMem
-  }
-
-  override def getExecutorMem: String = {
-    this.executorMem
-  }
-
-  override def setExecutorCores(executorCores: String): Unit = {
-    this.executorCores = executorCores
-  }
-
-  override def getExecutorCores: String = {
-    this.executorCores
   }
 
   override def setUUID(uuid: String): Unit = {

@@ -8,6 +8,8 @@ import java.io.{BufferedInputStream, File}
 
 object ImageUtil {
 
+  System.setProperty("java.awt.headless", "true")
+
   def getImage(imagePath: String, bundle: String = ""): Array[Byte] = {
     if (bundle == "") {
       try {
