@@ -87,6 +87,7 @@ class TopN extends ConfigurableStop[Table] {
       .defaultValue("*")
       .required(true)
       .language(Language.Text)
+      .order(1)
       .example("name,age")
 
     descriptor = column_list :: descriptor
@@ -98,6 +99,7 @@ class TopN extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(2)
       .example("name,age")
 
     descriptor = partition_list :: descriptor
@@ -109,6 +111,7 @@ class TopN extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(3)
       .example("name->asc,age-desc")
 
     descriptor = order_list :: descriptor
@@ -119,6 +122,7 @@ class TopN extends ConfigurableStop[Table] {
       .description("表名")
       .defaultValue("")
       .required(true)
+      .order(3)
       .example("test")
     descriptor = tableName :: descriptor
 
@@ -129,6 +133,7 @@ class TopN extends ConfigurableStop[Table] {
       .defaultValue("10")
       .required(true)
       .dataType(Int.toString())
+      .order(4)
       .example("10")
     descriptor = topNum :: descriptor
 
@@ -137,6 +142,7 @@ class TopN extends ConfigurableStop[Table] {
       .displayName("conditions")
       .description("查询条件")
       .required(false)
+      .order(5)
       .defaultValue("")
       //.example("age > 10 and name = 'test'")
     descriptor = conditions :: descriptor
@@ -148,6 +154,7 @@ class TopN extends ConfigurableStop[Table] {
       .defaultValue("false")
       .allowableValues(Set("ture", "false"))
       .required(false)
+      .order(6)
       .example("false")
     descriptor = isWindow :: descriptor
 

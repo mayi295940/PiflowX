@@ -1,10 +1,12 @@
 package cn.piflow.bundle.flink.model;
 
+import java.io.Serializable;
+
 /**
  * <metadata_column_definition>:
  *   column_name column_type METADATA [ FROM metadata_key ] [ VIRTUAL ]
  */
-public class FlinkTableMetadataColumn {
+public class FlinkTableMetadataColumn implements Serializable {
 
   private String columnName;
   private String columnType;

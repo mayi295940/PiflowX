@@ -122,20 +122,12 @@ class ReadFromKafka extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-
     val kafka_host = new PropertyDescriptor()
       .name("kafka_host")
       .displayName("KAFKA_HOST")
       .description("逗号分隔的Kafka broker列表。")
       .defaultValue("")
+      .order(1)
       .example("127.0.0.1:9092")
       .required(true)
 
@@ -146,6 +138,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
         "注意，'topic' 和 'topic-pattern' 两个选项只能使用其中一个。")
       .defaultValue("")
       .example("topic-1")
+      .order(2)
       .required(false)
 
     val topic_pattern = new PropertyDescriptor()
@@ -155,6 +148,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
         "注意，'topic' 和 'topic-pattern' 两个选项只能使用其中一个。")
       .defaultValue("")
       .example("topic1_*")
+      .order(3)
       .required(false)
 
     val startup_mode = new PropertyDescriptor()
@@ -164,6 +158,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .allowableValues(Set("earliest-offset", "latest-offset", "group-offsets", "timestamp", "specific-offsets"))
       .defaultValue("")
       .example("earliest-offset")
+      .order(4)
       .required(false)
 
     val format = new PropertyDescriptor()
@@ -174,6 +169,7 @@ class ReadFromKafka extends ConfigurableStop[Table] {
         "debezium-json", "canal-json", "maxwell-json", "ogg-json"))
       .defaultValue("")
       .example("json")
+      .order(5)
       .required(true)
 
     val group = new PropertyDescriptor()
@@ -182,22 +178,34 @@ class ReadFromKafka extends ConfigurableStop[Table] {
       .description("Kafka source的消费组id。如果未指定消费组ID，" +
         "则会使用自动生成的\"KafkaSource-{tableIdentifier}\"作为消费组ID。")
       .defaultValue("")
+      .order(6)
       .required(false)
+
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(7)
+      .example("")
+      .required(true)
 
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("Kafka source连接器其他配置")
       .defaultValue("{}")
+      .order(8)
       .required(false)
 
-    descriptor = tableDefinition :: descriptor
     descriptor = kafka_host :: descriptor
     descriptor = topic :: descriptor
     descriptor = topic_pattern :: descriptor
     descriptor = startup_mode :: descriptor
     descriptor = format :: descriptor
     descriptor = group :: descriptor
+    descriptor = tableDefinition :: descriptor
     descriptor = properties :: descriptor
     descriptor
   }

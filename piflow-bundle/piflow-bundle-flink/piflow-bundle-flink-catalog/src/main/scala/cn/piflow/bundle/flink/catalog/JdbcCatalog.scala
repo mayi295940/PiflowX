@@ -63,6 +63,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .description("catalog名称。")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("my_catalog")
     descriptor = catalogName :: descriptor
 
@@ -73,6 +74,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .defaultValue("")
       .allowableValues(Set("postgresql", "mysql"))
       .required(true)
+      .order(2)
       .example("mysql")
     descriptor = databaseType :: descriptor
 
@@ -82,6 +84,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .description("数据库ip。")
       .defaultValue("")
       .required(true)
+      .order(3)
       .example("127.0.0.1")
     descriptor = ip :: descriptor
 
@@ -91,6 +94,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .description("数据库端口。")
       .defaultValue("")
       .required(true)
+      .order(4)
       .example("3306")
     descriptor = port :: descriptor
 
@@ -100,6 +104,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .description("默认要连接的数据库。")
       .defaultValue("")
       .required(true)
+      .order(5)
       .example("my_database")
     descriptor = defaultDatabase :: descriptor
 
@@ -109,6 +114,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .description("账户的用户名。")
       .defaultValue("")
       .required(true)
+      .order(6)
       .example("root")
     descriptor = username :: descriptor
 
@@ -119,6 +125,7 @@ class JdbcCatalog extends ConfigurableStop[Table] {
       .defaultValue("")
       .sensitive(true)
       .required(true)
+      .order(7)
       .example("123456")
     descriptor = password :: descriptor
 

@@ -132,16 +132,6 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val scanStartupMode = new PropertyDescriptor()
       .name("scanStartupMode")
       .displayName("STARTUP_MODE")
@@ -149,6 +139,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .allowableValues(Set("initial", "latest-offset", "group-offsets", "timestamp"))
       .defaultValue("")
       .example("initial")
+      .order(1)
       .required(true)
     descriptor = scanStartupMode :: descriptor
 
@@ -159,6 +150,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(2)
       .example("user@test_tenant#cluster_name")
     descriptor = username :: descriptor
 
@@ -170,6 +162,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .required(true)
       .example("12345")
       .language(Language.Text)
+      .order(3)
       .sensitive(true)
     descriptor = password :: descriptor
 
@@ -180,6 +173,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(4)
       .example("test_tenant")
     descriptor = tenantName :: descriptor
 
@@ -190,6 +184,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(5)
       .example("127.0.0.1")
     descriptor = logProxyHost :: descriptor
 
@@ -200,6 +195,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("2983")
       .required(true)
       .language(Language.Text)
+      .order(6)
       .example("2983")
     descriptor = logProxyPort :: descriptor
 
@@ -210,6 +206,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(7)
       .example("127.0.0.1")
     descriptor = hostname :: descriptor
 
@@ -221,6 +218,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(8)
       .example("2881")
     descriptor = port :: descriptor
 
@@ -231,6 +229,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(9)
       .example("^test_db$")
     descriptor = databaseName :: descriptor
 
@@ -241,6 +240,7 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(10)
       .example("^orders$")
     descriptor = tableName :: descriptor
 
@@ -251,16 +251,29 @@ class OceanBaseCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(11)
       .example("db1.table1, db2.table2")
     descriptor = tableList :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(12)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(13)
       .required(false)
-
     descriptor = properties :: descriptor
 
     descriptor

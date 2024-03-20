@@ -102,6 +102,7 @@ class CreateTable extends ConfigurableStop[Table] {
       .description("连接器")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("datagen")
     descriptor = connector :: descriptor
 
@@ -111,15 +112,18 @@ class CreateTable extends ConfigurableStop[Table] {
       .description("Flink table定义。")
       .defaultValue("")
       .language(Language.FlinkTableSchema)
+      .order(2)
       .example("")
       .required(true)
     descriptor = tableDefinition :: descriptor
 
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(3)
       .required(false)
 
     descriptor = properties :: descriptor

@@ -51,6 +51,7 @@ class SelectHiveQLAppend extends ConfigurableStop[Table] {
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
+
     val hiveQL = new PropertyDescriptor()
       .name("hiveQL")
       .displayName("HiveQL")
@@ -58,15 +59,18 @@ class SelectHiveQLAppend extends ConfigurableStop[Table] {
       .allowableValues(Set(""))
       .description("Execute select clause of hiveQL")
       .required(true)
+      .order(1)
       .language(Language.Text)
       .example("select * from test.user1")
     descriptor = hiveQL :: descriptor
+
     val database = new PropertyDescriptor()
       .name("database")
       .displayName("DataBase")
       .description("The database name which the hiveQL will execute on")
       .defaultValue("")
       .required(true)
+      .order(2)
       .example("test")
     descriptor = database :: descriptor
 

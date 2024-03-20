@@ -1,10 +1,12 @@
 package cn.piflow.bundle.flink.model;
 
+import java.io.Serializable;
+
 /**
  * <physical_column_definition>: column_name column_type [ <column_constraint> ] [COMMENT
  * column_comment]
  */
-public class FlinkTablePhysicalColumn {
+public class FlinkTablePhysicalColumn implements Serializable {
 
   private String columnName;
 

@@ -106,22 +106,13 @@ class Elasticsearch7Write extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val hosts = new PropertyDescriptor()
       .name("hosts")
       .displayName("hosts")
       .description("要连接到的一台或多台Elasticsearch主机。")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("http://host_name:9092;http://host_name:9093")
     descriptor = hosts :: descriptor
 
@@ -131,6 +122,7 @@ class Elasticsearch7Write extends ConfigurableStop[Table] {
       .description("Elasticsearch中每条记录的索引。可以是一个静态索引（例如 'myIndex'）或一个动态索引（例如 'index-{log_ts|yyyy-MM-dd}'）。")
       .defaultValue("")
       .required(true)
+      .order(2)
       .example("myIndex")
     descriptor = index :: descriptor
 
@@ -140,6 +132,7 @@ class Elasticsearch7Write extends ConfigurableStop[Table] {
       .description("用于连接Elasticsearch实例的用户名。")
       .defaultValue("")
       .required(false)
+      .order(3)
       .example("")
     descriptor = username :: descriptor
 
@@ -150,14 +143,28 @@ class Elasticsearch7Write extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .example("")
+      .order(4)
       .sensitive(true)
     descriptor = password :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(5)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(6)
       .required(false)
 
     descriptor = properties :: descriptor

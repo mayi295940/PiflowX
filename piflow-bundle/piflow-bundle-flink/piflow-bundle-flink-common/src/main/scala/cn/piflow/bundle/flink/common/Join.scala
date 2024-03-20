@@ -74,21 +74,21 @@ class Join extends ConfigurableStop[Table] {
     val joinMode = new PropertyDescriptor()
       .name("joinMode")
       .displayName("JoinMode")
-      .description("For table associations, " +
-        "you can choose inner,left,right,full")
+      .description("For table associations,you can choose inner,left,right,full")
       .allowableValues(Set("inner", "left", "right", "full"))
       .defaultValue("inner")
       .required(true)
+      .order(1)
       .example("left")
     descriptor = joinMode :: descriptor
 
     val correlationColumn = new PropertyDescriptor()
       .name("correlationColumn")
       .displayName("CorrelationColumn")
-      .description("Columns associated with tables," +
-        "if multiple are separated by commas")
+      .description("Columns associated with tables,if multiple are separated by commas")
       .defaultValue("")
       .required(true)
+      .order(2)
       .example("id,name")
     descriptor = correlationColumn :: descriptor
 

@@ -19,7 +19,7 @@
 
         <dependency>
             <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-base</artifactId>
+            <artifactId>piflow-bundle-flink-model</artifactId>
             <version>0.9</version>
         </dependency>
 

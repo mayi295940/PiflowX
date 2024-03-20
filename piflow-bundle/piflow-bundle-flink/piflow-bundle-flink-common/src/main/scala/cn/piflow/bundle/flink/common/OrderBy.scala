@@ -49,7 +49,7 @@ class OrderBy extends ConfigurableStop[Table] {
       resultTable = resultTable.offset(offset)
     }
     if (fetch > 0) {
-       resultTable = resultTable.fetch(fetch)
+      resultTable = resultTable.fetch(fetch)
     }
 
     out.write(resultTable)
@@ -64,6 +64,7 @@ class OrderBy extends ConfigurableStop[Table] {
       .description("在流模式下运行时，表的主要排序顺序必须按时间属性升序。所有后续的orders都可以自由选择。但是批处理模式没有这个限制。")
       .defaultValue("")
       .required(false)
+      .order(1)
       .example("name->desc,age->asc")
     descriptor = condition :: descriptor
 
@@ -72,6 +73,7 @@ class OrderBy extends ConfigurableStop[Table] {
       .description("Offset操作根据偏移位置来限定（可能是已排序的）结果集。")
       .defaultValue("")
       .required(false)
+      .order(2)
       .example("10")
     descriptor = offset :: descriptor
 
@@ -80,6 +82,7 @@ class OrderBy extends ConfigurableStop[Table] {
       .description("Fetch操作将（可能已排序的）结果集限制为前n行。")
       .defaultValue("")
       .required(false)
+      .order(3)
       .example("10")
     descriptor = fetch :: descriptor
 

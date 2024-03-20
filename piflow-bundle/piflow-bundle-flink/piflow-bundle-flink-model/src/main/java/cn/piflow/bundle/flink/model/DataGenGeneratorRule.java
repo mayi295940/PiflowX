@@ -1,5 +1,6 @@
 package cn.piflow.bundle.flink.model;
 
+import java.io.Serializable;
 import java.time.Duration;
 
 /**
@@ -7,7 +8,7 @@ import java.time.Duration;
  *
  * @author mayi
  */
-public class DataGenGeneratorRule {
+public class DataGenGeneratorRule implements Serializable {
 
   /** 字段名 */
   private String columnName;

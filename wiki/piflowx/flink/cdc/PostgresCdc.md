@@ -138,12 +138,13 @@ outport：默认端口
                 }
             },
             {
-                "name":"ShowChangeLogData",
-                "bundle":"cn.piflow.bundle.flink.common.ShowChangeLogData",
-                "uuid":"c6604e600aa645d29264f4be5ce4e2eb",
-                "properties":{
-                    "showNumber":"10"
-                },
+              "name":"ShowChangeLogData",
+              "uuid":"c6604e600aa645d29264f4be5ce4e2eb",
+              "bundle": "cn.piflow.bundle.flink.common.ShowData",
+              "properties": {
+                "showNumber": "100",
+                "changeLog": true
+              },
                 "customizedProperties":{
 
                 }

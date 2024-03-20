@@ -45,15 +45,14 @@ class SelectField extends ConfigurableStop[Table] {
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
-    val inPorts = new PropertyDescriptor()
+    val columnNames = new PropertyDescriptor()
       .name("columnNames")
       .displayName("ColumnNames")
-      .description("Select the column you want," +
-        "multiple columns separated by commas")
+      .description("Select the column you want,multiple columns separated by commas")
       .defaultValue("")
       .required(true)
       .example("id,name")
-    descriptor = inPorts :: descriptor
+    descriptor = columnNames :: descriptor
     descriptor
   }
 

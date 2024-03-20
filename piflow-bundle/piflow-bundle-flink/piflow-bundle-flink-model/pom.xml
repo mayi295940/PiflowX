@@ -10,7 +10,7 @@
         <version>0.9</version>
     </parent>
 
-    <artifactId>piflow-bundle-flink-base</artifactId>
+    <artifactId>piflow-bundle-flink-model</artifactId>
 
     <dependencies>
         <dependency>

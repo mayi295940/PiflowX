@@ -121,22 +121,13 @@ class DorisWrite extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val fenodes = new PropertyDescriptor()
       .name("fenodes")
       .displayName("fenodes")
       .description("Doris FE http地址， 支持多个地址，使用逗号分隔。")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("127.0.0.1:8030")
     descriptor = fenodes :: descriptor
 
@@ -146,6 +137,7 @@ class DorisWrite extends ConfigurableStop[Table] {
       .description("Doris BE http地址， 支持多个地址，使用逗号分隔。")
       .defaultValue("")
       .required(false)
+      .order(2)
       .example("127.0.0.1:8030")
     descriptor = benodes :: descriptor
 
@@ -155,6 +147,7 @@ class DorisWrite extends ConfigurableStop[Table] {
       .description("访问Doris的用户名。")
       .defaultValue("")
       .required(true)
+      .order(3)
       .example("root")
     descriptor = username :: descriptor
 
@@ -165,6 +158,7 @@ class DorisWrite extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .example("12345")
+      .order(4)
       .sensitive(true)
     descriptor = password :: descriptor
 
@@ -174,6 +168,7 @@ class DorisWrite extends ConfigurableStop[Table] {
       .description("Doris表名。")
       .defaultValue("")
       .required(true)
+      .order(5)
       .language(Language.Text)
       .example("db.tbl")
     descriptor = tableIdentifier :: descriptor
@@ -185,6 +180,7 @@ class DorisWrite extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(6)
       .example("")
     descriptor = sinkLabelPrefix :: descriptor
 
@@ -195,14 +191,28 @@ class DorisWrite extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(7)
       .example("jdbc:mysql://127.0.0.1:9030")
     descriptor = jdbcUrl :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(8)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(9)
       .required(false)
 
     descriptor = properties :: descriptor

@@ -14,7 +14,7 @@
 
     <modules>
         <module>piflow-bundle-flink-all</module>
-        <module>piflow-bundle-flink-base</module>
+        <module>piflow-bundle-flink-model</module>
         <module>piflow-bundle-flink-cdc</module>
         <module>piflow-bundle-flink-common</module>
         <module>piflow-bundle-flink-catalog</module>

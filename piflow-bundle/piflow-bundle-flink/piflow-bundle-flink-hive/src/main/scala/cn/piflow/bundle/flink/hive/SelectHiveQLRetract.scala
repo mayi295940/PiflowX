@@ -60,6 +60,7 @@ class SelectHiveQLRetract extends ConfigurableStop[Table] {
       .description("Execute select clause of hiveQL")
       .required(true)
       .language(Language.Text)
+      .order(1)
       .example("select * from test.user1")
     descriptor = hiveQL :: descriptor
 
@@ -69,6 +70,7 @@ class SelectHiveQLRetract extends ConfigurableStop[Table] {
       .description("The database name which the hiveQL will execute on")
       .defaultValue("")
       .required(true)
+      .order(2)
       .example("test")
     descriptor = database :: descriptor
 

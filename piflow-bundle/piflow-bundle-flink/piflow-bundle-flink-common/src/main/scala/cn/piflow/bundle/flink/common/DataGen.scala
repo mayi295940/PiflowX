@@ -14,8 +14,8 @@ import scala.collection.mutable.{Map => MMap}
 class DataGen extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
-  override val description: String = "Mock dataframe."
-  override val inportList: List[String] = List(Port.DefaultPort)
+  override val description: String = "按数据生成规则进行读取。"
+  override val inportList: List[String] = List(Port.NonePort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
   private var schema: List[Map[String, Any]] = _
@@ -32,20 +32,6 @@ class DataGen extends ConfigurableStop[Table] {
 
     var descriptor: List[PropertyDescriptor] = List()
 
-    val schema = new PropertyDescriptor()
-      .name("schema")
-      .displayName("Schema")
-      .description("数据生成规则")
-      .defaultValue("")
-      .required(true)
-      .language(Language.DataGenSchema)
-      .example("[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000}," +
-        "{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15}," +
-        "{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}," +
-        "{\"filedName\":\"timeField\",\"filedType\":\"AS PROCTIME()\"}]")
-
-    descriptor = schema :: descriptor
-
     val count = new PropertyDescriptor()
       .name("count")
       .displayName("Count")
@@ -54,6 +40,7 @@ class DataGen extends ConfigurableStop[Table] {
       .required(true)
       .dataType(Int.toString())
       .example("10")
+      .order(1)
     descriptor = count :: descriptor
 
     val ratio = new PropertyDescriptor()
@@ -64,7 +51,23 @@ class DataGen extends ConfigurableStop[Table] {
       .required(false)
       .dataType(Int.toString())
       .example("10")
+      .order(2)
     descriptor = ratio :: descriptor
+
+    val schema = new PropertyDescriptor()
+      .name("schema")
+      .displayName("Schema")
+      .description("数据生成规则")
+      .defaultValue("")
+      .required(true)
+      .language(Language.DataGenSchema)
+      .order(3)
+      .example("[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000}," +
+        "{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15}," +
+        "{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}," +
+        "{\"filedName\":\"timeField\",\"filedType\":\"AS PROCTIME()\"}]")
+
+    descriptor = schema :: descriptor
 
     descriptor
   }
@@ -121,8 +124,17 @@ class DataGen extends ConfigurableStop[Table] {
       val filedMap = MMap(item.toSeq: _*)
 
       val filedName = MapUtil.get(filedMap, "filedName").toString
-      val filedType = MapUtil.get(filedMap, "filedType").toString
-      columns = columns :+ s"$filedName $filedType,"
+      columns = columns :+ s"$filedName "
+
+      val filedType = filedMap.getOrElse("filedType", "").toString
+      if (StringUtils.isNotBlank(filedType)) {
+        columns = columns :+ s"$filedType,"
+      }
+
+      val computedColumnExpression = filedMap.getOrElse("computedColumnExpression", "").toString
+      if (StringUtils.isNotBlank(computedColumnExpression)) {
+        columns = columns :+ s"AS $computedColumnExpression,"
+      }
 
       val kind = filedMap.getOrElse("kind", "").toString
       if (StringUtils.isNotBlank(kind)) {

@@ -46,15 +46,16 @@ class DropField extends ConfigurableStop[Table] {
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
-    val inPorts = new PropertyDescriptor()
+
+    val columnNames = new PropertyDescriptor()
       .name("columnNames")
       .displayName("ColumnNames")
-      .description("Fill in the columns you want to delete," +
-        "multiple columns names separated by commas")
+      .description("Fill in the columns you want to delete,multiple columns names separated by commas")
       .defaultValue("")
       .required(true)
       .example("id")
-    descriptor = inPorts :: descriptor
+    descriptor = columnNames :: descriptor
+
     descriptor
   }
 

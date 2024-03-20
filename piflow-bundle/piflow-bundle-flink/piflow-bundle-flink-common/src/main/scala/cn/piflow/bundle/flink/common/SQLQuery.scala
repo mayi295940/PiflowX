@@ -61,6 +61,7 @@ class SQLQuery extends ConfigurableStop[Table] {
       .description("将输入源注册为flink虚拟表,然后针对虚拟表进行查询计算。如果不需要，则不配置，比如sql中使用的表已经注册过。")
       .defaultValue("")
       .required(false)
+      .order(1)
       .example("input_temp")
     descriptor = registerSourceViewName :: descriptor
 
@@ -70,6 +71,7 @@ class SQLQuery extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Sql)
+      .order(2)
       .example("select * from temp")
     descriptor = sql :: descriptor
 
@@ -79,6 +81,7 @@ class SQLQuery extends ConfigurableStop[Table] {
       .description("将结果table注册为flink虚拟表,以便后续使用。如果不需要，则不配置。")
       .defaultValue("")
       .required(false)
+      .order(3)
       .example("output_temp")
 
     descriptor = registerResultViewName :: descriptor

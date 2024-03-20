@@ -35,12 +35,15 @@ class Fork extends ConfigurableStop[Table] {
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
-    val outports = new PropertyDescriptor().name("outports")
+
+    val outports = new PropertyDescriptor()
+      .name("outports")
       .displayName("outports")
       .description("Output ports string with comma")
       .defaultValue("")
       .required(true)
     descriptor = outports :: descriptor
+
     descriptor
   }
 

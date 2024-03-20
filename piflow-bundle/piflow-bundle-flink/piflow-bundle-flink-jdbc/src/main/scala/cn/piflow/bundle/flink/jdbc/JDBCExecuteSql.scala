@@ -72,6 +72,7 @@ class JDBCExecuteSql extends ConfigurableStop[Table] {
       .description("JDBC数据库url")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("jdbc:mysql://127.0.0.1:3306/dbname")
     descriptor = url :: descriptor
 
@@ -81,6 +82,7 @@ class JDBCExecuteSql extends ConfigurableStop[Table] {
       .description("用于连接到此URL的JDBC驱动类名")
       .defaultValue(DataBaseType.MySQL8.getDriverClassName)
       .required(true)
+      .order(2)
       .example(DataBaseType.MySQL8.getDriverClassName)
     descriptor = driver :: descriptor
 
@@ -90,6 +92,7 @@ class JDBCExecuteSql extends ConfigurableStop[Table] {
       .description("JDBC用户名。")
       .defaultValue("")
       .required(true)
+      .order(3)
       .example("root")
     descriptor = username :: descriptor
 
@@ -100,6 +103,7 @@ class JDBCExecuteSql extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .example("12345")
+      .order(4)
       .sensitive(true)
     descriptor = password :: descriptor
 
@@ -109,6 +113,7 @@ class JDBCExecuteSql extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Sql)
+      .order(5)
       .example("CREATE TABLE IF NOT EXISTS `test` (`id` int DEFAULT NULL,`name` varchar(20) DEFAULT NULL,`age` int DEFAULT NULL);")
     descriptor = sql :: descriptor
 

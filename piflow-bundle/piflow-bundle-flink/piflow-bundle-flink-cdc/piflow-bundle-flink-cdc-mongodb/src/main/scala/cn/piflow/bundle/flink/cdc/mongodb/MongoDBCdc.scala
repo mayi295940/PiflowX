@@ -112,22 +112,13 @@ class MongoDBCdc extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val url = new PropertyDescriptor()
       .name("hosts")
       .displayName("hosts")
       .description("MongoDB 服务器的主机名和端口对的逗号分隔列表。")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("localhost:27017,localhost:27018")
       .language(Language.Text)
     descriptor = url :: descriptor
@@ -139,6 +130,7 @@ class MongoDBCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(2)
       .example("root")
     descriptor = username :: descriptor
 
@@ -150,6 +142,7 @@ class MongoDBCdc extends ConfigurableStop[Table] {
       .required(false)
       .example("12345")
       .language(Language.Text)
+      .order(3)
       .sensitive(true)
     descriptor = password :: descriptor
 
@@ -161,6 +154,7 @@ class MongoDBCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(4)
       .example("test")
     descriptor = database :: descriptor
 
@@ -171,15 +165,29 @@ class MongoDBCdc extends ConfigurableStop[Table] {
         "该集合还支持正则表达式来监视与完全限定的集合标识符匹配的多个集合。")
       .defaultValue("")
       .required(true)
+      .order(5)
       .language(Language.Text)
       .example("test")
     descriptor = collection :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(6)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(7)
       .required(false)
 
     descriptor = properties :: descriptor

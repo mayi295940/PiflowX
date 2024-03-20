@@ -15,6 +15,7 @@ class ShowData extends ConfigurableStop[Table] {
   val outportList: List[String] = List(Port.DefaultPort)
 
   private var showNumber: Int = _
+  private var changeLog: Boolean = _
 
   def perform(in: JobInputStream[Table],
               out: JobOutputStream[Table],
@@ -25,7 +26,11 @@ class ShowData extends ConfigurableStop[Table] {
     val inputTable: Table = in.read()
     val resultTable = inputTable.limit(showNumber)
 
-    tableEnv.toDataStream(resultTable).print()
+    if (!changeLog) {
+      tableEnv.toDataStream(resultTable).print()
+    } else {
+      tableEnv.toChangelogStream(resultTable).print()
+    }
 
     out.write(inputTable)
   }
@@ -35,6 +40,7 @@ class ShowData extends ConfigurableStop[Table] {
   //set customized properties of your Stop
   def setProperties(map: Map[String, Any]): Unit = {
     showNumber = MapUtil.get(map, "showNumber", "10").asInstanceOf[String].toInt
+    changeLog = MapUtil.get(map, "changeLog", "false").asInstanceOf[String].toBoolean
   }
 
   //get descriptor of customized properties
@@ -49,6 +55,17 @@ class ShowData extends ConfigurableStop[Table] {
       .required(true)
       .example("10")
     descriptor = showNumber :: descriptor
+
+    val changeLog = new PropertyDescriptor()
+      .name("changeLog")
+      .displayName("changeLog")
+      .description("change log data")
+      .defaultValue("false")
+      .allowableValues(Set("true", "false"))
+      .required(false)
+      .example("false")
+    descriptor = changeLog :: descriptor
+
     descriptor
   }
 

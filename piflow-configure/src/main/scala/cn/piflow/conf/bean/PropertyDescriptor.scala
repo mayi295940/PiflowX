@@ -16,6 +16,7 @@ class PropertyDescriptor {
   var sensitive: Boolean = false
   var example: String = _
   var language: String = Language.Text
+  var order: Int = 0
 
   def name(name: String): PropertyDescriptor = {
     this.name = name
@@ -64,6 +65,11 @@ class PropertyDescriptor {
 
   def language(language: String): PropertyDescriptor = {
     this.language = language
+    this
+  }
+
+  def order(order: Int): PropertyDescriptor = {
+    this.order = order
     this
   }
 

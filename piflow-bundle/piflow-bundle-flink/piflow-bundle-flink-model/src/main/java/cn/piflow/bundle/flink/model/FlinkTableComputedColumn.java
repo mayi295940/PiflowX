@@ -1,10 +1,12 @@
 package cn.piflow.bundle.flink.model;
 
+import java.io.Serializable;
+
 /**
  * <computed_column_definition>:
  * column_name AS computed_column_expression [COMMENT column_comment]
  */
-public class FlinkTableComputedColumn {
+public class FlinkTableComputedColumn implements Serializable {
 
   private String columnName;
 

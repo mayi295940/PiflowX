@@ -128,10 +128,11 @@ outport：默认端口
             },
             {
                 "name":"ShowChangeLogData",
-                "bundle":"cn.piflow.bundle.flink.common.ShowChangeLogData",
                 "uuid":"6225e5ac18704ed0aa1c95e3fbe1ce28",
-                "properties":{
-                    "showNumber":"100"
+                "bundle": "cn.piflow.bundle.flink.common.ShowData",
+                "properties": {
+                  "showNumber": "100",
+                  "changeLog": true
                 },
                 "customizedProperties":{
 

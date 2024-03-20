@@ -1,6 +1,8 @@
 package cn.piflow.bundle.flink.model;
 
-public class FlinkTableWatermark {
+import java.io.Serializable;
+
+public class FlinkTableWatermark implements Serializable {
 
   private String rowTimeColumnName;
 

@@ -58,9 +58,10 @@ outport：默认端口
       {
         "uuid": "2222",
         "name": "ShowData1",
-        "bundle": "cn.piflow.bundle.flink.common.ShowChangeLogData",
+        "bundle": "cn.piflow.bundle.flink.common.ShowData",
         "properties": {
-          "showNumber": "100"
+          "showNumber": "100",
+          "changeLog": true
         }
       }
     ],

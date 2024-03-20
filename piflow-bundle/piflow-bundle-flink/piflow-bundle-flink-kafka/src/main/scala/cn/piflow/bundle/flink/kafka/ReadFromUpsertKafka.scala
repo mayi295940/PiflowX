@@ -110,21 +110,13 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-
     val kafka_host = new PropertyDescriptor()
       .name("kafka_host")
       .displayName("KAFKA_HOST")
       .description("逗号分隔的Kafka broker列表。")
       .defaultValue("")
       .example("127.0.0.1:9092")
+      .order(1)
       .required(true)
 
     val topic = new PropertyDescriptor()
@@ -133,6 +125,7 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
       .description("用于读取Kafka topic名称。")
       .defaultValue("")
       .example("topic-1")
+      .order(2)
       .required(true)
 
     val key_format = new PropertyDescriptor()
@@ -142,6 +135,7 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
       .allowableValues(Set("json", "csv", "avro"))
       .defaultValue("")
       .example("json")
+      .order(3)
       .required(true)
 
     val value_format = new PropertyDescriptor()
@@ -151,6 +145,7 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
       .allowableValues(Set("json", "csv", "avro"))
       .defaultValue("")
       .example("json")
+      .order(4)
       .required(true)
 
     val value_fields_include = new PropertyDescriptor()
@@ -163,6 +158,7 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
       .allowableValues(Set("ALL", "EXCEPT_KEY"))
       .example("ALL")
       .defaultValue("ALL")
+      .order(5)
       .required(true)
 
     val key_fields_prefix = new PropertyDescriptor()
@@ -173,25 +169,38 @@ class ReadFromUpsertKafka extends ConfigurableStop[Table] {
         "当构建消息键格式字段时，前缀会被移除，消息键格式将会使用无前缀的名称。 " +
         "请注意该配置项要求必须将 'value.fields-include' 配置为 'EXCEPT_KEY'。")
       .defaultValue("")
+      .order(6)
       .required(false)
+
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(7)
+      .example("")
+      .required(true)
 
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("该选项可以传递任意的Kafka参数。选项的后缀名必须匹配定义在Kafka参数文档中的参数名。" +
         " Flink 会自动移除 选项名中的 \"properties.\" 前缀，并将转换后的键名以及值传入KafkaClient。 " +
         "例如，你可以通过 'properties.allow.auto.create.topics' = 'false' 来禁止自动创建 topic。 " +
         "但是，某些选项，例如'key.deserializer'和'value.deserializer'是不允许通过该方式传递参数，因为Flink会重写这些参数的值。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(8)
       .required(false)
 
-    descriptor = tableDefinition :: descriptor
     descriptor = kafka_host :: descriptor
     descriptor = topic :: descriptor
     descriptor = key_format :: descriptor
     descriptor = value_format :: descriptor
     descriptor = value_fields_include :: descriptor
     descriptor = key_fields_prefix :: descriptor
+    descriptor = tableDefinition :: descriptor
     descriptor = properties :: descriptor
     descriptor
   }

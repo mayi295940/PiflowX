@@ -111,16 +111,6 @@ class MysqlCdc extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val hostname = new PropertyDescriptor()
       .name("hostname")
       .displayName("Hostname")
@@ -128,6 +118,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .example("127.0.0.1")
+      .order(1)
       .language(Language.Text)
     descriptor = hostname :: descriptor
 
@@ -138,6 +129,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(2)
       .example("root")
     descriptor = username :: descriptor
 
@@ -149,6 +141,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .required(true)
       .example("12345")
       .language(Language.Text)
+      .order(3)
       .sensitive(true)
     descriptor = password :: descriptor
 
@@ -159,6 +152,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(4)
       .example("test")
     descriptor = databaseName :: descriptor
 
@@ -169,6 +163,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(5)
       .example("test")
     descriptor = tableName :: descriptor
 
@@ -179,6 +174,7 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .defaultValue("3306")
       .required(false)
       .language(Language.Text)
+      .order(6)
       .example("3306")
     descriptor = port :: descriptor
 
@@ -192,15 +188,28 @@ class MysqlCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(7)
       .example("5400-5408")
     descriptor = serverId :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(8)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
 
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(9)
       .required(false)
 
     descriptor = properties :: descriptor

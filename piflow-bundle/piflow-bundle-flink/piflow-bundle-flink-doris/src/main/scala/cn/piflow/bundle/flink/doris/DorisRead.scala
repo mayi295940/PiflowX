@@ -129,22 +129,13 @@ class DorisRead extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val fenodes = new PropertyDescriptor()
       .name("fenodes")
       .displayName("Fenodes")
       .description("Doris FE http地址， 支持多个地址，使用逗号分隔。")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("127.0.0.1:8030")
     descriptor = fenodes :: descriptor
 
@@ -154,6 +145,7 @@ class DorisRead extends ConfigurableStop[Table] {
       .description("Doris BE http地址， 支持多个地址，使用逗号分隔。")
       .defaultValue("")
       .required(false)
+      .order(2)
       .example("")
     descriptor = benodes :: descriptor
 
@@ -163,6 +155,7 @@ class DorisRead extends ConfigurableStop[Table] {
       .description("访问Doris的用户名。")
       .defaultValue("")
       .required(true)
+      .order(3)
       .example("root")
     descriptor = username :: descriptor
 
@@ -173,6 +166,7 @@ class DorisRead extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .example("12345")
+      .order(4)
       .sensitive(true)
     descriptor = password :: descriptor
 
@@ -183,6 +177,7 @@ class DorisRead extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(5)
       .example("db.tbl")
     descriptor = tableIdentifier :: descriptor
 
@@ -193,6 +188,7 @@ class DorisRead extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(6)
       .example("jdbc:mysql://127.0.0.1:9030")
     descriptor = jdbcUrl :: descriptor
 
@@ -204,6 +200,7 @@ class DorisRead extends ConfigurableStop[Table] {
       .defaultValue("1024")
       .required(false)
       .language(Language.Text)
+      .order(7)
       .example("1024")
     descriptor = batchSize :: descriptor
 
@@ -214,6 +211,7 @@ class DorisRead extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(8)
       .example("")
     descriptor = readField :: descriptor
 
@@ -224,14 +222,28 @@ class DorisRead extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .language(Language.Text)
+      .order(9)
       .example("age=18")
     descriptor = queryFilter :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(10)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(11)
       .required(false)
 
     descriptor = properties :: descriptor

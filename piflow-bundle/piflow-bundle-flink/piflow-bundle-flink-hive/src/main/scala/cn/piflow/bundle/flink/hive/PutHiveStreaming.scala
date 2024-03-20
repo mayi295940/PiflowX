@@ -55,6 +55,7 @@ class PutHiveStreaming extends ConfigurableStop[Table] {
       .displayName("DataBase")
       .description("The database name")
       .defaultValue("")
+      .order(1)
       .required(true)
     descriptor = database :: descriptor
 
@@ -64,6 +65,7 @@ class PutHiveStreaming extends ConfigurableStop[Table] {
       .description("The table name")
       .defaultValue("")
       .required(true)
+      .order(2)
       .example("stream")
     descriptor = table :: descriptor
 

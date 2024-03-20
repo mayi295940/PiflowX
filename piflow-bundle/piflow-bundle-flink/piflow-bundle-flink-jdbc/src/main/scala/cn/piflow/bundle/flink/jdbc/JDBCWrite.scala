@@ -115,22 +115,13 @@ class JDBCWrite extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val url = new PropertyDescriptor()
       .name("url")
       .displayName("Url")
       .description("JDBC数据库url")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("jdbc:mysql://127.0.0.1:3306/test")
     descriptor = url :: descriptor
 
@@ -140,6 +131,7 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .description("用于连接到此URL的JDBC驱动类名，如果不设置，将自动从URL中推导")
       .defaultValue("")
       .required(false)
+      .order(2)
       .example(DataBaseType.MySQL8.getDriverClassName)
     descriptor = driver :: descriptor
 
@@ -149,6 +141,7 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .description("JDBC 用户名。如果指定了 'username' 和 'password' 中的任一参数，则两者必须都被指定。")
       .defaultValue("")
       .required(true)
+      .order(3)
       .example("root")
     descriptor = username :: descriptor
 
@@ -159,6 +152,7 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .example("123456")
+      .order(4)
       .sensitive(true)
     descriptor = password :: descriptor
 
@@ -168,15 +162,28 @@ class JDBCWrite extends ConfigurableStop[Table] {
       .description("连接到JDBC表的名称")
       .defaultValue("")
       .required(true)
+      .order(5)
       .example("test")
     descriptor = tableName :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(6)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
 
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(7)
       .required(false)
 
     descriptor = properties :: descriptor

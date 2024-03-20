@@ -15,7 +15,7 @@
 
         <dependency>
             <groupId>piflow</groupId>
-            <artifactId>piflow-bundle-flink-base</artifactId>
+            <artifactId>piflow-bundle-flink-model</artifactId>
             <version>0.9</version>
         </dependency>
 
@@ -29,6 +29,11 @@
             <groupId>piflow</groupId>
             <artifactId>piflow-bundle-flink-test</artifactId>
             <version>0.9</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
 

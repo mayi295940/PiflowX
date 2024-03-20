@@ -1,6 +1,8 @@
 package cn.piflow.bundle.flink.model;
 
 import cn.piflow.Constants;
+
+import java.io.Serializable;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,7 +33,7 @@ import org.apache.commons.lang3.StringUtils;
  * <p><like_options>: { { INCLUDING | EXCLUDING } { ALL | CONSTRAINTS | PARTITIONS } | { INCLUDING |
  * EXCLUDING | OVERWRITING } { GENERATED | OPTIONS | WATERMARKS } }[, ...]
  */
-public class FlinkTableDefinition {
+public class FlinkTableDefinition implements Serializable {
 
   private FlinkTableBaseInfo tableBaseInfo;
 

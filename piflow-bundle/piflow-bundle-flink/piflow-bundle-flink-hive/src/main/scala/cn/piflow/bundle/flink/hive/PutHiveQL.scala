@@ -63,6 +63,7 @@ class PutHiveQL extends ConfigurableStop[Table] {
       .description("The hdfs path of the hiveQL file")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("hdfs://192.168.3.138:8020/test/PutHiveQL.hiveql")
     descriptor = hiveQL_Path :: descriptor
 
@@ -72,6 +73,7 @@ class PutHiveQL extends ConfigurableStop[Table] {
       .description("The database name which the hiveQL will execute on")
       .defaultValue("")
       .required(true)
+      .order(2)
       .example("test")
     descriptor = database :: descriptor
 

@@ -101,22 +101,13 @@ class FileWrite extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val path = new PropertyDescriptor()
       .name("path")
       .displayName("path")
       .description("文件路径。")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example(" hdfs://server1:8020/flink/test/text.txt")
     descriptor = path :: descriptor
 
@@ -127,14 +118,28 @@ class FileWrite extends ConfigurableStop[Table] {
       .allowableValues(Set("json", "csv", "avro", "parquet", "orc", "raw", "debezium-json", "canal-json"))
       .defaultValue("")
       .example("json")
+      .order(2)
       .required(true)
     descriptor = format :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(3)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(4)
       .required(false)
 
     descriptor = properties :: descriptor

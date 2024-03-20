@@ -1,7 +1,9 @@
 package cn.piflow.bundle.flink.model;
 
 
-public class FlinkTableAsSelectStatement {
+import java.io.Serializable;
+
+public class FlinkTableAsSelectStatement implements Serializable {
 
   private String selectStatement;
 

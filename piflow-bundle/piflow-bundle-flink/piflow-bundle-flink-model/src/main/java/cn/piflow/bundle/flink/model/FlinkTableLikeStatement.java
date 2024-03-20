@@ -1,7 +1,9 @@
 package cn.piflow.bundle.flink.model;
 
 
-public class FlinkTableLikeStatement {
+import java.io.Serializable;
+
+public class FlinkTableLikeStatement implements Serializable {
 
   private String likeStatement;
 

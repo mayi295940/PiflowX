@@ -46,15 +46,18 @@ class ConvertSchema extends ConfigurableStop[Table] {
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
+
     var descriptor: List[PropertyDescriptor] = List()
-    val inports = new PropertyDescriptor().name("schema")
+
+    val schema = new PropertyDescriptor()
+      .name("schema")
       .displayName("Schema")
-      .description("Change column names," +
-        "multiple column names are separated by commas")
+      .description("Change column names,multiple column names are separated by commas")
       .defaultValue("")
       .required(true)
       .example("id->uuid")
-    descriptor = inports :: descriptor
+    descriptor = schema :: descriptor
+
     descriptor
   }
 

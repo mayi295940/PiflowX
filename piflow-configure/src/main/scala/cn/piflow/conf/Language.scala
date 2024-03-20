@@ -9,4 +9,5 @@ object Language {
   val Sql = "Sql"
   val DataGenSchema = "DataGenSchema"
   val FlinkTableSchema = "FlinkTableSchema"
+  val CustomProperties = "CustomProperties"
 }

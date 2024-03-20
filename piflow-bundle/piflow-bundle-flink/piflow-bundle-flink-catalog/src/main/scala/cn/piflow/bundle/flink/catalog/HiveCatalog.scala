@@ -79,6 +79,7 @@ class HiveCatalog extends ConfigurableStop[Table] {
       .description("catalog名称。")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("my_catalog")
     descriptor = catalogName :: descriptor
 
@@ -88,6 +89,7 @@ class HiveCatalog extends ConfigurableStop[Table] {
       .description("指向包含hive-site.xml目录的URI。该URI必须是Hadoop文件系统所支持的类型。 如果指定一个相对URI，即不包含scheme，则默认为本地文件系统。如果该参数没有指定，我们会在class path下查找hive-site.xml。")
       .defaultValue("")
       .required(false)
+      .order(2)
       .example("/opt/hive-conf")
     descriptor = hiveConfDir :: descriptor
 
@@ -97,6 +99,7 @@ class HiveCatalog extends ConfigurableStop[Table] {
       .description("Hadoop配置文件目录的路径。目前仅支持本地文件系统路径。推荐使用HADOOP_CONF_DIR环境变量来指定Hadoop配置。因此仅在环境变量不满足您的需求时再考虑使用该参数，例如当您希望为每个HiveCatalog单独设置Hadoop配置时。")
       .defaultValue("")
       .required(false)
+      .order(3)
       .example("/opt/hadoop-conf")
     descriptor = hadoopConDir :: descriptor
 
@@ -106,6 +109,7 @@ class HiveCatalog extends ConfigurableStop[Table] {
       .description("当一个catalog被设为当前catalog时，所使用的默认当前database。")
       .defaultValue("")
       .required(false)
+      .order(4)
       .example("my_database")
     descriptor = defaultDatabase :: descriptor
 
@@ -115,6 +119,7 @@ class HiveCatalog extends ConfigurableStop[Table] {
       .description("HiveCatalog能够自动检测使用的Hive版本。建议不要手动设置Hive版本，除非自动检测机制失败。")
       .defaultValue("")
       .required(false)
+      .order(5)
       .example("3.1.3")
     descriptor = hiveVersion :: descriptor
 

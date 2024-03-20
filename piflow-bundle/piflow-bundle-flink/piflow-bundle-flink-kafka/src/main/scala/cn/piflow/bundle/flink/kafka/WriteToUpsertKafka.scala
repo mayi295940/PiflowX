@@ -115,21 +115,13 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-
     val kafka_host = new PropertyDescriptor()
       .name("kafka_host")
       .displayName("KAFKA_HOST")
       .description("逗号分隔的Kafka broker列表。")
       .defaultValue("")
       .example("127.0.0.1:9092")
+      .order(1)
       .required(true)
 
     val topic = new PropertyDescriptor()
@@ -138,6 +130,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
       .description("用于写入Kafka topic名称。")
       .defaultValue("")
       .example("topic-1")
+      .order(2)
       .required(true)
 
     val key_format = new PropertyDescriptor()
@@ -147,6 +140,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
       .allowableValues(Set("json", "csv", "avro"))
       .defaultValue("")
       .example("json")
+      .order(3)
       .required(true)
 
     val value_format = new PropertyDescriptor()
@@ -157,6 +151,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
       .defaultValue("")
       .example("json")
       .required(true)
+      .order(3)
 
     val value_fields_include = new PropertyDescriptor()
       .name("value_fields_include")
@@ -169,6 +164,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
       .example("ALL")
       .defaultValue("ALL")
       .required(true)
+      .order(4)
 
     val key_fields_prefix = new PropertyDescriptor()
       .name("key_fields_prefix")
@@ -179,6 +175,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
         "请注意该配置项要求必须将 'value.fields-include' 配置为 'EXCEPT_KEY'。")
       .defaultValue("")
       .required(false)
+      .order(4)
 
     val sink_parallelism = new PropertyDescriptor()
       .name("sink_parallelism")
@@ -186,6 +183,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
       .description("定义upsert-kafka sink算子的并行度。默认情况下，由框架确定并行度，与上游链接算子的并行度保持一致。")
       .defaultValue("")
       .required(false)
+      .order(5)
 
     val sink_buffer_flush_max_rows = new PropertyDescriptor()
       .name("sink_buffer_flush_max_rows")
@@ -196,6 +194,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
         "两个选项为大于零的值。")
       .defaultValue("")
       .required(false)
+      .order(6)
 
     val sink_buffer_flush_interval = new PropertyDescriptor()
       .name("sink_buffer_flush_interval")
@@ -206,18 +205,31 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
         "和 'sink.buffer-flush.interval' 两个选项为大于零的值。")
       .defaultValue("")
       .required(false)
+      .order(7)
+
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(100)
+      .example("")
+      .required(true)
+      .order(8)
 
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("该选项可以传递任意的Kafka参数。选项的后缀名必须匹配定义在Kafka参数文档中的参数名。 " +
         "Flink 会自动移除 选项名中的 \"properties.\" 前缀，并将转换后的键名以及值传入 KafkaClient。 " +
         "例如，你可以通过 'properties.allow.auto.create.topics' = 'false' 来禁止自动创建 topic。 " +
         "但是，某些选项，例如'key.deserializer' 和 'value.deserializer' 是不允许通过该方式传递参数，因为Flink会重写这些参数的值。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(9)
       .required(false)
 
-    descriptor = tableDefinition :: descriptor
     descriptor = kafka_host :: descriptor
     descriptor = topic :: descriptor
     descriptor = key_format :: descriptor
@@ -227,6 +239,7 @@ class WriteToUpsertKafka extends ConfigurableStop[Table] {
     descriptor = sink_parallelism :: descriptor
     descriptor = sink_buffer_flush_max_rows :: descriptor
     descriptor = sink_buffer_flush_interval :: descriptor
+    descriptor = tableDefinition :: descriptor
     descriptor = properties :: descriptor
     descriptor
   }

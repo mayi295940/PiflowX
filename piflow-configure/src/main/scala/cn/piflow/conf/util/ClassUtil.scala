@@ -225,6 +225,7 @@ object ClassUtil {
                 ("required" -> property.required.toString) ~
                 ("sensitive" -> property.sensitive.toString) ~
                 ("example" -> property.example) ~
+                ("order" -> property.order) ~
                 ("language" -> property.language)
             })
     jsonValue

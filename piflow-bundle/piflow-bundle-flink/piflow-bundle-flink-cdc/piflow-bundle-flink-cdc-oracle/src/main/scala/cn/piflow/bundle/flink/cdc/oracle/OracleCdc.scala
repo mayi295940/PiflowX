@@ -120,22 +120,13 @@ class OracleCdc extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-    descriptor = tableDefinition :: descriptor
-
     val hostname = new PropertyDescriptor()
       .name("hostname")
       .displayName("Hostname")
       .description("Oracle数据库服务器的IP地址或主机名。如果url不为空，则可能未配置hostname，否则hostname不能为空。")
       .defaultValue("")
       .required(false)
+      .order(1)
       .example("127.0.0.1")
       .language(Language.Text)
     descriptor = hostname :: descriptor
@@ -147,6 +138,7 @@ class OracleCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(2)
       .example("root")
     descriptor = username :: descriptor
 
@@ -158,6 +150,7 @@ class OracleCdc extends ConfigurableStop[Table] {
       .required(true)
       .example("12345")
       .language(Language.Text)
+      .order(3)
       .sensitive(true)
     descriptor = password :: descriptor
 
@@ -168,6 +161,7 @@ class OracleCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(4)
       .example("test")
     descriptor = databaseName :: descriptor
 
@@ -178,6 +172,7 @@ class OracleCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(5)
       .example("test")
     descriptor = schemaName :: descriptor
 
@@ -188,6 +183,7 @@ class OracleCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(true)
       .language(Language.Text)
+      .order(6)
       .example("test")
     descriptor = tableName :: descriptor
 
@@ -198,6 +194,7 @@ class OracleCdc extends ConfigurableStop[Table] {
       .defaultValue("1521")
       .required(false)
       .language(Language.Text)
+      .order(7)
       .example("1521")
     descriptor = port :: descriptor
 
@@ -209,14 +206,28 @@ class OracleCdc extends ConfigurableStop[Table] {
       .defaultValue("")
       .required(false)
       .example("")
+      .order(8)
       .language(Language.Text)
     descriptor = url :: descriptor
 
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(9)
+      .example("")
+      .required(true)
+    descriptor = tableDefinition :: descriptor
+
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("连接器其他配置。")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(10)
       .required(false)
 
     descriptor = properties :: descriptor

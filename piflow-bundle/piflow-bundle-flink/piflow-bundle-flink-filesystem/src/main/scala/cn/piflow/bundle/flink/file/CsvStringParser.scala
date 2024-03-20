@@ -78,6 +78,7 @@ class CsvStringParser extends ConfigurableStop[Table] {
       .displayName("Content")
       .defaultValue("")
       .required(true)
+      .order(1)
       .example("1,zs\n2,ls\n3,ww")
     descriptor = content :: descriptor
 
@@ -87,6 +88,7 @@ class CsvStringParser extends ConfigurableStop[Table] {
       .description("The delimiter of CSV string")
       .defaultValue(",")
       .required(true)
+      .order(2)
       .example(",")
     descriptor = delimiter :: descriptor
 
@@ -96,6 +98,7 @@ class CsvStringParser extends ConfigurableStop[Table] {
       .description("The schema of CSV string")
       .defaultValue("")
       .required(false)
+      .order(3)
       .example("")
     descriptor = schema :: descriptor
 

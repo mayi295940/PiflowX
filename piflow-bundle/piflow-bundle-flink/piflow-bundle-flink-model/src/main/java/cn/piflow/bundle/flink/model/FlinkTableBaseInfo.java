@@ -1,6 +1,8 @@
 package cn.piflow.bundle.flink.model;
 
-public class FlinkTableBaseInfo {
+import java.io.Serializable;
+
+public class FlinkTableBaseInfo implements Serializable {
 
   private String catalogName;
 

@@ -109,21 +109,13 @@ class WriteToKafka extends ConfigurableStop[Table] {
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
     var descriptor: List[PropertyDescriptor] = List()
 
-    val tableDefinition = new PropertyDescriptor()
-      .name("tableDefinition")
-      .displayName("TableDefinition")
-      .description("Flink table定义。")
-      .defaultValue("")
-      .language(Language.FlinkTableSchema)
-      .example("")
-      .required(true)
-
     val kafka_host = new PropertyDescriptor()
       .name("kafka_host")
       .displayName("KAFKA_HOST")
       .description("逗号分隔的Kafka broker列表。")
       .defaultValue("")
       .example("127.0.0.1:9092")
+      .order(1)
       .required(true)
 
     val topic = new PropertyDescriptor()
@@ -132,6 +124,7 @@ class WriteToKafka extends ConfigurableStop[Table] {
       .description("写入的topic名。注意不支持topic列表。")
       .defaultValue("")
       .example("test")
+      .order(2)
       .required(true)
 
     val format = new PropertyDescriptor()
@@ -141,19 +134,33 @@ class WriteToKafka extends ConfigurableStop[Table] {
       .allowableValues(Set("json", "csv", "avro", "parquet", "orc", "raw", "protobuf",
         "debezium-json", "canal-json", "maxwell-json", "ogg-json"))
       .defaultValue("")
+      .order(3)
+      .required(true)
+
+    val tableDefinition = new PropertyDescriptor()
+      .name("tableDefinition")
+      .displayName("TableDefinition")
+      .description("Flink table定义。")
+      .defaultValue("")
+      .language(Language.FlinkTableSchema)
+      .order(100)
+      .example("")
+      .order(4)
       .required(true)
 
     val properties = new PropertyDescriptor()
       .name("properties")
-      .displayName("PROPERTIES")
+      .displayName("自定义参数")
       .description("Kafka source连接器其他配置")
       .defaultValue("{}")
+      .language(Language.CustomProperties)
+      .order(5)
       .required(false)
 
-    descriptor = tableDefinition :: descriptor
     descriptor = kafka_host :: descriptor
     descriptor = topic :: descriptor
     descriptor = format :: descriptor
+    descriptor = tableDefinition :: descriptor
     descriptor = properties :: descriptor
     descriptor
   }

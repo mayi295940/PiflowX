@@ -11,8 +11,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 class Insert extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
-  override val description: String = "从上游流或已注册的输入表向已注册的输出表插入数据。" +
-    "已注册表的 schema 必须与查询中的 schema 相匹配"
+  override val description: String = "从上游流或已注册的输入表向已注册的输出表插入数据。已注册表的schema必须与查询中的schema相匹配"
   override val inportList: List[String] = List(Port.DefaultPort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
@@ -42,20 +41,24 @@ class Insert extends ConfigurableStop[Table] {
 
     var descriptor: List[PropertyDescriptor] = List()
 
-    val inputTableName = new PropertyDescriptor().name("inputTableName").
-      displayName("输入表")
+    val inputTableName = new PropertyDescriptor()
+      .name("inputTableName")
+      .displayName("输入表")
       .description("输入表。如果为空，从上游输入流读取，不为空，从已注册的输入表的读取")
       .defaultValue("")
       .required(false)
-      .example("name->desc,age->asc")
+      .order(1)
+      .example("inputTableName")
     descriptor = inputTableName :: descriptor
 
-    val outputTableName = new PropertyDescriptor().name("outputTableName").
-      displayName("输出表")
+    val outputTableName = new PropertyDescriptor()
+      .name("outputTableName")
+      .displayName("输出表")
       .description("已注册的输出表")
       .defaultValue("")
       .required(true)
-      .example("10")
+      .order(2)
+      .example("outputTableName")
     descriptor = outputTableName :: descriptor
 
     descriptor
