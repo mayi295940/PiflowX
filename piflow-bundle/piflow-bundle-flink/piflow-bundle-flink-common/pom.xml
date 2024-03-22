@@ -42,6 +42,43 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.knaufk</groupId>
+            <artifactId>flink-faker</artifactId>
+            <version>0.5.3</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/flink-faker-0.5.3.jar</systemPath>
+        </dependency>
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <id>install-external-1</id>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <phase>install</phase>
+                        <configuration>
+                            <file>${project.basedir}/lib/flink-faker-0.5.3.jar</file>
+                            <groupId>com.github.knaufk</groupId>
+                            <artifactId>flink-faker</artifactId>
+                            <version>0.5.3</version>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
 
 </project>

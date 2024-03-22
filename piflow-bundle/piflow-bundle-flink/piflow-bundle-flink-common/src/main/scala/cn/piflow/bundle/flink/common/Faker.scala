@@ -11,10 +11,10 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 
 import scala.collection.mutable.{Map => MMap}
 
-class DataGen extends ConfigurableStop[Table] {
+class Faker extends ConfigurableStop[Table] {
 
   override val authorEmail: String = ""
-  override val description: String = "按数据生成规则进行读取。"
+  override val description: String = "根据每列提供的Data Faker表达式生成模拟数据。"
   override val inportList: List[String] = List(Port.NonePort)
   override val outportList: List[String] = List(Port.DefaultPort)
 
@@ -23,9 +23,9 @@ class DataGen extends ConfigurableStop[Table] {
   private var ratio: Int = _
 
   override def setProperties(map: Map[String, Any]): Unit = {
-    schema = MapUtil.get(map, "schema").asInstanceOf[List[Map[String, Any]]]
     count = MapUtil.get(map, "count", "10").asInstanceOf[String].toInt
     ratio = MapUtil.get(map, "ratio", "1").asInstanceOf[String].toInt
+    schema = MapUtil.get(map, "schema").asInstanceOf[List[Map[String, Any]]]
   }
 
   override def getPropertyDescriptor(): List[PropertyDescriptor] = {
@@ -35,9 +35,9 @@ class DataGen extends ConfigurableStop[Table] {
     val count = new PropertyDescriptor()
       .name("count")
       .displayName("Count")
-      .description("The count of dataframe")
+      .description("The number of rows to produce. If this is options is set, the source is bounded otherwise it is unbounded and runs indefinitely.")
       .defaultValue("")
-      .required(true)
+      .required(false)
       .dataType(Int.toString())
       .example("10")
       .order(1)
@@ -46,8 +46,8 @@ class DataGen extends ConfigurableStop[Table] {
     val ratio = new PropertyDescriptor()
       .name("ratio")
       .displayName("Ratio")
-      .description("rows per second")
-      .defaultValue("1")
+      .description("The maximum rate at which the source produces records.")
+      .defaultValue("10000")
       .required(false)
       .dataType(Int.toString())
       .example("10")
@@ -60,12 +60,9 @@ class DataGen extends ConfigurableStop[Table] {
       .description("schema")
       .defaultValue("")
       .required(true)
-      .language(Language.DataGenSchema)
+      .language(Language.DataFakerSchema)
       .order(3)
-      .example("[{\"filedName\":\"id\",\"filedType\":\"INT\",\"kind\":\"sequence\",\"start\":1,\"end\":10000}," +
-        "{\"filedName\":\"name\",\"filedType\":\"STRING\",\"kind\":\"random\",\"length\":15}," +
-        "{\"filedName\":\"age\",\"filedType\":\"INT\",\"kind\":\"random\",\"max\":100,\"min\":1}," +
-        "{\"filedName\":\"timeField\",\"filedType\":\"AS PROCTIME()\"}]")
+      .example("[{\"filedName\":\"name\",\"filedType\":\"STRING\",\"expression\":\"<superhero.name>\",\"comment\":\"姓名\"},{\"filedName\":\"power\",\"filedType\":\"STRING\",\"expression\":\"<superhero.power>\",\"nullRate\":0.5},{\"filedName\":\"age\",\"filedType\":\"INT\",\"expression\":\"<number.numberBetween ''0'',''1000''>\"},{\"filedName\":\"timeField\",\"computedColumnExpression\":\"PROCTIME()\"},{\"filedName\":\"timestamp1\",\"filedType\":\"TIMESTAMP(3)\",\"expression\":\"<date.past ''15'',''SECONDS''>\"},{\"filedName\":\"timestamp2\",\"filedType\":\"TIMESTAMP(3)\",\"expression\":\"<date.past ''15'',''5'',''SECONDS''>\"},{\"filedName\":\"timestamp3\",\"filedType\":\"TIMESTAMP(3)\",\"expression\":\"<date.future ''15'',''5'',''SECONDS''>\"},{\"filedName\":\"time\",\"filedType\":\"TIME\",\"expression\":\"<time.future ''15'',''5'',''SECONDS''>\"},{\"filedName\":\"date1\",\"filedType\":\"DATE\",\"expression\":\"<date.birthday>\"},{\"filedName\":\"date2\",\"filedType\":\"DATE\",\"expression\":\"<date.birthday ''1'',''100''>\"},{\"filedName\":\"order_status\",\"filedType\":\"STRING\",\"expression\":\"<Options.option ''RECEIVED'',''SHIPPED'',''CANCELLED'')>\"}]")
 
     descriptor = schema :: descriptor
 
@@ -96,7 +93,7 @@ class DataGen extends ConfigurableStop[Table] {
     // 生成数据源 DDL 语句
     val sourceDDL =
       s""" CREATE TABLE $tmpTable ($columns) WITH (
-         |'connector' = 'datagen',
+         |'connector' = 'faker',
          | $conf
          | 'number-of-rows'='$count',
          | 'rows-per-second'='$ratio'
@@ -113,7 +110,6 @@ class DataGen extends ConfigurableStop[Table] {
     out.write(resultTable)
 
   }
-
 
   private def getWithColumnsAndConf(schema: List[Map[String, Any]]): (String, String) = {
     var columns = List[String]()
@@ -143,39 +139,20 @@ class DataGen extends ConfigurableStop[Table] {
 
       columns = columns :+ Constants.COMMA
 
-      val kind = filedMap.getOrElse("kind", "").toString
-      if (StringUtils.isNotBlank(kind)) {
-        conf = s"'fields.$filedName.kind' = '$kind'," :: conf
+      var expression = filedMap.getOrElse("expression", "").toString
+      if (StringUtils.isNotBlank(expression)) {
+        expression = expression.trim.replaceFirst("<", "").dropRight(1)
+        conf = s"'fields.$filedName.expression' = '#{$expression}'," :: conf
       }
 
-      val min = filedMap.getOrElse("min", "").toString
-      if (StringUtils.isNotBlank(min)) {
-        conf = s"'fields.$filedName.min' = '$min'," :: conf
-      }
-
-      val max = filedMap.getOrElse("max", "").toString
-      if (StringUtils.isNotBlank(max)) {
-        conf = s"'fields.$filedName.max' = '$max'," :: conf
+      val nullRate = filedMap.getOrElse("nullRate", "").toString
+      if (StringUtils.isNotBlank(nullRate)) {
+        conf = s"'fields.$filedName.null-rate' = '$nullRate'," :: conf
       }
 
       val length = filedMap.getOrElse("length", "").toString
       if (StringUtils.isNotBlank(length)) {
         conf = s"'fields.$filedName.length' = '$length'," :: conf
-      }
-
-      val start = filedMap.getOrElse("start", "").toString
-      if (StringUtils.isNotBlank(start)) {
-        conf = s"'fields.$filedName.start' = '$start'," :: conf
-      }
-
-      val end = filedMap.getOrElse("end", "").toString
-      if (StringUtils.isNotBlank(end)) {
-        conf = s"'fields.$filedName.end' = '$end'," :: conf
-      }
-
-      val maxPast = filedMap.getOrElse("maxPast", "").toString
-      if (StringUtils.isNotBlank(maxPast)) {
-        conf = s"'fields.$filedName.max-past' = '$maxPast'," :: conf
       }
 
     })

@@ -8,6 +8,7 @@ object Language {
   val Shell = "Shell"
   val Sql = "Sql"
   val DataGenSchema = "DataGenSchema"
+  val DataFakerSchema = "DataFakerSchema"
   val FlinkTableSchema = "FlinkTableSchema"
   val CustomProperties = "CustomProperties"
 }
