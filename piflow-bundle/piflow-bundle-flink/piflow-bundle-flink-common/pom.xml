@@ -24,12 +24,12 @@
             <version>0.9</version>
             <scope>test</scope>
         </dependency>
-<!--                <dependency>-->
-<!--                    <groupId>piflow</groupId>-->
-<!--                    <artifactId>piflow-bundle-flink-jdbc</artifactId>-->
-<!--                    <version>0.9</version>-->
-<!--                    <scope>test</scope>-->
-<!--                </dependency>-->
+        <!--                <dependency>-->
+        <!--                    <groupId>piflow</groupId>-->
+        <!--                    <artifactId>piflow-bundle-flink-jdbc</artifactId>-->
+        <!--                    <version>0.9</version>-->
+        <!--                    <scope>test</scope>-->
+        <!--                </dependency>-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -47,8 +47,6 @@
             <groupId>com.github.knaufk</groupId>
             <artifactId>flink-faker</artifactId>
             <version>0.5.3</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/flink-faker-0.5.3.jar</systemPath>
         </dependency>
 
     </dependencies>
@@ -67,7 +65,7 @@
                         </goals>
                         <phase>install</phase>
                         <configuration>
-                            <file>${project.basedir}/lib/flink-faker-0.5.3.jar</file>
+                            <file>lib/flink-faker-0.5.3.jar</file>
                             <groupId>com.github.knaufk</groupId>
                             <artifactId>flink-faker</artifactId>
                             <version>0.5.3</version>
@@ -77,7 +75,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 
